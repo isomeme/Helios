@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Helios</string>
+    <string name="toast_playservices_unrecoverable">Helios requires Google Play Services.</string>
+    <string name="toast_location_failure">Unable to determine location.</string>
+    <string name="toast_location_permission_needed">Helios needs permission to access your device\'s location.</string>
+    <string name="toast_locationservice_not_available">Helios requires location services to be enabled.</string>
+    <string name="text_loading">Loading...</string>
+</resources>
