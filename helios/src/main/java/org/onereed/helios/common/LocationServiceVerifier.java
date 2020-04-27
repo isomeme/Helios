@@ -57,7 +57,6 @@ public class LocationServiceVerifier implements DefaultLifecycleObserver {
             task -> {
               try {
                 task.getResult(ApiException.class);
-                Log.d(TAG, "Location service available.");
               } catch (ApiException exception) {
                 switch (exception.getStatusCode()) {
                   case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
@@ -66,14 +65,14 @@ public class LocationServiceVerifier implements DefaultLifecycleObserver {
                       resolvable.startResolutionForResult(activity, REQUEST_CHECK_SETTINGS_CODE);
                     } catch (IntentSender.SendIntentException | ClassCastException e) {
                       Log.e(TAG, "Unexpected exception", e);
-                      ToastUtil.longToast(activity, R.string.toast_locationservice_not_available);
-                      activity.finish();
+                      ToastUtil.longToastAndFinish(
+                          activity, R.string.toast_locationservice_not_available);
                     }
                     break;
                   case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                     Log.e(TAG, "Location settings change unavailable.");
-                    ToastUtil.longToast(activity, R.string.toast_locationservice_not_available);
-                    activity.finish();
+                    ToastUtil.longToastAndFinish(
+                        activity, R.string.toast_locationservice_not_available);
                     break;
                 }
               }
@@ -86,11 +85,8 @@ public class LocationServiceVerifier implements DefaultLifecycleObserver {
         Log.i(TAG, "User enabled LocationServices.");
       } else {
         Log.e(TAG, "resultCode != RESULT_OK : " + resultCode);
-        ToastUtil.longToast(activity, R.string.toast_locationservice_not_available);
-        activity.finish();
+        ToastUtil.longToastAndFinish(activity, R.string.toast_locationservice_not_available);
       }
     }
   }
-
-
 }

@@ -38,17 +38,17 @@ public class PlayServicesVerifier implements DefaultLifecycleObserver {
     GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
     int code = googleApiAvailability.isGooglePlayServicesAvailable(activity);
 
-    if (code == ConnectionResult.SUCCESS) {
-      Log.d(TAG, "Play Services is available.");
-    } else if (googleApiAvailability.isUserResolvableError(code)) {
-      Log.w(TAG, "Play Services requires user setup, code=" + code);
-      googleApiAvailability
-          .getErrorDialog(
-              activity, code, PLAY_SERVICE_RESOLUTION_REQUEST, unused -> activity.finish())
-          .show();
-    } else {
-      Log.e(TAG, "Play Services not available, code=" + code);
-      ToastUtil.longToast(activity, R.string.toast_playservices_unrecoverable);
+    if (code != ConnectionResult.SUCCESS) {
+      if (googleApiAvailability.isUserResolvableError(code)) {
+        Log.w(TAG, "Play Services requires user setup, code=" + code);
+        googleApiAvailability
+            .getErrorDialog(
+                activity, code, PLAY_SERVICE_RESOLUTION_REQUEST, unused -> activity.finish())
+            .show();
+      } else {
+        Log.e(TAG, "Play Services not available, code=" + code);
+        ToastUtil.longToastAndFinish(activity, R.string.toast_playservices_unrecoverable);
+      }
     }
   }
 }

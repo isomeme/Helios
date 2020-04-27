@@ -69,7 +69,6 @@ class LocationManager implements DefaultLifecycleObserver {
             fusedLocationClient
                 .requestLocationUpdates(
                     locationRequest, locationCallback, locationHandlerThread.getLooper())
-                .addOnSuccessListener(unused -> Log.d(TAG, "Location update requested."))
                 .addOnFailureListener(e -> Log.e(TAG, "Location update request failed.", e)));
   }
 
@@ -124,11 +123,9 @@ class LocationManager implements DefaultLifecycleObserver {
 
     @Override
     public void onLocationResult(LocationResult locationResult) {
-      Log.d(TAG, "LocationResult obtained.");
       locationConsumer.accept(locationResult.getLastLocation());
       fusedLocationClient
           .removeLocationUpdates(this)
-          .addOnSuccessListener(unused -> Log.d(TAG, "Removed location update."))
           .addOnFailureListener(e -> Log.w(TAG, "Failed to remove location update.", e));
     }
   }

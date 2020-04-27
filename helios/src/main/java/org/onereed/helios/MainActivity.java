@@ -29,8 +29,8 @@ public class MainActivity extends AppCompatActivity {
   private final LocationManager locationManager = new LocationManager(this);
 
   private final MainHandler mainHandler = new MainHandler(this);
-  private final SunHandler sunHandler =
-      new SunHandler(this, locationManager, mainHandler::acceptSunTimes);
+  private final SunCalculator sunCalculator =
+      new SunCalculator(this, locationManager, mainHandler::acceptSunTimes);
 
   private ActivityMainBinding activityMainBinding;
 
@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
   public void onResume() {
     Log.d(TAG, "onResume");
     super.onResume();
-    sunHandler.update();
+    sunCalculator.update();
   }
 
   @Override
@@ -64,17 +64,14 @@ public class MainActivity extends AppCompatActivity {
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
-    Log.d(TAG, "onCreateOptionsMenu");
     getMenuInflater().inflate(R.menu.options_menu, menu);
     return true;
   }
 
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
-    Log.d(TAG, "onOptionsItemSelected");
-
     if (item.getItemId() == R.id.action_refresh) {
-      sunHandler.update();
+      sunCalculator.update();
       return true;
     }
 
