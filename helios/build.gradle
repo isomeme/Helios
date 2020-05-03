@@ -44,15 +44,16 @@ dependencies {
 dependencies {
     implementation 'org.shredzone.commons:commons-suncalc:2.6'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-common-java8:2.2.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
 }
 
 dependencies {
-    implementation group: 'com.google.guava', name: 'guava', version: '28.2-jre'
+    implementation group: 'com.google.guava', name: 'guava', version: '29.0-jre'
 }
 
 dependencies {
-    // Use 'api' rather than 'compile' for Android or java-library projects.
-    api                 "com.google.auto.value:auto-value-annotations:1.6.2"
-    annotationProcessor "com.google.auto.value:auto-value:1.6.2"
-}
+    api 'com.google.auto.value:auto-value-annotations:1.7.1'
+    annotationProcessor 'com.google.auto.value:auto-value:1.7.1'
+ }

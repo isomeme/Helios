@@ -10,6 +10,8 @@ import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.onereed.helios.common.LocationServiceVerifier;
 import org.onereed.helios.common.LogUtil;
@@ -20,7 +22,6 @@ import org.onereed.helios.sun.SunCalculator;
 import org.onereed.helios.sun.SunInfo;
 
 import java.lang.ref.WeakReference;
-import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,18 +33,21 @@ public class MainActivity extends AppCompatActivity {
 
   private final MainHandler mainHandler = new MainHandler(this);
   private final SunCalculator sunCalculator = new SunCalculator(mainHandler::acceptSunInfo);
-
-  private ActivityMainBinding activityMainBinding;
+  private final SunEventsAdapter sunEventsAdapter = new SunEventsAdapter(this);
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     Log.d(TAG, "onCreate");
     super.onCreate(savedInstanceState);
 
-    activityMainBinding = ActivityMainBinding.inflate(getLayoutInflater());
+    ActivityMainBinding activityMainBinding = ActivityMainBinding.inflate(getLayoutInflater());
 
     setContentView(activityMainBinding.getRoot());
     setSupportActionBar(activityMainBinding.toolbar);
+
+    RecyclerView.LayoutManager sunEventsLayoutManager = new LinearLayoutManager(this);
+    activityMainBinding.sunEventsRecyclerView.setLayoutManager(sunEventsLayoutManager);
+    activityMainBinding.sunEventsRecyclerView.setAdapter(sunEventsAdapter);
 
     getLifecycle().addObserver(playServicesVerifier);
     getLifecycle().addObserver(locationServiceVerifier);
@@ -107,9 +111,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void display(SunInfo sunInfo) {
-    Date date = new Date();
-    String text = String.format("%s\n\n%s", date, sunInfo);
-    activityMainBinding.textSun.setText(text);
+    sunEventsAdapter.acceptSunInfo(sunInfo);
   }
 
   private static class MainHandler extends Handler {
