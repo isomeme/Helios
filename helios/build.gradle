@@ -50,3 +50,9 @@ dependencies {
 dependencies {
     implementation group: 'com.google.guava', name: 'guava', version: '28.2-jre'
 }
+
+dependencies {
+    // Use 'api' rather than 'compile' for Android or java-library projects.
+    api                 "com.google.auto.value:auto-value-annotations:1.6.2"
+    annotationProcessor "com.google.auto.value:auto-value:1.6.2"
+}

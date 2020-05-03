@@ -14,8 +14,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.onereed.helios.common.LocationServiceVerifier;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.PlayServicesVerifier;
+import org.onereed.helios.common.ToastUtil;
 import org.onereed.helios.databinding.ActivityMainBinding;
-import org.shredzone.commons.suncalc.SunTimes;
+import org.onereed.helios.sun.SunCalculator;
+import org.onereed.helios.sun.SunInfo;
 
 import java.lang.ref.WeakReference;
 import java.util.Date;
@@ -29,8 +31,7 @@ public class MainActivity extends AppCompatActivity {
   private final LocationManager locationManager = new LocationManager(this);
 
   private final MainHandler mainHandler = new MainHandler(this);
-  private final SunCalculator sunCalculator =
-      new SunCalculator(this, locationManager, mainHandler::acceptSunTimes);
+  private final SunCalculator sunCalculator = new SunCalculator(mainHandler::acceptSunInfo);
 
   private ActivityMainBinding activityMainBinding;
 
@@ -53,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
   public void onResume() {
     Log.d(TAG, "onResume");
     super.onResume();
-    sunCalculator.update();
+    updateSun();
   }
 
   @Override
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     if (item.getItemId() == R.id.action_refresh) {
-      sunCalculator.update();
+      updateSun();
       return true;
     }
 
@@ -93,9 +94,21 @@ public class MainActivity extends AppCompatActivity {
     locationManager.acceptPermissionsResult(requestCode, permissions, grantResults);
   }
 
-  private void display(SunTimes sunTimes) {
+  private void updateSun() {
+    locationManager.requestLocation(
+        location -> {
+          if (location == null) {
+            Log.e(TAG, "Location is null.");
+            ToastUtil.longToast(this, R.string.toast_location_failure);
+          } else {
+            sunCalculator.acceptLocation(location);
+          }
+        });
+  }
+
+  private void display(SunInfo sunInfo) {
     Date date = new Date();
-    String text = String.format("%s\n\n%s", date, sunTimes);
+    String text = String.format("%s\n\n%s", date, sunInfo);
     activityMainBinding.textSun.setText(text);
   }
 
@@ -107,8 +120,8 @@ public class MainActivity extends AppCompatActivity {
       this.mainActivityRef = new WeakReference<>(mainActivity);
     }
 
-    private void acceptSunTimes(SunTimes sunTimes) {
-      this.sendMessage(this.obtainMessage(0, sunTimes));
+    private void acceptSunInfo(SunInfo sunInfo) {
+      this.sendMessage(this.obtainMessage(0, sunInfo));
     }
 
     @Override
@@ -117,8 +130,8 @@ public class MainActivity extends AppCompatActivity {
 
       if (mainActivity != null) {
         if (msg.what == 0) {
-          SunTimes sunTimes = (SunTimes) msg.obj;
-          mainActivity.display(sunTimes);
+          SunInfo sunInfo = (SunInfo) msg.obj;
+          mainActivity.display(sunInfo);
         }
       }
     }
