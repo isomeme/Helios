@@ -1,8 +1,6 @@
 package org.onereed.helios.sun;
 
 import android.location.Location;
-import android.os.SystemClock;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -12,6 +10,7 @@ import com.google.common.collect.Iterables;
 import org.onereed.helios.common.LogUtil;
 import org.shredzone.commons.suncalc.SunTimes;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -33,9 +32,11 @@ public class SunCalculator {
   private final Executor executor = Executors.newSingleThreadExecutor();
 
   private final Consumer<SunInfo> sunInfoConsumer;
+  private final Clock clock;
 
-  public SunCalculator(Consumer<SunInfo> sunInfoConsumer) {
+  public SunCalculator(Consumer<SunInfo> sunInfoConsumer, Clock clock) {
     this.sunInfoConsumer = sunInfoConsumer;
+    this.clock = clock;
   }
 
   public void acceptLocation(@NonNull Location location) {
@@ -43,23 +44,20 @@ public class SunCalculator {
   }
 
   private void locationToSunInfo(@NonNull Location location) {
-    long nowElapsedNanos = SystemClock.elapsedRealtimeNanos();
-    long fixElapsedNanos = location.getElapsedRealtimeNanos();
-    long ageNanos = nowElapsedNanos - fixElapsedNanos;
-    Duration age = Duration.ofNanos(ageNanos);
-
     double lat = location.getLatitude();
     double lon = location.getLongitude();
+    Instant now = clock.instant();
+    SunInfo sunInfo = getSunInfo(lat, lon, now);
 
-    Log.d(TAG, String.format("lat=%f lon=%f age=%s", lat, lon, age));
+    sunInfoConsumer.accept(sunInfo);
+  }
 
-    Instant now = Instant.now();
+  private SunInfo getSunInfo(double lat, double lon, Instant now) {
     Date nextTime = Date.from(now);
     Date prevTime = Date.from(now.minus(ONE_DAY));
 
-    SunTimes.Parameters locationParams = SunTimes.compute().at(lat, lon);
-    SunTimes nextSunTimes = locationParams.on(nextTime).execute();
-    SunTimes prevSunTimes = locationParams.on(prevTime).execute();
+    SunTimes nextSunTimes = SunTimes.compute().at(lat, lon).on(nextTime).fullCycle().execute();
+    SunTimes prevSunTimes = SunTimes.compute().at(lat, lon).on(prevTime).fullCycle().execute();
 
     SunEvent mostRecentSunEvent = Iterables.getLast(toSunEvents(prevSunTimes));
     ImmutableList<SunEvent> upcomingSunEvents = toSunEvents(nextSunTimes);
@@ -76,9 +74,7 @@ public class SunCalculator {
 
     boolean isCrossingHorizon = !(nextSunTimes.isAlwaysDown() || nextSunTimes.isAlwaysUp());
 
-    SunInfo sunInfo = SunInfo.create(now, allSunEvents, indexOfClosestEvent, isCrossingHorizon);
-
-    sunInfoConsumer.accept(sunInfo);
+    return SunInfo.create(now, allSunEvents, indexOfClosestEvent, isCrossingHorizon);
   }
 
   private static ImmutableList<SunEvent> toSunEvents(SunTimes sunTimes) {

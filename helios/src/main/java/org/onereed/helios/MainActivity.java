@@ -22,6 +22,7 @@ import org.onereed.helios.sun.SunCalculator;
 import org.onereed.helios.sun.SunInfo;
 
 import java.lang.ref.WeakReference;
+import java.time.Clock;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,7 +33,8 @@ public class MainActivity extends AppCompatActivity {
   private final LocationManager locationManager = new LocationManager(this);
 
   private final MainHandler mainHandler = new MainHandler(this);
-  private final SunCalculator sunCalculator = new SunCalculator(mainHandler::acceptSunInfo);
+  private final SunCalculator sunCalculator =
+      new SunCalculator(mainHandler::acceptSunInfo, Clock.systemUTC());
   private final SunEventsAdapter sunEventsAdapter = new SunEventsAdapter(this);
 
   @Override
