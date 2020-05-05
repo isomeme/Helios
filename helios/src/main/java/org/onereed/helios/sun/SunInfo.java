@@ -11,6 +11,9 @@ import java.time.Instant;
 @AutoValue
 public abstract class SunInfo {
 
+  public static final SunInfo EMPTY =
+      SunInfo.create(Instant.EPOCH, ImmutableList.of(), -1, true);
+
   public abstract Instant getTimestamp();
 
   public abstract ImmutableList<SunEvent> getSunEvents();

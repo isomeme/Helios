@@ -35,21 +35,21 @@ public class MainActivity extends AppCompatActivity {
   private final MainHandler mainHandler = new MainHandler(this);
   private final SunCalculator sunCalculator =
       new SunCalculator(mainHandler::acceptSunInfo, Clock.systemUTC());
-  private final SunEventsAdapter sunEventsAdapter = new SunEventsAdapter(this);
+  private final SunInfoAdapter sunInfoAdapter = new SunInfoAdapter(this);
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    Log.d(TAG, "onCreate");
     super.onCreate(savedInstanceState);
+    Log.d(TAG, "onCreate");
 
     ActivityMainBinding activityMainBinding = ActivityMainBinding.inflate(getLayoutInflater());
-
     setContentView(activityMainBinding.getRoot());
     setSupportActionBar(activityMainBinding.toolbar);
 
+    activityMainBinding.sunEventsRecyclerView.setAdapter(sunInfoAdapter);
+
     RecyclerView.LayoutManager sunEventsLayoutManager = new LinearLayoutManager(this);
     activityMainBinding.sunEventsRecyclerView.setLayoutManager(sunEventsLayoutManager);
-    activityMainBinding.sunEventsRecyclerView.setAdapter(sunEventsAdapter);
 
     getLifecycle().addObserver(playServicesVerifier);
     getLifecycle().addObserver(locationServiceVerifier);
@@ -58,15 +58,15 @@ public class MainActivity extends AppCompatActivity {
 
   @Override
   public void onResume() {
-    Log.d(TAG, "onResume");
     super.onResume();
+    Log.d(TAG, "onResume");
     updateSun();
   }
 
   @Override
   public void onPause() {
-    Log.d(TAG, "onPause");
     super.onPause();
+    Log.d(TAG, "onPause");
   }
 
   @Override
@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void display(SunInfo sunInfo) {
-    sunEventsAdapter.acceptSunInfo(sunInfo);
+    sunInfoAdapter.acceptSunInfo(sunInfo);
   }
 
   private static class MainHandler extends Handler {

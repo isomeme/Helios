@@ -20,6 +20,9 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /** Obtains sun position info and hands it off to a consumer. */
 public class SunCalculator {
@@ -111,8 +114,8 @@ public class SunCalculator {
   private ImmutableList<SunEvent> getShownEvents(Set<SunEvent> allSunEventsSet, Instant now) {
     ImmutableList<SunEvent> allSunEvents = ImmutableList.sortedCopyOf(allSunEventsSet);
 
-    int firstNowOrAfter =
-        Iterables.indexOf(allSunEvents, sunEvent -> !sunEvent.getTime().isBefore(now));
+    Predicate<SunEvent> isNowOrAfter = sunEvent -> !checkNotNull(sunEvent).getTime().isBefore(now);
+    int firstNowOrAfter = Iterables.indexOf(allSunEvents, isNowOrAfter::test);
 
     if (firstNowOrAfter < 1) {
       Log.e(TAG, String.format("Now not in range. allSunEvents=%s now=%s", allSunEvents, now));
