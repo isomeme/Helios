@@ -1,5 +1,6 @@
 package org.onereed.helios.sun;
 
+import android.annotation.SuppressLint;
 import android.location.Location;
 
 import androidx.annotation.NonNull;
@@ -8,6 +9,8 @@ import androidx.annotation.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
+import org.onereed.helios.common.LogUtil;
+import org.onereed.helios.logger.AppLogger;
 import org.shredzone.commons.suncalc.SunTimes;
 
 import java.time.Clock;
@@ -27,7 +30,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
  */
 public class SunEngine {
 
-//  private static final String TAG = LogUtil.makeTag(SunEngine.class);
+  private static final String TAG = LogUtil.makeTag(SunEngine.class);
 
   private static final Duration ONE_DAY = Duration.ofDays(1L);
 
@@ -54,9 +57,10 @@ public class SunEngine {
     sunInfoConsumer.accept(sunInfo);
   }
 
+  @SuppressLint("DefaultLocale")
   @VisibleForTesting
   static SunInfo getSunInfo(double lat, double lon, Instant now) {
-//    Log.d(TAG, String.format("lat=%f lon=%f now=%s", lat, lon, now));
+    AppLogger.debug(TAG, String.format("lat=%f lon=%f now=%s", lat, lon, now));
 
     Date nextDay = Date.from(now);
 
@@ -65,7 +69,7 @@ public class SunEngine {
     ImmutableList<SunEvent> nextEvents = toSunEvents(nextSunTimes);
 
     if (nextEvents.isEmpty()) {
-//      Log.e(TAG, "Bad sun data, nextSunTimes=" + nextSunTimes);
+      AppLogger.error(TAG, "Bad sun data, nextSunTimes=" + nextSunTimes);
       return SunInfo.EMPTY;
     }
 
@@ -75,7 +79,7 @@ public class SunEngine {
     ImmutableList<SunEvent> precedingEvents = toSunEvents(precedingSunTimes);
 
     if (precedingEvents.isEmpty()) {
-//      Log.e(TAG, "Bad sun data, precedingSunTimes=" + precedingSunTimes);
+      AppLogger.error(TAG, "Bad sun data, precedingSunTimes=" + precedingSunTimes);
       return SunInfo.EMPTY;
     }
 
@@ -101,9 +105,7 @@ public class SunEngine {
     return ImmutableList.sortedCopyOf(unsortedEvents);
   }
 
-  /**
-   * We show the most recent previous event and up to 4 upcoming events.
-   */
+  /** We show the most recent previous event and up to 4 upcoming events. */
   private static ImmutableList<SunEvent> getShownEvents(
       ImmutableList<SunEvent> precedingEvents, ImmutableList<SunEvent> nextEvents, Instant now) {
 

@@ -12,8 +12,8 @@ public final class LocationUtil {
 
   /**
    * Creates a one-shot location request. These need to be created fresh at each usage because
-   * (unbelievably) the expiration duration is relative to request *creation* time, not when
-   * the request is sent. Go figure.
+   * (unbelievably) the expiration duration is relative to request *creation* time, not when the
+   * request is sent. Go figure.
    */
   public static LocationRequest createOneShotLocationRequest() {
     return new LocationRequest()

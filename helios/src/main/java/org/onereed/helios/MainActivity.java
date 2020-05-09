@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -18,6 +17,8 @@ import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.PlayServicesVerifier;
 import org.onereed.helios.common.ToastUtil;
 import org.onereed.helios.databinding.ActivityMainBinding;
+import org.onereed.helios.logger.AndroidLogger;
+import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEngine;
 import org.onereed.helios.sun.SunInfo;
 
@@ -33,14 +34,16 @@ public class MainActivity extends AppCompatActivity {
   private final LocationManager locationManager = new LocationManager(this);
 
   private final MainHandler mainHandler = new MainHandler(this);
-  private final SunEngine sunEngine =
-      new SunEngine(mainHandler::acceptSunInfo, Clock.systemUTC());
   private final SunInfoAdapter sunInfoAdapter = new SunInfoAdapter(this);
+
+  private SunEngine sunEngine;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    Log.d(TAG, "onCreate");
+
+    AppLogger.init(AndroidLogger.create());
+    AppLogger.debug(TAG, "onCreate");
 
     ActivityMainBinding activityMainBinding = ActivityMainBinding.inflate(getLayoutInflater());
     setContentView(activityMainBinding.getRoot());
@@ -54,19 +57,21 @@ public class MainActivity extends AppCompatActivity {
     getLifecycle().addObserver(playServicesVerifier);
     getLifecycle().addObserver(locationServiceVerifier);
     getLifecycle().addObserver(locationManager);
+
+    sunEngine = new SunEngine(mainHandler::acceptSunInfo, Clock.systemUTC());
   }
 
   @Override
   public void onResume() {
     super.onResume();
-    Log.d(TAG, "onResume");
+    AppLogger.debug(TAG, "onResume");
     updateSun();
   }
 
   @Override
   public void onPause() {
     super.onPause();
-    Log.d(TAG, "onPause");
+    AppLogger.debug(TAG, "onPause");
   }
 
   @Override
@@ -87,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-    Log.d(TAG, "onActivityResult");
+    AppLogger.debug(TAG, "onActivityResult");
     super.onActivityResult(requestCode, resultCode, intent);
     locationServiceVerifier.acceptActivityResult(requestCode, resultCode);
   }
@@ -96,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
   public void onRequestPermissionsResult(
       int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-    Log.d(TAG, "onRequestPermissionsResult");
+    AppLogger.debug(TAG, "onRequestPermissionsResult");
     locationManager.acceptPermissionsResult(requestCode, permissions, grantResults);
   }
 
@@ -104,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
     locationManager.requestLocation(
         location -> {
           if (location == null) {
-            Log.e(TAG, "Location is null.");
+            AppLogger.error(TAG, "Location is null.");
             ToastUtil.longToast(this, R.string.toast_location_failure);
           } else {
             sunEngine.acceptLocation(location);

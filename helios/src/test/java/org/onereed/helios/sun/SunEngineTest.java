@@ -2,7 +2,10 @@ package org.onereed.helios.sun;
 
 import com.google.common.collect.ImmutableList;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.onereed.helios.logger.AppLogger;
+import org.onereed.helios.logger.JavaLogger;
 
 import java.time.Instant;
 
@@ -17,9 +20,12 @@ public class SunEngineTest {
   private static final double LAT = 34.0;
   private static final double LON = -118.5;
 
-  /**
-   * Make sure we don't use a "preceding" event in the future.
-   */
+  @Before
+  public void setup() {
+    AppLogger.init(JavaLogger.create());
+  }
+
+  /** Make sure we don't use a "preceding" event in the future. */
   @Test
   public void testEventOverlap() {
     Instant now = Instant.parse("2020-05-09T02:30:00Z");
