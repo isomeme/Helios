@@ -18,7 +18,7 @@ import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.PlayServicesVerifier;
 import org.onereed.helios.common.ToastUtil;
 import org.onereed.helios.databinding.ActivityMainBinding;
-import org.onereed.helios.sun.SunCalculator;
+import org.onereed.helios.sun.SunEngine;
 import org.onereed.helios.sun.SunInfo;
 
 import java.lang.ref.WeakReference;
@@ -33,8 +33,8 @@ public class MainActivity extends AppCompatActivity {
   private final LocationManager locationManager = new LocationManager(this);
 
   private final MainHandler mainHandler = new MainHandler(this);
-  private final SunCalculator sunCalculator =
-      new SunCalculator(mainHandler::acceptSunInfo, Clock.systemUTC());
+  private final SunEngine sunEngine =
+      new SunEngine(mainHandler::acceptSunInfo, Clock.systemUTC());
   private final SunInfoAdapter sunInfoAdapter = new SunInfoAdapter(this);
 
   @Override
@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Location is null.");
             ToastUtil.longToast(this, R.string.toast_location_failure);
           } else {
-            sunCalculator.acceptLocation(location);
+            sunEngine.acceptLocation(location);
           }
         });
   }

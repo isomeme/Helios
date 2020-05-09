@@ -42,7 +42,7 @@ dependencies {
 }
 
 dependencies {
-    implementation 'org.shredzone.commons:commons-suncalc:2.6'
+    implementation 'org.shredzone.commons:commons-suncalc:2.7'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-common-java8:2.2.0'
