@@ -16,18 +16,21 @@ import org.onereed.helios.common.LocationServiceVerifier;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.PlayServicesVerifier;
 import org.onereed.helios.common.ToastUtil;
+import org.onereed.helios.concurrent.AppExecutors;
 import org.onereed.helios.databinding.ActivityMainBinding;
-import org.onereed.helios.logger.AndroidLogger;
 import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEngine;
 import org.onereed.helios.sun.SunInfo;
 
 import java.lang.ref.WeakReference;
 import java.time.Clock;
+import java.util.concurrent.Executor;
 
 public class MainActivity extends AppCompatActivity {
 
   private static final String TAG = LogUtil.makeTag(MainActivity.class);
+
+  private final Executor backgroundExecutor = AppExecutors.createBackgroundExecutor();
 
   private final PlayServicesVerifier playServicesVerifier = new PlayServicesVerifier(this);
   private final LocationServiceVerifier locationServiceVerifier = new LocationServiceVerifier(this);
@@ -36,13 +39,12 @@ public class MainActivity extends AppCompatActivity {
   private final MainHandler mainHandler = new MainHandler(this);
   private final SunInfoAdapter sunInfoAdapter = new SunInfoAdapter(this);
 
-  private SunEngine sunEngine;
+  private final SunEngine sunEngine =
+      new SunEngine(mainHandler::acceptSunInfo, Clock.systemUTC(), backgroundExecutor);
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
-    AppLogger.init(AndroidLogger.create());
     AppLogger.debug(TAG, "onCreate");
 
     ActivityMainBinding activityMainBinding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -57,8 +59,6 @@ public class MainActivity extends AppCompatActivity {
     getLifecycle().addObserver(playServicesVerifier);
     getLifecycle().addObserver(locationServiceVerifier);
     getLifecycle().addObserver(locationManager);
-
-    sunEngine = new SunEngine(mainHandler::acceptSunInfo, Clock.systemUTC());
   }
 
   @Override

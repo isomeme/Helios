@@ -3,9 +3,9 @@ package org.onereed.helios.logger;
 /**
  * Interface for a general logger. Implementations can use different logging frameworks. This is a
  * workaround for the problem that the Android static {@code Log} implementation cannot be used in
- * classes ander unit test.
+ * classes ander standalone testing.
  */
-public interface GeneralLogger {
+interface GeneralLogger {
 
   void verbose(String tag, String message);
 

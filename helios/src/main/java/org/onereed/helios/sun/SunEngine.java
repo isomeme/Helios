@@ -1,10 +1,8 @@
 package org.onereed.helios.sun;
 
-import android.annotation.SuppressLint;
 import android.location.Location;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -20,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -34,14 +31,14 @@ public class SunEngine {
 
   private static final Duration ONE_DAY = Duration.ofDays(1L);
 
-  private final Executor executor = Executors.newSingleThreadExecutor();
-
   private final Consumer<SunInfo> sunInfoConsumer;
   private final Clock clock;
+  private final Executor executor;
 
-  public SunEngine(Consumer<SunInfo> sunInfoConsumer, Clock clock) {
+  public SunEngine(Consumer<SunInfo> sunInfoConsumer, Clock clock, Executor executor) {
     this.sunInfoConsumer = sunInfoConsumer;
     this.clock = clock;
+    this.executor = executor;
   }
 
   public void acceptLocation(@NonNull Location location) {
@@ -57,19 +54,16 @@ public class SunEngine {
     sunInfoConsumer.accept(sunInfo);
   }
 
-  @SuppressLint("DefaultLocale")
-  @VisibleForTesting
-  static SunInfo getSunInfo(double lat, double lon, Instant now) {
-    AppLogger.debug(TAG, String.format("lat=%f lon=%f now=%s", lat, lon, now));
+  private static SunInfo getSunInfo(double lat, double lon, Instant now) {
+    AppLogger.debug(TAG, "lat=%.3f lon=%.3f now=%s", lat, lon, now);
 
     Date nextDay = Date.from(now);
-
     SunTimes nextSunTimes = SunTimes.compute().at(lat, lon).on(nextDay).execute();
     boolean isCrossingHorizon = !(nextSunTimes.isAlwaysDown() || nextSunTimes.isAlwaysUp());
     ImmutableList<SunEvent> nextEvents = toSunEvents(nextSunTimes);
 
     if (nextEvents.isEmpty()) {
-      AppLogger.error(TAG, "Bad sun data, nextSunTimes=" + nextSunTimes);
+      AppLogger.error(TAG, "Bad sun data, nextSunTimes=%s", nextSunTimes);
       return SunInfo.EMPTY;
     }
 
@@ -79,7 +73,7 @@ public class SunEngine {
     ImmutableList<SunEvent> precedingEvents = toSunEvents(precedingSunTimes);
 
     if (precedingEvents.isEmpty()) {
-      AppLogger.error(TAG, "Bad sun data, precedingSunTimes=" + precedingSunTimes);
+      AppLogger.error(TAG, "Bad sun data, precedingSunTimes=%s", precedingSunTimes);
       return SunInfo.EMPTY;
     }
 

@@ -5,14 +5,13 @@ import android.util.Log;
 /**
  * An implementation of {@link GeneralLogger} that uses Android logging.
  */
-public class AndroidLogger implements GeneralLogger {
+class AndroidLogger implements GeneralLogger {
 
-  public static AndroidLogger create() {
+  static AndroidLogger create() {
     return new AndroidLogger();
   }
 
-  private AndroidLogger() {
-  }
+  private AndroidLogger() {}
 
   @Override
   public void verbose(String tag, String message) {

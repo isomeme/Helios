@@ -6,13 +6,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A Java-logger based implementation of {@link GeneralLogger}, intended for use only in tests.
+ * A Java {@link Logger} based implementation of {@link GeneralLogger}, intended for use only in
+ * tests.
  */
-public class JavaLogger implements GeneralLogger {
+class JavaLogger implements GeneralLogger {
 
   private final Logger logger = Logger.getLogger("test");
 
-  public static JavaLogger create() {
+  static JavaLogger create() {
     return new JavaLogger();
   }
 
