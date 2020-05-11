@@ -19,7 +19,7 @@ public final class LocationUtil {
     return new LocationRequest()
         .setFastestInterval(BRIEF_INTERVAL_MILLIS)
         .setInterval(BRIEF_INTERVAL_MILLIS)
-        .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+        .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
         .setNumUpdates(1)
         .setExpirationDuration(ONE_SHOT_DURATION_MILLIS);
   }

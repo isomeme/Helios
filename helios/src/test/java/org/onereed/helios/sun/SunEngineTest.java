@@ -13,10 +13,8 @@ import org.onereed.helios.logger.AppLogger;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.function.Consumer;
 
-import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 /**
@@ -30,8 +28,6 @@ public class SunEngineTest {
   private static final double LON = -118.5;
 
   @Mock
-  private Consumer<SunInfo> mockSunInfoConsumer;
-  @Mock
   private Clock mockClock;
   @Mock
   private Location mockLocation;
@@ -41,8 +37,7 @@ public class SunEngineTest {
   @Before
   public void setup() {
     AppLogger.useJavaLogger();
-
-    sunEngine = new SunEngine(mockSunInfoConsumer, mockClock, directExecutor());
+    sunEngine = new SunEngine(mockClock);
   }
 
   /**
@@ -56,7 +51,7 @@ public class SunEngineTest {
     when(mockLocation.getLatitude()).thenReturn(LAT);
     when(mockLocation.getLongitude()).thenReturn(LON);
 
-    sunEngine.acceptLocation(mockLocation);
+    SunInfo sunInfo = sunEngine.locationToSunInfo(mockLocation);
 
     SunInfo expectedSunInfo =
         SunInfo.create(
@@ -70,6 +65,6 @@ public class SunEngineTest {
             1,
             true);
 
-    verify(mockSunInfoConsumer).accept(expectedSunInfo);
+    assertEquals(expectedSunInfo, sunInfo);
   }
 }

@@ -1,6 +1,7 @@
 package org.onereed.helios;
 
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -12,10 +13,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.Tasks;
+
 import org.onereed.helios.common.LocationServiceVerifier;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.PlayServicesVerifier;
-import org.onereed.helios.common.ToastUtil;
 import org.onereed.helios.databinding.ActivityMainBinding;
 import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEngine;
@@ -23,12 +25,15 @@ import org.onereed.helios.sun.SunInfo;
 
 import java.lang.ref.WeakReference;
 import java.time.Clock;
+import java.time.Duration;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
   private static final String TAG = LogUtil.makeTag(MainActivity.class);
+
+  private static final Duration LOCATION_STALE = Duration.ofMinutes(10L);
 
   private final Executor backgroundExecutor = Executors.newWorkStealingPool();
 
@@ -39,10 +44,12 @@ public class MainActivity extends AppCompatActivity {
   private final MainHandler mainHandler = new MainHandler(this);
   private final SunInfoAdapter sunInfoAdapter = new SunInfoAdapter(this);
 
-  private final SunEngine sunEngine =
-      new SunEngine(mainHandler::acceptSunInfo, Clock.systemUTC(), backgroundExecutor);
+  private final SunEngine sunEngine = new SunEngine(Clock.systemUTC());
 
   private ActivityMainBinding activityMainBinding;
+
+  private Location latestLocation = null;
+  private SunInfo latestSunInfo = SunInfo.EMPTY;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
   public void onResume() {
     super.onResume();
     AppLogger.debug(TAG, "onResume");
-    updateSun();
+    updateLocation();
   }
 
   @Override
@@ -84,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     if (item.getItemId() == R.id.action_refresh) {
-      updateSun();
+      updateLocation();
       return true;
     }
 
@@ -106,26 +113,33 @@ public class MainActivity extends AppCompatActivity {
     locationManager.acceptPermissionsResult(requestCode, permissions, grantResults);
   }
 
-  private void updateSun() {
-    activityMainBinding.progressBar.show();
-    locationManager.requestLocation(
-        location -> {
-          if (location == null) {
-            activityMainBinding.progressBar.hide();
-            AppLogger.error(TAG, "Location is null.");
-            ToastUtil.longToast(this, R.string.toast_location_failure);
-          } else {
-            sunEngine.acceptLocation(location);
-          }
-        });
+  private void updateLocation() {
+    if (locationManager.requestLocation(mainHandler::acceptLocation)) {
+      activityMainBinding.progressBar.show();
+    }
+  }
+
+  private void acceptLocation(Location location) {
+    latestLocation = location;
+    Tasks.call(backgroundExecutor, () -> sunEngine.locationToSunInfo(location))
+        .addOnSuccessListener(mainHandler::acceptSunInfo)
+        .addOnFailureListener(
+            t -> {
+              activityMainBinding.progressBar.hide();
+              AppLogger.error(TAG, t, "Error from SunEngine.");
+            });
   }
 
   private void acceptSunInfo(SunInfo sunInfo) {
-    sunInfoAdapter.acceptSunInfo(sunInfo);
     activityMainBinding.progressBar.hide();
+    latestSunInfo = sunInfo;
+    sunInfoAdapter.acceptSunInfo(sunInfo);
   }
 
   private static class MainHandler extends Handler {
+
+    private static final int LOCATION_MSG = 0;
+    private static final int SUN_INFO_MSG = 1;
 
     private final WeakReference<MainActivity> mainActivityRef;
 
@@ -133,19 +147,30 @@ public class MainActivity extends AppCompatActivity {
       this.mainActivityRef = new WeakReference<>(mainActivity);
     }
 
+    private void acceptLocation(Location location) {
+      sendMessage(this.obtainMessage(LOCATION_MSG, location));
+    }
+
     private void acceptSunInfo(SunInfo sunInfo) {
-      this.sendMessage(this.obtainMessage(0, sunInfo));
+      sendMessage(this.obtainMessage(SUN_INFO_MSG, sunInfo));
     }
 
     @Override
     public void handleMessage(@NonNull Message msg) {
       MainActivity mainActivity = mainActivityRef.get();
+      if (mainActivity == null) {
+        return;
+      }
 
-      if (mainActivity != null) {
-        if (msg.what == 0) {
+      switch (msg.what) {
+        case LOCATION_MSG:
+          Location location = (Location) msg.obj;
+          mainActivity.acceptLocation(location);
+          break;
+        case SUN_INFO_MSG:
           SunInfo sunInfo = (SunInfo) msg.obj;
           mainActivity.acceptSunInfo(sunInfo);
-        }
+          break;
       }
     }
   }

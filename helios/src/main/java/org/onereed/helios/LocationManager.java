@@ -60,28 +60,31 @@ class LocationManager implements DefaultLifecycleObserver {
     locationHandlerThread.quitSafely();
   }
 
-  void requestLocation(Consumer<Location> locationConsumer) {
-    LocationRequest locationRequest = LocationUtil.createOneShotLocationRequest();
-    LocationCallback locationCallback = new LocationUpdateRecipient(locationConsumer);
-
-    runWithPermission(
-        () ->
-            fusedLocationClient
-                .requestLocationUpdates(
-                    locationRequest, locationCallback, locationHandlerThread.getLooper())
-                .addOnFailureListener(e -> Log.e(TAG, "Location update request failed.", e)));
-  }
-
-  private void runWithPermission(Runnable runnable) {
+  /**
+   * Returns {@code true} if the location request was made successfully. A {@code false} return
+   * value indicates that we are initiating a user permission request, meaning that the activity
+   * will soon be paused.
+   */
+  boolean requestLocation(Consumer<Location> locationConsumer) {
     int permissionResult =
         ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
 
-    if (permissionResult == PackageManager.PERMISSION_GRANTED) {
-      runnable.run();
+    boolean permixxionOkay = permissionResult == PackageManager.PERMISSION_GRANTED;
+
+    if (permixxionOkay) {
+      LocationRequest locationRequest = LocationUtil.createOneShotLocationRequest();
+      LocationCallback locationCallback = new LocationUpdateRecipient(locationConsumer);
+
+      fusedLocationClient
+          .requestLocationUpdates(
+              locationRequest, locationCallback, locationHandlerThread.getLooper())
+          .addOnFailureListener(e -> Log.e(TAG, "Location update request failed.", e));
     } else {
       Log.d(TAG, "Requesting location permission.");
       ActivityCompat.requestPermissions(activity, PERMISSIONS, REQUEST_PERMISSION_CODE);
     }
+
+    return permixxionOkay;
   }
 
   /**

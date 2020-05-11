@@ -17,8 +17,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
@@ -31,30 +29,18 @@ public class SunEngine {
 
   private static final Duration ONE_DAY = Duration.ofDays(1L);
 
-  private final Consumer<SunInfo> sunInfoConsumer;
   private final Clock clock;
-  private final Executor executor;
 
-  public SunEngine(Consumer<SunInfo> sunInfoConsumer, Clock clock, Executor executor) {
-    this.sunInfoConsumer = sunInfoConsumer;
+  public SunEngine(Clock clock) {
     this.clock = clock;
-    this.executor = executor;
   }
 
-  public void acceptLocation(@NonNull Location location) {
-    executor.execute(() -> locationToSunInfo(location));
-  }
-
-  private void locationToSunInfo(@NonNull Location location) {
+  public @NonNull
+  SunInfo locationToSunInfo(@NonNull Location location) {
     double lat = location.getLatitude();
     double lon = location.getLongitude();
     Instant now = clock.instant();
-    SunInfo sunInfo = getSunInfo(lat, lon, now);
 
-    sunInfoConsumer.accept(sunInfo);
-  }
-
-  private static SunInfo getSunInfo(double lat, double lon, Instant now) {
     AppLogger.debug(TAG, "lat=%.3f lon=%.3f now=%s", lat, lon, now);
 
     Date nextDay = Date.from(now);
