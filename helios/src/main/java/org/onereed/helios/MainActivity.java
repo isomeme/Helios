@@ -16,7 +16,6 @@ import org.onereed.helios.common.LocationServiceVerifier;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.PlayServicesVerifier;
 import org.onereed.helios.common.ToastUtil;
-import org.onereed.helios.concurrent.AppExecutors;
 import org.onereed.helios.databinding.ActivityMainBinding;
 import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEngine;
@@ -25,12 +24,13 @@ import org.onereed.helios.sun.SunInfo;
 import java.lang.ref.WeakReference;
 import java.time.Clock;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
   private static final String TAG = LogUtil.makeTag(MainActivity.class);
 
-  private final Executor backgroundExecutor = AppExecutors.createBackgroundExecutor();
+  private final Executor backgroundExecutor = Executors.newWorkStealingPool();
 
   private final PlayServicesVerifier playServicesVerifier = new PlayServicesVerifier(this);
   private final LocationServiceVerifier locationServiceVerifier = new LocationServiceVerifier(this);
@@ -42,19 +42,20 @@ public class MainActivity extends AppCompatActivity {
   private final SunEngine sunEngine =
       new SunEngine(mainHandler::acceptSunInfo, Clock.systemUTC(), backgroundExecutor);
 
+  private ActivityMainBinding activityMainBinding;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     AppLogger.debug(TAG, "onCreate");
 
-    ActivityMainBinding activityMainBinding = ActivityMainBinding.inflate(getLayoutInflater());
+    activityMainBinding = ActivityMainBinding.inflate(getLayoutInflater());
     setContentView(activityMainBinding.getRoot());
     setSupportActionBar(activityMainBinding.toolbar);
 
-    activityMainBinding.sunEventsRecyclerView.setAdapter(sunInfoAdapter);
-
     RecyclerView.LayoutManager sunEventsLayoutManager = new LinearLayoutManager(this);
     activityMainBinding.sunEventsRecyclerView.setLayoutManager(sunEventsLayoutManager);
+    activityMainBinding.sunEventsRecyclerView.setAdapter(sunInfoAdapter);
 
     getLifecycle().addObserver(playServicesVerifier);
     getLifecycle().addObserver(locationServiceVerifier);
@@ -106,9 +107,11 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void updateSun() {
+    activityMainBinding.progressBar.show();
     locationManager.requestLocation(
         location -> {
           if (location == null) {
+            activityMainBinding.progressBar.hide();
             AppLogger.error(TAG, "Location is null.");
             ToastUtil.longToast(this, R.string.toast_location_failure);
           } else {
@@ -117,8 +120,9 @@ public class MainActivity extends AppCompatActivity {
         });
   }
 
-  private void display(SunInfo sunInfo) {
+  private void acceptSunInfo(SunInfo sunInfo) {
     sunInfoAdapter.acceptSunInfo(sunInfo);
+    activityMainBinding.progressBar.hide();
   }
 
   private static class MainHandler extends Handler {
@@ -140,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
       if (mainActivity != null) {
         if (msg.what == 0) {
           SunInfo sunInfo = (SunInfo) msg.obj;
-          mainActivity.display(sunInfo);
+          mainActivity.acceptSunInfo(sunInfo);
         }
       }
     }
