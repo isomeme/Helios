@@ -7,7 +7,7 @@ import java.time.Duration;
 /** Static utility methods for working with locations. */
 public final class LocationUtil {
 
-  private static final long BRIEF_INTERVAL_MILLIS = 500;
+  private static final long BRIEF_INTERVAL_MILLIS = 500L;
   private static final long ONE_SHOT_DURATION_MILLIS = Duration.ofMinutes(5L).toMillis();
 
   /**

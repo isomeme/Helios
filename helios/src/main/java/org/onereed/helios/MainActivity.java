@@ -5,8 +5,10 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,8 +35,9 @@ public class MainActivity extends AppCompatActivity {
 
   private static final String TAG = LogUtil.makeTag(MainActivity.class);
 
-  private static final Duration LOCATION_STALE = Duration.ofMinutes(10L);
+  private static final long LOCATION_STALE_NANOS = Duration.ofMinutes(10L).toNanos();
 
+  private final Clock clock = Clock.systemUTC();
   private final Executor backgroundExecutor = Executors.newWorkStealingPool();
 
   private final PlayServicesVerifier playServicesVerifier = new PlayServicesVerifier(this);
@@ -44,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
   private final MainHandler mainHandler = new MainHandler(this);
   private final SunInfoAdapter sunInfoAdapter = new SunInfoAdapter(this);
 
-  private final SunEngine sunEngine = new SunEngine(Clock.systemUTC());
+  private final SunEngine sunEngine = new SunEngine(clock);
 
   private ActivityMainBinding activityMainBinding;
 
@@ -73,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
   public void onResume() {
     super.onResume();
     AppLogger.debug(TAG, "onResume");
-    updateLocation();
+    mainHandler.requestUpdate(false);
   }
 
   @Override
@@ -91,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     if (item.getItemId() == R.id.action_refresh) {
-      updateLocation();
+      mainHandler.requestUpdate(true);
       return true;
     }
 
@@ -113,38 +116,67 @@ public class MainActivity extends AppCompatActivity {
     locationManager.acceptPermissionsResult(requestCode, permissions, grantResults);
   }
 
-  private void updateLocation() {
-    if (locationManager.requestLocation(mainHandler::acceptLocation)) {
-      activityMainBinding.progressBar.show();
+  private void update(boolean isForced) {
+    long lastLocationAgeNanos =
+        latestLocation == null
+            ? Long.MAX_VALUE
+            : SystemClock.elapsedRealtimeNanos() - latestLocation.getElapsedRealtimeNanos();
+    boolean isLastLocationStale = lastLocationAgeNanos > LOCATION_STALE_NANOS;
+    boolean showProgressBar = false;
+
+    AppLogger.debug(
+        TAG, "update, isForced=%s, isLastLocationStale=%s", isForced, isLastLocationStale);
+
+    if (isForced || isLastLocationStale) {
+      // If requestLocation returns false, it means that the user is being prompted for location
+      // permission, and we're headed into paused state.
+
+      showProgressBar = locationManager.requestLocation(mainHandler::acceptLocation);
+    } else if (latestSunInfo.getStaleTime().isBefore(clock.instant())) {
+      showProgressBar = true;
+      startSunInfoCalculation(latestLocation);
+    }
+
+    if (showProgressBar) {
+      activityMainBinding.progressBar.setVisibility(View.VISIBLE);
     }
   }
 
   private void acceptLocation(Location location) {
     latestLocation = location;
+    startSunInfoCalculation(location);
+  }
+
+  private void startSunInfoCalculation(Location location) {
     Tasks.call(backgroundExecutor, () -> sunEngine.locationToSunInfo(location))
         .addOnSuccessListener(mainHandler::acceptSunInfo)
         .addOnFailureListener(
             t -> {
-              activityMainBinding.progressBar.hide();
+              activityMainBinding.progressBar.setVisibility(View.INVISIBLE);
               AppLogger.error(TAG, t, "Error from SunEngine.");
             });
   }
 
   private void acceptSunInfo(SunInfo sunInfo) {
-    activityMainBinding.progressBar.hide();
+    activityMainBinding.progressBar.setVisibility(View.INVISIBLE);
     latestSunInfo = sunInfo;
     sunInfoAdapter.acceptSunInfo(sunInfo);
   }
 
   private static class MainHandler extends Handler {
 
-    private static final int LOCATION_MSG = 0;
-    private static final int SUN_INFO_MSG = 1;
+    private static final int UPDATE_MSG = 0;
+    private static final int LOCATION_MSG = 1;
+    private static final int SUN_INFO_MSG = 2;
 
     private final WeakReference<MainActivity> mainActivityRef;
 
     private MainHandler(MainActivity mainActivity) {
       this.mainActivityRef = new WeakReference<>(mainActivity);
+    }
+
+    private void requestUpdate(boolean isForced) {
+      sendMessage((this.obtainMessage(UPDATE_MSG, isForced)));
     }
 
     private void acceptLocation(Location location) {
@@ -163,6 +195,10 @@ public class MainActivity extends AppCompatActivity {
       }
 
       switch (msg.what) {
+        case UPDATE_MSG:
+          boolean isForced = (Boolean) msg.obj;
+          mainActivity.update(isForced);
+          break;
         case LOCATION_MSG:
           Location location = (Location) msg.obj;
           mainActivity.acceptLocation(location);

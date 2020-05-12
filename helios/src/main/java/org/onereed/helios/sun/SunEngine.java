@@ -65,11 +65,23 @@ public class SunEngine {
 
     ImmutableList<SunEvent> shownSunEvents = getShownEvents(precedingEvents, nextEvents, now);
 
-    Duration beforeToNow = Duration.between(shownSunEvents.get(0).getTime(), now);
-    Duration nowToAfter = Duration.between(now, shownSunEvents.get(1).getTime());
-    int indexOfClosestEvent = beforeToNow.compareTo(nowToAfter) < 0 ? 0 : 1;
+    Instant beforeTime = shownSunEvents.get(0).getTime();
+    Instant afterTime = shownSunEvents.get(1).getTime();
+    Duration between = Duration.between(beforeTime, afterTime);
+    Instant halfway = beforeTime.plus(between.dividedBy(2L));
 
-    return SunInfo.create(now, shownSunEvents, indexOfClosestEvent, isCrossingHorizon);
+    int indexOfClosestEvent;
+    Instant staleTime;
+
+    if (now.isBefore(halfway)) {
+      indexOfClosestEvent = 0;
+      staleTime = halfway;
+    } else {
+      indexOfClosestEvent = 1;
+      staleTime = afterTime;
+    }
+
+    return SunInfo.create(now, shownSunEvents, indexOfClosestEvent, isCrossingHorizon, staleTime);
   }
 
   private static ImmutableList<SunEvent> toSunEvents(SunTimes sunTimes) {

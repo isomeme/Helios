@@ -69,9 +69,9 @@ class LocationManager implements DefaultLifecycleObserver {
     int permissionResult =
         ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
 
-    boolean permixxionOkay = permissionResult == PackageManager.PERMISSION_GRANTED;
+    boolean permissionOkay = permissionResult == PackageManager.PERMISSION_GRANTED;
 
-    if (permixxionOkay) {
+    if (permissionOkay) {
       LocationRequest locationRequest = LocationUtil.createOneShotLocationRequest();
       LocationCallback locationCallback = new LocationUpdateRecipient(locationConsumer);
 
@@ -84,7 +84,7 @@ class LocationManager implements DefaultLifecycleObserver {
       ActivityCompat.requestPermissions(activity, PERMISSIONS, REQUEST_PERMISSION_CODE);
     }
 
-    return permixxionOkay;
+    return permissionOkay;
   }
 
   /**
