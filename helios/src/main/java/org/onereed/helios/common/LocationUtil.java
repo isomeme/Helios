@@ -7,20 +7,16 @@ import java.time.Duration;
 /** Static utility methods for working with locations. */
 public final class LocationUtil {
 
-  private static final long BRIEF_INTERVAL_MILLIS = 500L;
-  private static final long ONE_SHOT_DURATION_MILLIS = Duration.ofMinutes(5L).toMillis();
+  private static final long FASTEST_INTERVAL_MILLIS = Duration.ofSeconds(30L).toMillis();
+  private static final long INTERVAL_MILLIS = Duration.ofMinutes(2L).toMillis();
 
   /**
-   * Creates a one-shot location request. These need to be created fresh at each usage because
-   * (unbelievably) the expiration duration is relative to request *creation* time, not when the
-   * request is sent. Go figure.
+   * Creates a repeated location request.
    */
-  public static LocationRequest createOneShotLocationRequest() {
+  public static LocationRequest createRepeatedLocationRequest() {
     return new LocationRequest()
-        .setFastestInterval(BRIEF_INTERVAL_MILLIS)
-        .setInterval(BRIEF_INTERVAL_MILLIS)
-        .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
-        .setNumUpdates(1)
-        .setExpirationDuration(ONE_SHOT_DURATION_MILLIS);
+        .setFastestInterval(FASTEST_INTERVAL_MILLIS)
+        .setInterval(INTERVAL_MILLIS)
+        .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
   }
 }

@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.HandlerThread;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -23,6 +22,7 @@ import com.google.android.gms.location.LocationServices;
 import org.onereed.helios.common.LocationUtil;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.ToastUtil;
+import org.onereed.helios.logger.AppLogger;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -34,18 +34,22 @@ class LocationManager implements DefaultLifecycleObserver {
   private static final int REQUEST_PERMISSION_CODE = 1;
   private static final String[] PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION};
 
+  private final LocationUpdateRecipient locationUpdateRecipient = new LocationUpdateRecipient();
+
   private final Activity activity;
+  private final Consumer<Location> locationConsumer;
 
   private FusedLocationProviderClient fusedLocationClient;
   private HandlerThread locationHandlerThread;
 
-  LocationManager(Activity activity) {
+  LocationManager(Activity activity, Consumer<Location> locationConsumer) {
     this.activity = activity;
+    this.locationConsumer = locationConsumer;
   }
 
   @Override
   public void onCreate(@NonNull LifecycleOwner owner) {
-    Log.d(TAG, "onCreate");
+    AppLogger.debug(TAG, "onCreate");
 
     fusedLocationClient =
         LocationServices.getFusedLocationProviderClient(activity.getApplicationContext());
@@ -55,32 +59,53 @@ class LocationManager implements DefaultLifecycleObserver {
   }
 
   @Override
+  public void onResume(@NonNull LifecycleOwner owner) {
+    AppLogger.debug(TAG, "onResume");
+
+    if (checkPermission()) {
+      LocationRequest locationRequest = LocationUtil.createRepeatedLocationRequest();
+      fusedLocationClient
+          .requestLocationUpdates(
+              locationRequest, locationUpdateRecipient, locationHandlerThread.getLooper())
+          .addOnFailureListener(e -> AppLogger.error(TAG, e, "Location update request failed."));
+    }
+  }
+
+  @Override
+  public void onPause(@NonNull LifecycleOwner owner) {
+    AppLogger.debug(TAG, "onPause");
+
+    fusedLocationClient
+        .removeLocationUpdates(locationUpdateRecipient)
+        .addOnFailureListener(e -> AppLogger.error(TAG, e, "Failed to remove location update."));
+  }
+
+  @Override
   public void onDestroy(@NonNull LifecycleOwner owner) {
-    Log.d(TAG, "onDestroy");
+    AppLogger.debug(TAG, "onDestroy");
     locationHandlerThread.quitSafely();
   }
 
+  void requestLastLocation() {
+    AppLogger.debug(TAG, "requestLastLocation");
+    fusedLocationClient.getLastLocation()
+        .addOnSuccessListener(locationConsumer::accept)
+        .addOnFailureListener(e -> AppLogger.error(TAG, e, "getLastLocation failed."));
+  }
+
   /**
-   * Returns {@code true} if the location request was made successfully. A {@code false} return
+   * Returns {@code true} if we already have all needed location permissions. A {@code false} return
    * value indicates that we are initiating a user permission request, meaning that the activity
    * will soon be paused.
    */
-  boolean requestLocation(Consumer<Location> locationConsumer) {
+  private boolean checkPermission() {
     int permissionResult =
         ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
 
     boolean permissionOkay = permissionResult == PackageManager.PERMISSION_GRANTED;
 
-    if (permissionOkay) {
-      LocationRequest locationRequest = LocationUtil.createOneShotLocationRequest();
-      LocationCallback locationCallback = new LocationUpdateRecipient(locationConsumer);
-
-      fusedLocationClient
-          .requestLocationUpdates(
-              locationRequest, locationCallback, locationHandlerThread.getLooper())
-          .addOnFailureListener(e -> Log.e(TAG, "Location update request failed.", e));
-    } else {
-      Log.d(TAG, "Requesting location permission.");
+    if (!permissionOkay) {
+      AppLogger.debug(TAG, "Requesting location permission.");
       ActivityCompat.requestPermissions(activity, PERMISSIONS, REQUEST_PERMISSION_CODE);
     }
 
@@ -102,34 +127,25 @@ class LocationManager implements DefaultLifecycleObserver {
 
     // If request is cancelled, the result arrays are empty.
     if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-      Log.d(TAG, "User granted request for location permission.");
+      AppLogger.debug(TAG, "User granted request for location permission.");
     } else {
-      Log.w(TAG, "User refused request for location permission.");
+      AppLogger.warning(TAG, "User refused request for location permission.");
       ToastUtil.longToast(activity, R.string.toast_location_permission_needed);
     }
   }
 
   private class LocationUpdateRecipient extends LocationCallback {
 
-    private final Consumer<Location> locationConsumer;
-
-    private LocationUpdateRecipient(Consumer<Location> locationConsumer) {
-      this.locationConsumer = locationConsumer;
-    }
-
     @Override
     public void onLocationAvailability(LocationAvailability locationAvailability) {
       if (!locationAvailability.isLocationAvailable()) {
-        Log.w(TAG, "Location not available.");
+        AppLogger.warning(TAG, "Location not available.");
       }
     }
 
     @Override
     public void onLocationResult(LocationResult locationResult) {
       locationConsumer.accept(locationResult.getLastLocation());
-      fusedLocationClient
-          .removeLocationUpdates(this)
-          .addOnFailureListener(e -> Log.w(TAG, "Failed to remove location update.", e));
     }
   }
 }

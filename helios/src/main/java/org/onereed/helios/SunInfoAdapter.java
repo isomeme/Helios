@@ -11,10 +11,14 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.onereed.helios.common.LogUtil;
+import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEvent;
 import org.onereed.helios.sun.SunInfo;
 
 class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventHolder> {
+
+  private static final String TAG = LogUtil.makeTag(SunInfoAdapter.class);
 
   static class SunEventHolder extends RecyclerView.ViewHolder {
     private final CardView cardView;
@@ -29,17 +33,16 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventHolder>
 
   private final Activity activity;
 
-  private SunInfo sunInfo = SunInfo.EMPTY;
+  private SunInfo sunInfo = null;
 
   SunInfoAdapter(Activity activity) {
     this.activity = activity;
   }
 
   void acceptSunInfo(SunInfo newSunInfo) {
-    if (!sunInfo.equals(newSunInfo)) {
+    AppLogger.debug(TAG, "Accepting newSunInfo=%s", newSunInfo);
       sunInfo = newSunInfo;
       notifyDataSetChanged();
-    }
   }
 
   @NonNull
@@ -73,6 +76,6 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventHolder>
 
   @Override
   public int getItemCount() {
-    return sunInfo.getSunEvents().size();
+    return sunInfo == null ? 0 : sunInfo.getSunEvents().size();
   }
 }
