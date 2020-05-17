@@ -48,7 +48,7 @@ public class LocationServiceVerifier implements DefaultLifecycleObserver {
   public void onResume(@NonNull LifecycleOwner owner) {
     LocationSettingsRequest locationSettingsRequest =
         new LocationSettingsRequest.Builder()
-            .addLocationRequest(LocationUtil.createRepeatedLocationRequest())
+            .addLocationRequest(LocationUtil.REPEATED_LOCATION_REQUEST)
             .build();
 
     settingsClient

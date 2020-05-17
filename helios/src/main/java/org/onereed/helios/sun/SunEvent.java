@@ -1,7 +1,6 @@
 package org.onereed.helios.sun;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 
@@ -11,6 +10,7 @@ import org.shredzone.commons.suncalc.SunTimes;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -36,9 +36,15 @@ public abstract class SunEvent implements Comparable<SunEvent> {
       this.colorResource = colorResource;
     }
 
-    @Nullable
-    Date getDate(SunTimes sunTimes) {
-      return dateExtractor.apply(sunTimes);
+    /**
+     * Returns the {@link SunEvent} corresponding to this {@link Type}, in the given {@link
+     * SunTimes} instance, if it is available. Rise and set events will not be available for arctic
+     * summer and winter.
+     */
+    Optional<SunEvent> createSunEvent(@NonNull SunTimes sunTimes) {
+      return Optional.ofNullable(dateExtractor.apply(sunTimes))
+          .map(Date::toInstant)
+          .map(instant -> SunEvent.create(instant, this));
     }
 
     public int getColorResource() {

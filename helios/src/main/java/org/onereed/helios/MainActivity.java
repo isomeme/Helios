@@ -17,6 +17,9 @@ import org.onereed.helios.common.PlayServicesVerifier;
 import org.onereed.helios.databinding.ActivityMainBinding;
 import org.onereed.helios.logger.AppLogger;
 
+/**
+ * Main activity for Helios.
+ */
 public class MainActivity extends AppCompatActivity {
 
   private static final String TAG = LogUtil.makeTag(MainActivity.class);
@@ -42,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     activityMainBinding.sunEventsRecyclerView.setLayoutManager(sunEventsLayoutManager);
     activityMainBinding.sunEventsRecyclerView.setAdapter(sunInfoAdapter);
 
-    ViewModelProvider.Factory factory = new ViewModelProvider.NewInstanceFactory();
+    ViewModelProvider.Factory factory = new SunInfoViewModelFactory();
     SunInfoViewModel sunInfoViewModel =
         new ViewModelProvider(this, factory).get(SunInfoViewModel.class);
 

@@ -15,7 +15,6 @@ import androidx.lifecycle.LifecycleOwner;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
@@ -63,10 +62,11 @@ class LocationManager implements DefaultLifecycleObserver {
     AppLogger.debug(TAG, "onResume");
 
     if (checkPermission()) {
-      LocationRequest locationRequest = LocationUtil.createRepeatedLocationRequest();
       fusedLocationClient
           .requestLocationUpdates(
-              locationRequest, locationUpdateRecipient, locationHandlerThread.getLooper())
+              LocationUtil.REPEATED_LOCATION_REQUEST,
+              locationUpdateRecipient,
+              locationHandlerThread.getLooper())
           .addOnFailureListener(e -> AppLogger.error(TAG, e, "Location update request failed."));
     }
   }
@@ -88,7 +88,8 @@ class LocationManager implements DefaultLifecycleObserver {
 
   void requestLastLocation() {
     AppLogger.debug(TAG, "requestLastLocation");
-    fusedLocationClient.getLastLocation()
+    fusedLocationClient
+        .getLastLocation()
         .addOnSuccessListener(locationConsumer::accept)
         .addOnFailureListener(e -> AppLogger.error(TAG, e, "getLastLocation failed."));
   }

@@ -9,23 +9,19 @@ import androidx.lifecycle.ViewModel;
 
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.logger.AppLogger;
-import org.onereed.helios.sun.SunEngine;
 import org.onereed.helios.sun.SunInfo;
+import org.onereed.helios.sun.SunInfoSource;
 
 import java.time.Clock;
-import java.util.concurrent.Executors;
 
 /**
  * Stores and updates data needed for {@link SunInfo} display.
  */
-@SuppressWarnings("WeakerAccess") // Must be public for ViewModelProvider.
-public class SunInfoViewModel extends ViewModel {
+class SunInfoViewModel extends ViewModel {
 
-  private final String TAG = LogUtil.makeTag(SunInfoViewModel.class);
+  private static final String TAG = LogUtil.makeTag(SunInfoViewModel.class);
 
   private static final Clock CLOCK = Clock.systemUTC();
-
-  private final SunEngine sunEngine = new SunEngine(CLOCK);
 
   private final MutableLiveData<SunInfo> sunInfoMutableLiveData = new MutableLiveData<>();
 
@@ -38,12 +34,12 @@ public class SunInfoViewModel extends ViewModel {
   void acceptLocation(@NonNull Location location) {
     AppLogger.debug(TAG, "Accepting location=%s", location);
     lastLocation = location;
-    // TODO: Find a better way.
-    Executors.newSingleThreadExecutor().submit(this::updateSunInfo);
+    updateSunInfo();
   }
 
   private void updateSunInfo() {
-    SunInfo sunInfo = sunEngine.locationToSunInfo(lastLocation);
-    sunInfoMutableLiveData.postValue(sunInfo);
+    SunInfoSource.request(lastLocation.getLatitude(), lastLocation.getLongitude(), CLOCK.instant())
+        .addOnSuccessListener(sunInfoMutableLiveData::postValue)
+        .addOnFailureListener(e -> AppLogger.error(TAG, e, "Failure obtaining SunInfo."));
   }
 }
