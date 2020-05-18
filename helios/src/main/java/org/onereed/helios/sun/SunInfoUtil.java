@@ -25,45 +25,72 @@ class SunInfoUtil {
 
   private static final String TAG = LogUtil.makeTag(SunInfoUtil.class);
 
-  private static final Duration ONE_DAY = Duration.ofDays(1L);
+  /**
+   * We use an offset of just less than a full day to get the preceding events, to avoid edge
+   * cases where an event happening right at the time we're checking falls out of both the
+   * preceding and upcoming events lists. We then remove duplicates in the preceding events.
+   */
+  private static final Duration PRECEDING_OFFSET = Duration.ofDays(1L).minusMinutes(10L);
 
   static @NonNull SunInfo getSunInfo(double lat, double lon, @NonNull Instant when) {
     AppLogger.debug(TAG, "lat=%.3f lon=%.3f when=%s", lat, lon, when);
 
-    Date nextDay = Date.from(when);
-    SunTimes nextSunTimes = SunTimes.compute().at(lat, lon).on(nextDay).execute();
-    boolean isCrossingHorizon = !(nextSunTimes.isAlwaysDown() || nextSunTimes.isAlwaysUp());
+    SunTimes nextSunTimes = getSunTimes(lat, lon, when);
+    SunInfo.HorizonStatus horizonStatus = getHorizonStatus(nextSunTimes);
     ImmutableList<SunEvent> nextEvents = toSunEvents(nextSunTimes);
 
     verify(!nextEvents.isEmpty(), "nextEvents empty for nextSunTimes=%s", nextSunTimes);
 
     SunEvent nextEvent = nextEvents.get(0);
-    Date precedingDay = Date.from(nextEvent.getTime().minus(ONE_DAY));
-    SunTimes precedingSunTimes = SunTimes.compute().at(lat, lon).on(precedingDay).execute();
+    Instant precedingDay = nextEvent.getTime().minus(PRECEDING_OFFSET);
+    SunTimes precedingSunTimes = getSunTimes(lat, lon, precedingDay);
     ImmutableList<SunEvent> precedingEvents = toSunEvents(precedingSunTimes);
 
     verify(
         !precedingEvents.isEmpty(), "precedingEvents empty for precedingSunTimes=%s", nextSunTimes);
 
-    ImmutableList<SunEvent> shownSunEvents = getShownEvents(precedingEvents, nextEvents, when);
+    SunEvent mostRecentEvent = getMostRecentEvent(precedingEvents, nextEvents);
+    Iterable<SunEvent> eventsAfterNext = Iterables.skip(nextEvents, 1);
 
-    Instant beforeTime = shownSunEvents.get(0).getTime();
-    Instant afterTime = shownSunEvents.get(1).getTime();
+    Instant beforeTime = mostRecentEvent.getTime();
+    Instant afterTime = nextEvent.getTime();
     Duration between = Duration.between(beforeTime, afterTime);
     Instant halfway = beforeTime.plus(between.dividedBy(2L));
 
-    int indexOfClosestEvent;
-    Instant staleTime;
-
     if (when.isBefore(halfway)) {
-      indexOfClosestEvent = 0;
-      staleTime = halfway;
+      mostRecentEvent = mostRecentEvent.toBuilder().setClosest(true).build();
     } else {
-      indexOfClosestEvent = 1;
-      staleTime = afterTime;
+      nextEvent = nextEvent.toBuilder().setClosest(true).build();
     }
 
-    return SunInfo.create(when, shownSunEvents, indexOfClosestEvent, isCrossingHorizon, staleTime);
+    ImmutableList<SunEvent> shownSunEvents =
+        ImmutableList.<SunEvent>builder()
+            .add(mostRecentEvent)
+            .add(nextEvent)
+            .addAll(eventsAfterNext)
+            .build();
+
+    return SunInfo.create(when, horizonStatus, shownSunEvents);
+  }
+
+  private static SunTimes getSunTimes(double lat, double lon, Instant when) {
+    // Full-cycle mode is needed when the current time is just after an event -- sunset, for
+    // example -- and the next such event is more than 24 hours in the future, as happens throughout
+    // winter and spring.
+
+    return SunTimes.compute().at(lat, lon).on(Date.from(when)).fullCycle().execute();
+  }
+
+  private static SunInfo.HorizonStatus getHorizonStatus(SunTimes nextSunTimes) {
+    if (nextSunTimes.isAlwaysUp()) {
+      return SunInfo.HorizonStatus.ALWAYS_ABOVE;
+    }
+
+    if (nextSunTimes.isAlwaysDown()) {
+      return SunInfo.HorizonStatus.ALWAYS_BELOW;
+    }
+
+    return SunInfo.HorizonStatus.NORMAL;
   }
 
   private static ImmutableList<SunEvent> toSunEvents(SunTimes sunTimes) {
@@ -74,32 +101,22 @@ class SunInfoUtil {
         .collect(toImmutableList());
   }
 
-  /** We show the most recent previous event and up to 4 upcoming events. */
-  private static ImmutableList<SunEvent> getShownEvents(
-      ImmutableList<SunEvent> precedingEvents, ImmutableList<SunEvent> nextEvents, Instant when) {
+  private static SunEvent getMostRecentEvent(
+      ImmutableList<SunEvent> precedingEvents, ImmutableList<SunEvent> nextEvents) {
 
-    // It is possible for the last preceding event and the first next event to be the same.
-    // For example, during spring sunset happens several minutes later each day. If we run
-    // between noon and sunset, the preceding day from the next sunset won't quite stretch
-    // back far enough to reach yesterday's sunset time, so today's will be included instead.
-    // We deal with this by filtering events that are not before 'when' from the preceding list.
-    // To guard against weird polar edge cases, we actually allow for an overlap of more than one
-    // preceding item.
+    // It is possible for preceding and upcoming events to overlap, e.g. if it's just before
+    // sunrise and the last sunrise was more than 24 hours before this one. To guard against this,
+    // we discard preceding events which are in the next-events list.
 
-    SunEvent lastPrecedingEvent =
-        precedingEvents.stream()
-            .sorted(reverseOrder())
-            .filter(event -> event.getTime().isBefore(when))
-            .findFirst()
-            .orElseThrow(
-                () ->
-                    new FormattedVerifyException(
-                        "Nothing in precedingEvents=%s is before when=%s", precedingEvents, when));
-
-    return ImmutableList.<SunEvent>builder()
-        .add(lastPrecedingEvent)
-        .addAll(Iterables.limit(nextEvents, 4))
-        .build();
+    return precedingEvents.stream()
+        .sorted(reverseOrder())
+        .filter(event -> !nextEvents.contains(event))
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new FormattedVerifyException(
+                    "Nothing in precedingEvents=%s is not also in nextEvents=%s",
+                    precedingEvents, nextEvents));
   }
 
   private SunInfoUtil() {}

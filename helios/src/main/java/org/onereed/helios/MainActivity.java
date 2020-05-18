@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,9 +18,9 @@ import org.onereed.helios.common.PlayServicesVerifier;
 import org.onereed.helios.databinding.ActivityMainBinding;
 import org.onereed.helios.logger.AppLogger;
 
-/**
- * Main activity for Helios.
- */
+import java.time.Instant;
+
+/** Main activity for Helios. */
 public class MainActivity extends AppCompatActivity {
 
   private static final String TAG = LogUtil.makeTag(MainActivity.class);
@@ -27,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
   private final PlayServicesVerifier playServicesVerifier = new PlayServicesVerifier(this);
   private final LocationServiceVerifier locationServiceVerifier = new LocationServiceVerifier(this);
 
-  private final SunInfoAdapter sunInfoAdapter = new SunInfoAdapter(this);
+  private final SunEventsAdapter sunEventsAdapter = new SunEventsAdapter(this);
 
   private ActivityMainBinding activityMainBinding;
   private LocationManager locationManager;
@@ -43,13 +44,14 @@ public class MainActivity extends AppCompatActivity {
 
     RecyclerView.LayoutManager sunEventsLayoutManager = new LinearLayoutManager(this);
     activityMainBinding.sunEventsRecyclerView.setLayoutManager(sunEventsLayoutManager);
-    activityMainBinding.sunEventsRecyclerView.setAdapter(sunInfoAdapter);
+    activityMainBinding.sunEventsRecyclerView.setAdapter(sunEventsAdapter);
 
     ViewModelProvider.Factory factory = new SunInfoViewModelFactory();
     SunInfoViewModel sunInfoViewModel =
         new ViewModelProvider(this, factory).get(SunInfoViewModel.class);
 
-    sunInfoViewModel.getSunInfoLiveData().observe(this, sunInfoAdapter::acceptSunInfo);
+    sunInfoViewModel.getSunEventsLiveData().observe(this, sunEventsAdapter::acceptSunEvents);
+    sunInfoViewModel.getLastUpdateTimeLiveData().observe(this, this::onSunInfoUpdated);
     locationManager = new LocationManager(this, sunInfoViewModel::acceptLocation);
 
     getLifecycle().addObserver(playServicesVerifier);
@@ -78,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     if (item.getItemId() == R.id.action_refresh) {
+      activityMainBinding.progressBar.setVisibility(View.VISIBLE);
       locationManager.requestLastLocation();
       return true;
     }
@@ -98,5 +101,9 @@ public class MainActivity extends AppCompatActivity {
 
     AppLogger.debug(TAG, "onRequestPermissionsResult");
     locationManager.acceptPermissionsResult(requestCode, permissions, grantResults);
+  }
+
+  private void onSunInfoUpdated(Instant ignored) {
+    activityMainBinding.progressBar.setVisibility(View.INVISIBLE);
   }
 }

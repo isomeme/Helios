@@ -11,14 +11,18 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.common.collect.ImmutableList;
+
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEvent;
-import org.onereed.helios.sun.SunInfo;
 
-class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventHolder> {
+class SunEventsAdapter extends RecyclerView.Adapter<SunEventsAdapter.SunEventHolder> {
 
-  private static final String TAG = LogUtil.makeTag(SunInfoAdapter.class);
+  private static final String TAG = LogUtil.makeTag(SunEventsAdapter.class);
+
+  private static final int DATE_FORMAT_FLAGS =
+      DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NUMERIC_DATE | DateUtils.FORMAT_SHOW_TIME;
 
   static class SunEventHolder extends RecyclerView.ViewHolder {
     private final CardView cardView;
@@ -33,16 +37,22 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventHolder>
 
   private final Activity activity;
 
-  private SunInfo sunInfo = null;
+  private ImmutableList<SunEvent> sunEvents = ImmutableList.of();
 
-  SunInfoAdapter(Activity activity) {
+  SunEventsAdapter(Activity activity) {
     this.activity = activity;
+    setHasStableIds(true);
   }
 
-  void acceptSunInfo(SunInfo newSunInfo) {
-    AppLogger.debug(TAG, "Accepting newSunInfo=%s", newSunInfo);
-      sunInfo = newSunInfo;
-      notifyDataSetChanged();
+  void acceptSunEvents(ImmutableList<SunEvent> newSunEvents) {
+    AppLogger.debug(TAG, "Accepting newSunEvents=%s", newSunEvents);
+    sunEvents = newSunEvents;
+    notifyDataSetChanged();
+  }
+
+  @Override
+  public long getItemId(int position) {
+    return sunEvents.get(position).getTime().toEpochMilli();
   }
 
   @NonNull
@@ -55,27 +65,20 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventHolder>
 
   @Override
   public void onBindViewHolder(@NonNull SunEventHolder holder, int position) {
-    SunEvent sunEvent = sunInfo.getSunEvents().get(position);
-    boolean isClosestEvent = sunInfo.getIndexOfClosestEvent() == position;
+    SunEvent sunEvent = sunEvents.get(position);
 
     int colorResource = sunEvent.getType().getColorResource();
     int color = activity.getResources().getColor(colorResource, null);
     holder.cardView.setCardBackgroundColor(color);
 
     long eventTimeMillis = sunEvent.getTime().toEpochMilli();
-    String timeStr =
-        DateUtils.formatDateTime(
-            activity,
-            eventTimeMillis,
-            DateUtils.FORMAT_SHOW_DATE
-                | DateUtils.FORMAT_NUMERIC_DATE
-                | DateUtils.FORMAT_SHOW_TIME);
+    String timeStr = DateUtils.formatDateTime(activity, eventTimeMillis, DATE_FORMAT_FLAGS);
     holder.eventTimeView.setText(timeStr);
-    holder.eventTimeView.setTypeface(null, isClosestEvent ? Typeface.BOLD : Typeface.NORMAL);
+    holder.eventTimeView.setTypeface(null, sunEvent.isClosest() ? Typeface.BOLD : Typeface.NORMAL);
   }
 
   @Override
   public int getItemCount() {
-    return sunInfo == null ? 0 : sunInfo.getSunEvents().size();
+    return sunEvents.size();
   }
 }

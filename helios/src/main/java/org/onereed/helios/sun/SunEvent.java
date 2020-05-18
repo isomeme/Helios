@@ -13,9 +13,7 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.function.Function;
 
-/**
- * Represents one sun event -- rise, noon, set, or nadir.
- */
+/** Represents one sun event -- rise, noon, set, or nadir. */
 @AutoValue
 public abstract class SunEvent implements Comparable<SunEvent> {
 
@@ -44,7 +42,7 @@ public abstract class SunEvent implements Comparable<SunEvent> {
     Optional<SunEvent> createSunEvent(@NonNull SunTimes sunTimes) {
       return Optional.ofNullable(dateExtractor.apply(sunTimes))
           .map(Date::toInstant)
-          .map(instant -> SunEvent.create(instant, this));
+          .map(instant -> SunEvent.builder().setTime(instant).setType(this).build());
     }
 
     public int getColorResource() {
@@ -58,12 +56,30 @@ public abstract class SunEvent implements Comparable<SunEvent> {
   @NonNull
   public abstract Type getType();
 
-  static SunEvent create(Instant time, Type type) {
-    return new AutoValue_SunEvent(time, type);
-  }
+  /** True if this event is the closest one to the time of calculation. */
+  public abstract boolean isClosest();
 
   @Override
   public int compareTo(@NonNull SunEvent o) {
     return COMPARATOR.compare(this, o);
+  }
+
+  /**
+   * Returns a {@link SunEvent.Builder}. As a convenience, {@code setClosest} is set to
+   * {@code false}.
+   */
+  static Builder builder() {
+    return new AutoValue_SunEvent.Builder().setClosest(false);
+  }
+
+  abstract Builder toBuilder();
+
+  @AutoValue.Builder
+  abstract static class Builder {
+    abstract Builder setTime(Instant time);
+    abstract Builder setType(Type type);
+    abstract Builder setClosest(boolean isClosest);
+
+    abstract SunEvent build();
   }
 }
