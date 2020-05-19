@@ -41,7 +41,7 @@ public class SunInfoUtilTest {
             when,
             HorizonStatus.NORMAL,
             ImmutableList.of(
-                event("2020-05-08T19:51:00Z", Type.NOON, false),
+                event("2020-05-08T19:52:00Z", Type.NOON, false),
                 event("2020-05-09T02:44:00Z", Type.SET, true),
                 event("2020-05-09T07:50:00Z", Type.NADIR, false),
                 event("2020-05-09T12:57:00Z", Type.RISE, false),

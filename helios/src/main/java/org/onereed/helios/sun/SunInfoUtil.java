@@ -30,7 +30,7 @@ class SunInfoUtil {
    * cases where an event happening right at the time we're checking falls out of both the
    * preceding and upcoming events lists. We then remove duplicates in the preceding events.
    */
-  private static final Duration PRECEDING_OFFSET = Duration.ofDays(1L).minusMinutes(10L);
+  private static final Duration PRECEDING_OFFSET = Duration.ofDays(1L).minusMinutes(30L);
 
   static @NonNull SunInfo getSunInfo(double lat, double lon, @NonNull Instant when) {
     AppLogger.debug(TAG, "lat=%.3f lon=%.3f when=%s", lat, lon, when);
@@ -110,7 +110,7 @@ class SunInfoUtil {
 
     return precedingEvents.stream()
         .sorted(reverseOrder())
-        .filter(event -> !nextEvents.contains(event))
+        .filter(event -> nextEvents.stream().noneMatch(event::isDuplicateOf))
         .findFirst()
         .orElseThrow(
             () ->
