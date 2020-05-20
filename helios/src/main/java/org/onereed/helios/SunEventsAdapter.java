@@ -22,7 +22,11 @@ class SunEventsAdapter extends RecyclerView.Adapter<SunEventsAdapter.SunEventHol
   private static final String TAG = LogUtil.makeTag(SunEventsAdapter.class);
 
   private static final int DATE_FORMAT_FLAGS =
-      DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NUMERIC_DATE | DateUtils.FORMAT_SHOW_TIME;
+      DateUtils.FORMAT_SHOW_DATE
+          | DateUtils.FORMAT_NUMERIC_DATE
+          | DateUtils.FORMAT_SHOW_WEEKDAY
+          | DateUtils.FORMAT_SHOW_TIME
+          | DateUtils.FORMAT_ABBREV_ALL;
 
   static class SunEventHolder extends RecyclerView.ViewHolder {
     private final CardView cardView;

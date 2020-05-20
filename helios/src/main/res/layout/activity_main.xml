@@ -20,23 +20,19 @@
         android:theme="?attr/actionBarTheme"
         app:maxButtonHeight="56dp" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/sunEventsRecyclerView"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         android:layout_below="@id/toolbar"
         android:layout_alignParentBottom="true"
-        android:layout_marginTop="16dp"
-        android:scrollbars="vertical" />
+        android:layout_marginTop="16dp">
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:indeterminate="true"
-        android:visibility="invisible"
-        tools:visibility="visible" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/sunEventsRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
 
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </RelativeLayout>

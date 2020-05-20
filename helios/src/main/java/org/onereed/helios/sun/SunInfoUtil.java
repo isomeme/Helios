@@ -104,10 +104,6 @@ class SunInfoUtil {
   private static SunEvent getMostRecentEvent(
       ImmutableList<SunEvent> precedingEvents, ImmutableList<SunEvent> nextEvents) {
 
-    // It is possible for preceding and upcoming events to overlap, e.g. if it's just before
-    // sunrise and the last sunrise was more than 24 hours before this one. To guard against this,
-    // we discard preceding events which are in the next-events list.
-
     return precedingEvents.stream()
         .sorted(reverseOrder())
         .filter(event -> nextEvents.stream().noneMatch(event::isDuplicateOf))

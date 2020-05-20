@@ -4,13 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import org.onereed.helios.common.LocationServiceVerifier;
 import org.onereed.helios.common.LogUtil;
@@ -21,13 +21,13 @@ import org.onereed.helios.logger.AppLogger;
 import java.time.Instant;
 
 /** Main activity for Helios. */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+    implements SwipeRefreshLayout.OnRefreshListener {
 
   private static final String TAG = LogUtil.makeTag(MainActivity.class);
 
   private final PlayServicesVerifier playServicesVerifier = new PlayServicesVerifier(this);
   private final LocationServiceVerifier locationServiceVerifier = new LocationServiceVerifier(this);
-
   private final SunEventsAdapter sunEventsAdapter = new SunEventsAdapter(this);
 
   private ActivityMainBinding activityMainBinding;
@@ -46,12 +46,14 @@ public class MainActivity extends AppCompatActivity {
     activityMainBinding.sunEventsRecyclerView.setLayoutManager(sunEventsLayoutManager);
     activityMainBinding.sunEventsRecyclerView.setAdapter(sunEventsAdapter);
 
+    activityMainBinding.swipeRefresh.setOnRefreshListener(this);
+
     ViewModelProvider.Factory factory = new SunInfoViewModelFactory();
     SunInfoViewModel sunInfoViewModel =
         new ViewModelProvider(this, factory).get(SunInfoViewModel.class);
 
     sunInfoViewModel.getSunEventsLiveData().observe(this, sunEventsAdapter::acceptSunEvents);
-    sunInfoViewModel.getLastUpdateTimeLiveData().observe(this, this::onSunInfoUpdated);
+    sunInfoViewModel.getLastUpdateTimeLiveData().observe(this, this::updateCompleted);
     locationManager = new LocationManager(this, sunInfoViewModel::acceptLocation);
 
     getLifecycle().addObserver(playServicesVerifier);
@@ -80,8 +82,8 @@ public class MainActivity extends AppCompatActivity {
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     if (item.getItemId() == R.id.action_refresh) {
-      activityMainBinding.progressBar.setVisibility(View.VISIBLE);
-      locationManager.requestLastLocation();
+      activityMainBinding.swipeRefresh.setRefreshing(true);
+      requestLocationUpdate();
       return true;
     }
 
@@ -103,7 +105,16 @@ public class MainActivity extends AppCompatActivity {
     locationManager.acceptPermissionsResult(requestCode, permissions, grantResults);
   }
 
-  private void onSunInfoUpdated(Instant ignored) {
-    activityMainBinding.progressBar.setVisibility(View.INVISIBLE);
+  @Override
+  public void onRefresh() {
+    requestLocationUpdate();
+  }
+
+  private void requestLocationUpdate() {
+    locationManager.requestLastLocation();
+  }
+
+  private void updateCompleted(Instant ignored) {
+    activityMainBinding.swipeRefresh.setRefreshing(false);
   }
 }
