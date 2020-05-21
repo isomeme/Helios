@@ -2,6 +2,7 @@ package org.onereed.helios;
 
 import android.app.Activity;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -79,6 +80,9 @@ class SunEventsAdapter extends RecyclerView.Adapter<SunEventsAdapter.SunEventHol
     String timeStr = DateUtils.formatDateTime(activity, eventTimeMillis, DATE_FORMAT_FLAGS);
     holder.eventTimeView.setText(timeStr);
     holder.eventTimeView.setTypeface(null, sunEvent.isClosest() ? Typeface.BOLD : Typeface.NORMAL);
+
+    int iconResource = sunEvent.getType().getIconResource();
+    holder.eventTimeView.setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0);
   }
 
   @Override
