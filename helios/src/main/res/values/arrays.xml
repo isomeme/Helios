@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <integer-array name="sun_event_colors">
+        <item>@color/bg_rise</item>
+        <item>@color/bg_noon</item>
+        <item>@color/bg_set</item>
+        <item>@color/bg_nadir</item>
+    </integer-array>
+
+    <integer-array name="sun_event_icons">
+        <item>@drawable/ic_rise_36dp</item>
+        <item>@drawable/ic_noon_36dp</item>
+        <item>@drawable/ic_set_36dp</item>
+        <item>@drawable/ic_nadir_36dp</item>
+    </integer-array>
+
+    <string-array name="sun_event_names">
+        <item>Sunrise</item>
+        <item>Noon</item>
+        <item>Sunset</item>
+        <item>Midnight</item>
+    </string-array>
+
+</resources>

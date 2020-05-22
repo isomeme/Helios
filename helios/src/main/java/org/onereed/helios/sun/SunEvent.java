@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 
 import com.google.auto.value.AutoValue;
 
-import org.onereed.helios.R;
 import org.shredzone.commons.suncalc.SunTimes;
 
 import java.time.Duration;
@@ -28,19 +27,15 @@ public abstract class SunEvent implements Comparable<SunEvent> {
   private static final Duration DIFFERENT_EVENT_SEPARATION = Duration.ofHours(3L);
 
   public enum Type {
-    RISE(SunTimes::getRise, R.color.bg_rise, R.drawable.ic_rise_36dp),
-    NOON(SunTimes::getNoon, R.color.bg_noon, R.drawable.ic_noon_36dp),
-    SET(SunTimes::getSet, R.color.bg_set, R.drawable.ic_set_36dp),
-    NADIR(SunTimes::getNadir, R.color.bg_nadir, R.drawable.ic_nadir_36dp);
+    RISE(SunTimes::getRise),
+    NOON(SunTimes::getNoon),
+    SET(SunTimes::getSet),
+    NADIR(SunTimes::getNadir);
 
     private final Function<SunTimes, Date> dateExtractor;
-    private final int colorResource;
-    private final int iconResource;
 
-    Type(Function<SunTimes, Date> dateExtractor, int colorResource, int iconResource) {
+    Type(Function<SunTimes, Date> dateExtractor) {
       this.dateExtractor = dateExtractor;
-      this.colorResource = colorResource;
-      this.iconResource = iconResource;
     }
 
     /**
@@ -52,14 +47,6 @@ public abstract class SunEvent implements Comparable<SunEvent> {
       return Optional.ofNullable(dateExtractor.apply(sunTimes))
           .map(Date::toInstant)
           .map(instant -> SunEvent.builder().setTime(instant).setType(this).build());
-    }
-
-    public int getColorResource() {
-      return colorResource;
-    }
-
-    public int getIconResource() {
-      return iconResource;
     }
   }
 
