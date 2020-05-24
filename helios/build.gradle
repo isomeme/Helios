@@ -63,6 +63,11 @@ dependencies {
 }
 
 dependencies {
+    annotationProcessor 'com.ryanharter.auto.value:auto-value-parcel:0.2.7'
+    implementation 'com.ryanharter.auto.value:auto-value-parcel-adapter:0.2.7'
+}
+
+dependencies {
     implementation 'com.google.dagger:dagger:2.27'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.27'
 }

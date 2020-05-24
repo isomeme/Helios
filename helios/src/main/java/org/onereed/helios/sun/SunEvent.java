@@ -1,5 +1,7 @@
 package org.onereed.helios.sun;
 
+import android.os.Parcelable;
+
 import androidx.annotation.NonNull;
 
 import com.google.auto.value.AutoValue;
@@ -15,7 +17,7 @@ import java.util.function.Function;
 
 /** Represents one sun event -- rise, noon, set, or nadir. */
 @AutoValue
-public abstract class SunEvent implements Comparable<SunEvent> {
+public abstract class SunEvent implements Comparable<SunEvent>, Parcelable {
 
   private static final Comparator<SunEvent> COMPARATOR =
       Comparator.comparing(SunEvent::getTime).thenComparing(SunEvent::getType);

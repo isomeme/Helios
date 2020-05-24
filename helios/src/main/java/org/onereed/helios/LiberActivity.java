@@ -1,14 +1,14 @@
 package org.onereed.helios;
 
-import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.onereed.helios.databinding.ActivityLiberBinding;
-
-import java.util.Locale;
+import org.onereed.helios.sun.SunEvent;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -19,16 +19,23 @@ public class LiberActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    ActivityLiberBinding activityLiberBinding =
-        ActivityLiberBinding.inflate(getLayoutInflater());
+    ActivityLiberBinding activityLiberBinding = ActivityLiberBinding.inflate(getLayoutInflater());
     setContentView(activityLiberBinding.getRoot());
     setSupportActionBar(activityLiberBinding.toolbar);
     checkNotNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-    Intent intent = getIntent();
-    int ordinal = intent.getIntExtra(Messages.SUN_EVENT_MSG, 0);
-    String eventStr = getResources().getStringArray(R.array.sun_event_names)[ordinal];
-    activityLiberBinding.header.setText(String.format(Locale.ENGLISH, "%s Resh", eventStr));
+    SunEvent sunEvent = checkNotNull(getIntent().getParcelableExtra(Messages.SUN_EVENT_MSG));
+    SunEvent.Type type = sunEvent.getType();
+    int eventNum = type.ordinal();
+    Resources resources = getResources();
+
+    String eventStr = resources.getStringArray(R.array.sun_event_names)[eventNum];
+    activityLiberBinding.header.setText(getString(R.string.invocation_title, eventStr));
+
+    String inocationHtml =
+        String.format("file:///android_asset/invocation_%s.html", type.toString().toLowerCase());
+    activityLiberBinding.invocation.setBackgroundColor(Color.TRANSPARENT);
+    activityLiberBinding.invocation.loadUrl(inocationHtml);
   }
 
   @Override
