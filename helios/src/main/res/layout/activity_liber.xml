@@ -17,26 +17,14 @@
         android:theme="?attr/actionBarTheme"
         app:maxButtonHeight="56dp" />
 
-    <TextView
-        android:id="@+id/header"
+    <WebView
+        android:id="@+id/invocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/toolbar"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="false"
-        android:layout_marginTop="16dp"
-        android:padding="20dp"
-        android:textAlignment="center"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-        tools:text="Heading" />
-
-    <WebView
-        android:id="@+id/invocation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/header"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="false"
+        android:layout_marginTop="20dp"
         tools:text="Invocation"/>
 
 </RelativeLayout>

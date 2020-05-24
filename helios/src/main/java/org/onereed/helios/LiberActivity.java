@@ -1,6 +1,5 @@
 package org.onereed.helios;
 
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
@@ -26,11 +25,6 @@ public class LiberActivity extends AppCompatActivity {
 
     SunEvent sunEvent = checkNotNull(getIntent().getParcelableExtra(Messages.SUN_EVENT_MSG));
     SunEvent.Type type = sunEvent.getType();
-    int eventNum = type.ordinal();
-    Resources resources = getResources();
-
-    String eventStr = resources.getStringArray(R.array.sun_event_names)[eventNum];
-    activityLiberBinding.header.setText(getString(R.string.invocation_title, eventStr));
 
     String inocationHtml =
         String.format("file:///android_asset/invocation_%s.html", type.toString().toLowerCase());
