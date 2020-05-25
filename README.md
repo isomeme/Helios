@@ -24,5 +24,5 @@ Catherine Berry (cdberry@gmail.com)
 Helios is open source software. The source code is distributed under the terms of
 [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
-Helios makes use of the [commons-suncalc](https://github.com/shred/commons-suncalc)  
+Helios makes use of the [commons-suncalc](https://github.com/shred/commons-suncalc)
 library, which is also distributed under the terms of Apache License 2.0.
