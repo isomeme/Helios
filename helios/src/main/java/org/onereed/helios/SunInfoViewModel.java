@@ -44,10 +44,14 @@ class SunInfoViewModel extends ViewModel {
     return lastUpdateTimeMutableLiveData;
   }
 
-  void acceptLocation(@NonNull Location location) {
-    AppLogger.debug(TAG, "Accepting location=%s", location);
-    lastLocation = location;
-    updateSunInfo();
+  void acceptLocation(Location location) {
+    // Location has never been null in emulator or device tests, but it was null on all automated
+    // Play Store acceptance tests. So we will handle it gracefully.
+
+    if (location != null) {
+      lastLocation = location;
+      updateSunInfo();
+    }
   }
 
   private void updateSunInfo() {
