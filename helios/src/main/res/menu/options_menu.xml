@@ -3,10 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_direction"
+        android:icon="@drawable/ic_navigation_black_24dp"
+        android:iconTint="@android:color/primary_text_dark_nodisable"
+        android:title="@string/control_directions"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_refresh"
         android:icon="@drawable/ic_refresh_24dp"
         android:title="@string/control_refresh"
         app:showAsAction="never" />
+
     <item
         android:id="@+id/action_settings"
         android:title="@string/control_settings"

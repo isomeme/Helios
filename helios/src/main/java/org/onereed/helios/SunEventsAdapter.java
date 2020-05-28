@@ -98,7 +98,7 @@ class SunEventsAdapter extends RecyclerView.Adapter<SunEventsAdapter.SunEventHol
 
   private void sendToLiberActivity(SunEvent sunEvent) {
     Intent intent = new Intent(activity, LiberActivity.class);
-    intent.putExtra(Messages.SUN_EVENT_MSG, sunEvent);
+    intent.putExtra(Messages.SUN_EVENT_TYPE_MSG, sunEvent.getType().ordinal());
     activity.startActivity(intent);
   }
 

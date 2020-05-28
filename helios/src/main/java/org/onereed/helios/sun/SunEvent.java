@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 /** Represents one sun event -- rise, noon, set, or nadir. */
 @AutoValue
-public abstract class SunEvent implements Comparable<SunEvent>, Parcelable {
+public abstract class SunEvent implements Comparable<SunEvent> {
 
   private static final Comparator<SunEvent> COMPARATOR =
       Comparator.comparing(SunEvent::getTime).thenComparing(SunEvent::getType);
