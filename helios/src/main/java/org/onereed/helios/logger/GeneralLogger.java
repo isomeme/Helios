@@ -18,8 +18,4 @@ interface GeneralLogger {
   void error(String tag, String message);
 
   void error(String tag, String message, Throwable tr);
-
-  default void silent(String tag, String message) {
-    // Do nothing.
-  }
 }

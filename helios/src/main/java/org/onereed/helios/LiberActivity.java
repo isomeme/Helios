@@ -35,6 +35,7 @@ public class LiberActivity extends AppCompatActivity {
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.options_menu, menu);
+    menu.findItem(R.id.action_refresh).setEnabled(false);
     return true;
   }
 }

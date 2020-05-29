@@ -15,9 +15,4 @@
         android:title="@string/control_refresh"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/action_settings"
-        android:title="@string/control_settings"
-        app:showAsAction="never" />
-
 </menu>

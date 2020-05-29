@@ -1,6 +1,7 @@
 package org.onereed.helios;
 
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,6 +37,11 @@ public class MainActivity extends AppCompatActivity
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    if ((this.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+      AppLogger.useAndroidLogger();
+    }
+
     AppLogger.debug(TAG, "onCreate");
 
     activityMainBinding = ActivityMainBinding.inflate(getLayoutInflater());
