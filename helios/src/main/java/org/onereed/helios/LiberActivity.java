@@ -23,8 +23,8 @@ public class LiberActivity extends AppCompatActivity {
     setSupportActionBar(activityLiberBinding.toolbar);
     checkNotNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-    int ordinal = getIntent().getIntExtra(Messages.SUN_EVENT_TYPE_MSG, -1);
-    SunEvent.Type type = SunEvent.Type.values()[ordinal];
+    int sunEventTypeOrdinal = getIntent().getIntExtra(Messages.SUN_EVENT_TYPE_MSG, -1);
+    SunEvent.Type type = SunEvent.Type.values()[sunEventTypeOrdinal];
 
     String inocationHtml =
         String.format("file:///android_asset/invocation_%s.html", type.toString().toLowerCase());

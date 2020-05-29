@@ -73,32 +73,33 @@ class SunEventsAdapter extends RecyclerView.Adapter<SunEventsAdapter.SunEventHol
   @Override
   public void onBindViewHolder(@NonNull SunEventHolder holder, int position) {
     SunEvent sunEvent = sunEvents.get(position);
-    int ordinal = sunEvent.getType().ordinal();
+    int sunEventTypeOrdinal = sunEvent.getType().ordinal();
     Resources resources = activity.getResources();
 
     ResourceUtil.withTypedArray(
         resources,
         R.array.sun_event_colors,
-        typedArray -> holder.cardView.setCardBackgroundColor(typedArray.getColor(ordinal, 0)));
+        typedArray ->
+            holder.cardView.setCardBackgroundColor(typedArray.getColor(sunEventTypeOrdinal, 0)));
 
     ResourceUtil.withTypedArray(
         resources,
         R.array.sun_event_icons,
         typedArray ->
             holder.eventTimeView.setCompoundDrawablesWithIntrinsicBounds(
-                typedArray.getResourceId(ordinal, 0), 0, 0, 0));
+                typedArray.getResourceId(sunEventTypeOrdinal, 0), 0, 0, 0));
 
     long eventTimeMillis = sunEvent.getTime().toEpochMilli();
     String timeStr = DateUtils.formatDateTime(activity, eventTimeMillis, DATE_FORMAT_FLAGS);
     holder.eventTimeView.setText(timeStr);
     holder.eventTimeView.setTypeface(null, sunEvent.isClosest() ? Typeface.BOLD : Typeface.NORMAL);
 
-    holder.cardView.setOnClickListener(ignored -> sendToLiberActivity(sunEvent));
+    holder.cardView.setOnClickListener(ignored -> sendToLiberActivity(sunEventTypeOrdinal));
   }
 
-  private void sendToLiberActivity(SunEvent sunEvent) {
+  private void sendToLiberActivity(int sunEventTypeOrdinal) {
     Intent intent = new Intent(activity, LiberActivity.class);
-    intent.putExtra(Messages.SUN_EVENT_TYPE_MSG, sunEvent.getType().ordinal());
+    intent.putExtra(Messages.SUN_EVENT_TYPE_MSG, sunEventTypeOrdinal);
     activity.startActivity(intent);
   }
 
