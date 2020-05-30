@@ -1,18 +1,20 @@
 package org.onereed.helios;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.Menu;
 
-import androidx.appcompat.app.AppCompatActivity;
+import com.google.common.collect.ImmutableMap;
 
 import org.onereed.helios.databinding.ActivityLiberBinding;
 import org.onereed.helios.sun.SunEvent;
 
+import java.util.Map;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /** Activity for displaying the text of Liber Resh. */
-public class LiberActivity extends AppCompatActivity {
+public class LiberActivity extends AbstractMenuActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -33,9 +35,8 @@ public class LiberActivity extends AppCompatActivity {
   }
 
   @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.options_menu, menu);
-    menu.findItem(R.id.action_refresh).setEnabled(false);
-    return true;
+  protected Map<Integer, Runnable> getMenuActions() {
+    return ImmutableMap.of(
+        R.id.action_direction, () -> startActivity(new Intent(this, CompassActivity.class)));
   }
 }

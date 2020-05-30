@@ -3,15 +3,14 @@ package org.onereed.helios;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.common.collect.ImmutableMap;
 
 import org.onereed.helios.common.LocationServiceVerifier;
 import org.onereed.helios.common.LogUtil;
@@ -20,9 +19,10 @@ import org.onereed.helios.databinding.ActivityMainBinding;
 import org.onereed.helios.logger.AppLogger;
 
 import java.time.Instant;
+import java.util.Map;
 
 /** Main activity for Helios. */
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AbstractMenuActivity
     implements SwipeRefreshLayout.OnRefreshListener {
 
   private static final String TAG = LogUtil.makeTag(MainActivity.class);
@@ -80,20 +80,15 @@ public class MainActivity extends AppCompatActivity
   }
 
   @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.options_menu, menu);
-    return true;
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    if (item.getItemId() == R.id.action_refresh) {
-      activityMainBinding.swipeRefresh.setRefreshing(true);
-      requestLocationUpdate();
-      return true;
-    }
-
-    return super.onOptionsItemSelected(item);
+  protected Map<Integer, Runnable> getMenuActions() {
+    return ImmutableMap.of(
+        R.id.action_refresh,
+        () -> {
+          activityMainBinding.swipeRefresh.setRefreshing(true);
+          requestLocationUpdate();
+        },
+        R.id.action_direction,
+        () -> startActivity(new Intent(this, CompassActivity.class)));
   }
 
   @Override
@@ -111,6 +106,7 @@ public class MainActivity extends AppCompatActivity
     locationManager.acceptPermissionsResult(requestCode, permissions, grantResults);
   }
 
+  /** This is called from swipe-up gesture refresh. Menu-driven refresh is handled separately. */
   @Override
   public void onRefresh() {
     requestLocationUpdate();

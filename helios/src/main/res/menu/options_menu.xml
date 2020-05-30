@@ -7,12 +7,14 @@
         android:icon="@drawable/ic_navigation_black_24dp"
         android:iconTint="@android:color/primary_text_dark_nodisable"
         android:title="@string/control_directions"
+        android:visible="false"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_refresh"
         android:icon="@drawable/ic_refresh_24dp"
         android:title="@string/control_refresh"
+        android:visible="false"
         app:showAsAction="never" />
 
 </menu>
