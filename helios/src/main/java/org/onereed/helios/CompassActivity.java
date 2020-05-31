@@ -26,14 +26,8 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
   private SensorManager sensorManager;
 
-  private final float[] accelerometerReading = new float[3];
-  private final float[] magnetometerReading = new float[3];
-
   private final float[] rotationMatrix = new float[9];
   private final float[] orientationAngles = new float[3];
-
-  private boolean isAccelerometerReadingSet = false;
-  private boolean isMagnetometerReadingSet = false;
 
   private ActivityCompassBinding activityCompassBinding;
 
@@ -63,16 +57,13 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   protected void onResume() {
     super.onResume();
 
-    Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-    if (accelerometer != null) {
-      sensorManager.registerListener(
-          this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
-    }
-    Sensor magneticField = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-    if (magneticField != null) {
-      sensorManager.registerListener(
-          this, magneticField, SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
-    }
+    Sensor rotationVectorSensor =
+        checkNotNull(sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR));
+    sensorManager.registerListener(
+        this,
+        rotationVectorSensor,
+        SensorManager.SENSOR_DELAY_NORMAL,
+        SensorManager.SENSOR_DELAY_UI);
   }
 
   @Override
@@ -81,44 +72,21 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     sensorManager.unregisterListener(this);
   }
 
-  // Get readings from accelerometer and magnetometer. To simplify calculations,
-  // consider storing these readings as unit vectors.
   @Override
   public void onSensorChanged(SensorEvent event) {
-    if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-      System.arraycopy(event.values, 0, accelerometerReading, 0, accelerometerReading.length);
-      isAccelerometerReadingSet = true;
-    } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-      System.arraycopy(event.values, 0, magnetometerReading, 0, magnetometerReading.length);
-      isMagnetometerReadingSet = true;
+    if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+      SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
+      SensorManager.getOrientation(rotationMatrix, orientationAngles);
+
+      String info =
+          String.format(
+              Locale.ENGLISH,
+              "azimuth=%.4f pitch=%.4f roll=%.4f",
+              toDegrees(orientationAngles[0]),
+              toDegrees(orientationAngles[1]),
+              toDegrees(orientationAngles[2]));
+
+      activityCompassBinding.azimuth.setText(info);
     }
-
-    if (isAccelerometerReadingSet && isMagnetometerReadingSet) {
-      updateOrientationAngles();
-    }
-  }
-
-  // Compute the three orientation angles based on the most recent readings from
-  // the device's accelerometer and magnetometer.
-  public void updateOrientationAngles() {
-    // Update rotation matrix, which is needed to update orientation angles.
-    SensorManager.getRotationMatrix(
-        rotationMatrix, null, accelerometerReading, magnetometerReading);
-
-    // "mRotationMatrix" now has up-to-date information.
-
-    SensorManager.getOrientation(rotationMatrix, orientationAngles);
-
-    // "orientationAngles" now has up-to-date information.
-
-    String info =
-        String.format(
-            Locale.ENGLISH,
-            "azimuth=%.4f pitch=%.4f roll=%.4f",
-            toDegrees(rotationMatrix[0]),
-            toDegrees(rotationMatrix[1]),
-            toDegrees(rotationMatrix[2]));
-
-    activityCompassBinding.azimuth.setText(info);
   }
 }

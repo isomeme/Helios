@@ -1,6 +1,5 @@
 package org.onereed.helios;
 
-import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
 
