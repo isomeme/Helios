@@ -102,10 +102,27 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
     activityCompassBinding.azimuth.setText(info);
 
+    RotateAnimation rotateAnimation = createRotateAnimation(azimuth);
+    activityCompassBinding.compass.startAnimation(rotateAnimation);
+    oldAzimuth = azimuth;
+  }
+
+  private RotateAnimation createRotateAnimation(float azimuth) {
+    // When animating from e.g. -179 to +179, we don't want to go the long way around the circle.
+
+    float adjustedAzimuth = azimuth;
+    float azimuthDelta = azimuth - oldAzimuth;
+
+    if (azimuthDelta > 180.0f) {
+      adjustedAzimuth -= 360.0f;
+    } else if (azimuthDelta < -180.0f) {
+      adjustedAzimuth += 360.0f;
+    }
+
     RotateAnimation rotateAnimation =
         new RotateAnimation(
             -oldAzimuth,
-            -azimuth,
+            -adjustedAzimuth,
             Animation.RELATIVE_TO_SELF,
             0.5f,
             Animation.RELATIVE_TO_SELF,
@@ -113,8 +130,6 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
     rotateAnimation.setDuration(ROTATION_ANIMATION_DURATION_MILLIS);
     rotateAnimation.setFillAfter(true); // Hold end position after animation
-
-    activityCompassBinding.compass.startAnimation(rotateAnimation);
-    oldAzimuth = azimuth;
+    return rotateAnimation;
   }
 }
