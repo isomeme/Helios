@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEvent.Type;
-import org.onereed.helios.sun.SunInfo.HorizonStatus;
 
 import java.time.Instant;
 
@@ -39,13 +38,13 @@ public class SunInfoUtilTest {
     SunInfo expectedSunInfo =
         SunInfo.create(
             when,
-            HorizonStatus.NORMAL,
+            1,
             ImmutableList.of(
-                event("2020-05-08T19:52:00Z", Type.NOON, false),
-                event("2020-05-09T02:44:00Z", Type.SET, true),
-                event("2020-05-09T07:50:00Z", Type.NADIR, false),
-                event("2020-05-09T12:57:00Z", Type.RISE, false),
-                event("2020-05-09T19:47:00Z", Type.NOON, false)));
+                event("2020-05-08T19:52:00Z", Type.NOON, 181.25805009888),
+                event("2020-05-09T02:44:00Z", Type.SET, 291.8502225919628),
+                event("2020-05-09T07:50:00Z", Type.NADIR, 359.8568414354525),
+                event("2020-05-09T12:57:00Z", Type.RISE, 68.06762096768347),
+                event("2020-05-09T19:47:00Z", Type.NOON, 177.0827771863477)));
 
     assertEquals(expectedSunInfo, sunInfo);
   }
@@ -62,19 +61,19 @@ public class SunInfoUtilTest {
     SunInfo expectedSunInfo =
         SunInfo.create(
             when,
-            HorizonStatus.NORMAL,
+            0,
             ImmutableList.of(
-                event("2020-05-18T02:51:00Z", Type.SET, true),
-                event("2020-05-18T07:50:00Z", Type.NADIR, false),
-                event("2020-05-18T12:50:00Z", Type.RISE, false),
-                event("2020-05-18T19:51:00Z", Type.NOON, false),
-                event("2020-05-19T02:51:00Z", Type.SET, false)));
+                event("2020-05-18T02:51:00Z", Type.SET, 294.5873847123942),
+                event("2020-05-18T07:50:00Z", Type.NADIR, 359.8582061019339),
+                event("2020-05-18T12:50:00Z", Type.RISE, 65.34461082274493),
+                event("2020-05-18T19:51:00Z", Type.NOON, 180.47091858781326),
+                event("2020-05-19T02:51:00Z", Type.SET, 294.7528076783142)));
 
     assertEquals(expectedSunInfo, sunInfo);
   }
 
-  private static SunEvent event(String text, Type type, boolean isClosest) {
-    Instant when = Instant.parse(text);
-    return SunEvent.builder().setTime(when).setType(type).setClosest(isClosest).build();
+  private static SunEvent event(String whenText, Type type, double azimuth) {
+    Instant when = Instant.parse(whenText);
+    return SunEvent.create(when, type, azimuth);
   }
 }

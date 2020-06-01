@@ -29,7 +29,7 @@ public class MainActivity extends AbstractMenuActivity
 
   private final PlayServicesVerifier playServicesVerifier = new PlayServicesVerifier(this);
   private final LocationServiceVerifier locationServiceVerifier = new LocationServiceVerifier(this);
-  private final SunEventsAdapter sunEventsAdapter = new SunEventsAdapter(this);
+  private final SunInfoAdapter sunInfoAdapter = new SunInfoAdapter(this);
 
   private ActivityMainBinding activityMainBinding;
   private LocationManager locationManager;
@@ -50,7 +50,7 @@ public class MainActivity extends AbstractMenuActivity
 
     RecyclerView.LayoutManager sunEventsLayoutManager = new LinearLayoutManager(this);
     activityMainBinding.sunEventsRecyclerView.setLayoutManager(sunEventsLayoutManager);
-    activityMainBinding.sunEventsRecyclerView.setAdapter(sunEventsAdapter);
+    activityMainBinding.sunEventsRecyclerView.setAdapter(sunInfoAdapter);
 
     activityMainBinding.swipeRefresh.setOnRefreshListener(this);
 
@@ -58,7 +58,7 @@ public class MainActivity extends AbstractMenuActivity
     SunInfoViewModel sunInfoViewModel =
         new ViewModelProvider(this, factory).get(SunInfoViewModel.class);
 
-    sunInfoViewModel.getSunEventsLiveData().observe(this, sunEventsAdapter::acceptSunEvents);
+    sunInfoViewModel.getSunInfoLiveData().observe(this, sunInfoAdapter::acceptSunInfo);
     sunInfoViewModel.getLastUpdateTimeLiveData().observe(this, this::updateCompleted);
     locationManager = new LocationManager(this, sunInfoViewModel::acceptLocation);
 

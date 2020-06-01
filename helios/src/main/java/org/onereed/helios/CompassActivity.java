@@ -6,6 +6,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -26,6 +28,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
   private ActivityCompassBinding activityCompassBinding;
   private SensorManager sensorManager;
+  float oldAzimuth = 0.0f;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +80,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
       SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
       SensorManager.getOrientation(rotationMatrix, orientationAngles);
 
-      float azimuth = (float) Math.toDegrees(orientationAngles[0]);
+      float azimuth = (float) toDegrees(orientationAngles[0]);
 
       String info =
           String.format(
@@ -88,7 +91,26 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
               toDegrees(orientationAngles[2]));
 
       activityCompassBinding.azimuth.setText(info);
-      activityCompassBinding.compass.setRotation(-azimuth);
+      //      activityCompassBinding.compass.setRotation(-azimuth);
+
+      // create a rotation animation (reverse turn degree degrees)
+      RotateAnimation ra =
+          new RotateAnimation(
+              -oldAzimuth,
+              -azimuth,
+              Animation.RELATIVE_TO_SELF,
+              0.5f,
+              Animation.RELATIVE_TO_SELF,
+              0.5f);
+
+      ra.setDuration(200L); // millis
+
+      // Hold the new position when animation is done.
+      ra.setFillAfter(true);
+
+      // Start the animation
+      activityCompassBinding.compass.startAnimation(ra);
+      oldAzimuth = azimuth;
     }
   }
 }

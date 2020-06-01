@@ -2,9 +2,7 @@ package org.onereed.helios.logger;
 
 import android.util.Log;
 
-/**
- * An implementation of {@link GeneralLogger} that uses Android logging.
- */
+/** An implementation of {@link GeneralLogger} that uses Android logging. */
 class AndroidLogger implements GeneralLogger {
 
   static AndroidLogger create() {

@@ -9,21 +9,15 @@ import java.time.Instant;
 @AutoValue
 public abstract class SunInfo {
 
-  public enum HorizonStatus {
-    NORMAL,
-    ALWAYS_ABOVE,
-    ALWAYS_BELOW
-  }
-
   public abstract Instant getTimestamp();
 
-  public abstract HorizonStatus getHorizonStatus();
+  public abstract int closestEventIndex();
 
   public abstract ImmutableList<SunEvent> getSunEvents();
 
   static SunInfo create(
-      Instant timestamp, HorizonStatus horizonStatus, ImmutableList<SunEvent> sunEvents) {
+      Instant timestamp, int closestEventIndex, ImmutableList<SunEvent> sunEvents) {
 
-    return new AutoValue_SunInfo(timestamp, horizonStatus, sunEvents);
+    return new AutoValue_SunInfo(timestamp, closestEventIndex, sunEvents);
   }
 }

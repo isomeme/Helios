@@ -8,9 +8,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/**
- * A {@link ThreadPoolExecutor} which runs tasks at Android {@code BACKGROUND} priority.
- */
+/** A {@link ThreadPoolExecutor} which runs tasks at Android {@code BACKGROUND} priority. */
 public class BackgroundThreadPoolExecutor extends ThreadPoolExecutor {
 
   private static final int POOL_SIZE = 4;

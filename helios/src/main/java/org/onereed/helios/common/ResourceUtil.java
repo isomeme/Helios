@@ -10,8 +10,8 @@ import java.util.function.Function;
 public class ResourceUtil {
 
   /**
-   * Creates a {@link TypedArray} from {@code resources} and {@code arrayResourceId}, and gives
-   * it to {@code consumer}. This method takes care of recycling the {@link TypedArray} after use.
+   * Creates a {@link TypedArray} from {@code resources} and {@code arrayResourceId}, and gives it
+   * to {@code consumer}. This method takes care of recycling the {@link TypedArray} after use.
    */
   public static void withTypedArray(
       Resources resources, int arrayResourceId, Consumer<TypedArray> consumer) {
@@ -32,7 +32,8 @@ public class ResourceUtil {
    * the result of pass it to {@code function}. This method takes care of recycling the {@link
    * TypedArray} after use.
    */
-  public static <T> T fromTypedArray(Resources resources, int arrayResourceId, Function<TypedArray, T> function) {
+  public static <T> T fromTypedArray(
+      Resources resources, int arrayResourceId, Function<TypedArray, T> function) {
     TypedArray typedArray = null;
     try {
       typedArray = resources.obtainTypedArray(arrayResourceId);
