@@ -23,7 +23,8 @@
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".CompassActivity"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="nosensor" />
     </application>
 
 </manifest>

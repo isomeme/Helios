@@ -24,12 +24,8 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
   private static final String TAG = LogUtil.makeTag(CompassActivity.class);
 
-  private SensorManager sensorManager;
-
-  private final float[] rotationMatrix = new float[9];
-  private final float[] orientationAngles = new float[3];
-
   private ActivityCompassBinding activityCompassBinding;
+  private SensorManager sensorManager;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -75,18 +71,24 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   @Override
   public void onSensorChanged(SensorEvent event) {
     if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+      float[] rotationMatrix = new float[9];
+      float[] orientationAngles = new float[3];
+
       SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
       SensorManager.getOrientation(rotationMatrix, orientationAngles);
+
+      float azimuth = (float) Math.toDegrees(orientationAngles[0]);
 
       String info =
           String.format(
               Locale.ENGLISH,
               "azimuth=%.4f pitch=%.4f roll=%.4f",
-              toDegrees(orientationAngles[0]),
+              azimuth,
               toDegrees(orientationAngles[1]),
               toDegrees(orientationAngles[2]));
 
       activityCompassBinding.azimuth.setText(info);
+      activityCompassBinding.compass.setRotation(-azimuth);
     }
   }
 }
