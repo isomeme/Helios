@@ -26,6 +26,13 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
   private static final String TAG = LogUtil.makeTag(CompassActivity.class);
 
+  /**
+   * How long the compass rotation would last, in theory. In practice it will be interrupted by a
+   * new azimuth reading before then, but this serves to damp the motion of the compass, making it
+   * visually smoother.
+   */
+  private static final long ROTATION_ANIMATION_DURATION_MILLIS = 200L;
+
   private ActivityCompassBinding activityCompassBinding;
   private SensorManager sensorManager;
   float oldAzimuth = 0.0f;
@@ -73,44 +80,41 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
   @Override
   public void onSensorChanged(SensorEvent event) {
-    if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
-      float[] rotationMatrix = new float[9];
-      float[] orientationAngles = new float[3];
-
-      SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
-      SensorManager.getOrientation(rotationMatrix, orientationAngles);
-
-      float azimuth = (float) toDegrees(orientationAngles[0]);
-
-      String info =
-          String.format(
-              Locale.ENGLISH,
-              "azimuth=%.4f pitch=%.4f roll=%.4f",
-              azimuth,
-              toDegrees(orientationAngles[1]),
-              toDegrees(orientationAngles[2]));
-
-      activityCompassBinding.azimuth.setText(info);
-      //      activityCompassBinding.compass.setRotation(-azimuth);
-
-      // create a rotation animation (reverse turn degree degrees)
-      RotateAnimation ra =
-          new RotateAnimation(
-              -oldAzimuth,
-              -azimuth,
-              Animation.RELATIVE_TO_SELF,
-              0.5f,
-              Animation.RELATIVE_TO_SELF,
-              0.5f);
-
-      ra.setDuration(200L); // millis
-
-      // Hold the new position when animation is done.
-      ra.setFillAfter(true);
-
-      // Start the animation
-      activityCompassBinding.compass.startAnimation(ra);
-      oldAzimuth = azimuth;
+    if (event.sensor.getType() != Sensor.TYPE_ROTATION_VECTOR) {
+      return;
     }
+
+    float[] rotationMatrix = new float[9];
+    float[] orientationAngles = new float[3];
+
+    SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
+    SensorManager.getOrientation(rotationMatrix, orientationAngles);
+
+    float azimuth = (float) toDegrees(orientationAngles[0]);
+
+    String info =
+        String.format(
+            Locale.ENGLISH,
+            "azimuth=%.4f pitch=%.4f roll=%.4f",
+            azimuth,
+            toDegrees(orientationAngles[1]),
+            toDegrees(orientationAngles[2]));
+
+    activityCompassBinding.azimuth.setText(info);
+
+    RotateAnimation rotateAnimation =
+        new RotateAnimation(
+            -oldAzimuth,
+            -azimuth,
+            Animation.RELATIVE_TO_SELF,
+            0.5f,
+            Animation.RELATIVE_TO_SELF,
+            0.5f);
+
+    rotateAnimation.setDuration(ROTATION_ANIMATION_DURATION_MILLIS);
+    rotateAnimation.setFillAfter(true); // Hold end position after animation
+
+    activityCompassBinding.compass.startAnimation(rotateAnimation);
+    oldAzimuth = azimuth;
   }
 }
