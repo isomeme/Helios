@@ -1,6 +1,7 @@
 package org.onereed.helios.sun;
 
 import org.junit.Test;
+import org.shredzone.commons.suncalc.SunPosition;
 import org.shredzone.commons.suncalc.SunTimes;
 
 import java.time.Duration;
@@ -8,6 +9,7 @@ import java.time.Instant;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * A test originally written to show that {@link SunTimes} returned null noon and nadir values for
@@ -80,5 +82,23 @@ public class SunCalcTest {
     SunTimes sunTimes = SunTimes.compute().on(justBeforeNoon).fullCycle().at(COORDS).execute();
 
     assertEquals(NOON, sunTimes.getNoon().toInstant());
+  }
+
+  @Test
+  public void testNoonAzimuthNear180_bad() {
+    Date calcTime = Date.from(Instant.parse("2020-06-02T03:30:00Z"));
+    SunTimes sunTimes = SunTimes.compute().at(COORDS).on(calcTime).execute();
+    Date noon = sunTimes.getNoon();
+    SunPosition sunPosition = SunPosition.compute().at(COORDS).on(noon).execute();
+
+    // It seems reasonable to expect that northern temperate zone noon sun azimuth would be within
+    // 1 degree of +-180, given that the sun only moves 0.25 degree per minute and SunCalc says
+    // it's accurate to ~1 minute. Yet this example is off by nearly 5 degrees. Noon time (and
+    // azimuth) vary by around +- 5 deg (or +- 20 min) based on when the on() time is.
+    //
+    // Based on cross-checking with online calculators, I believe that SunPosition is pretty
+    // accurate, and SunTimes is doing something wrong with its interpolation or curve-fitting.
+
+    assertNotEquals(180.0, sunPosition.getAzimuth(), 1.0); // SHOULD BE EQUAL WITHIN DELTA
   }
 }

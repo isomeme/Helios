@@ -38,6 +38,7 @@ public class SunInfoUtilTest {
     SunInfo expectedSunInfo =
         SunInfo.create(
             when,
+            289.93357351191065,
             1,
             ImmutableList.of(
                 event("2020-05-08T19:52:00Z", Type.NOON, 181.25805009888),
@@ -61,6 +62,7 @@ public class SunInfoUtilTest {
     SunInfo expectedSunInfo =
         SunInfo.create(
             when,
+            294.5638405069754,
             0,
             ImmutableList.of(
                 event("2020-05-18T02:51:00Z", Type.SET, 294.5873847123942),
