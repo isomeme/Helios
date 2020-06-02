@@ -27,17 +27,32 @@
         android:layout_marginTop="20dp"
         tools:text="Azimuth" />
 
-    <ImageView
-        android:id="@+id/compass"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/compass_composite"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/azimuth"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="false"
-        android:layout_marginTop="20dp"
-        android:contentDescription="@string/content_compass_display"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_circle_single_tick"
-        android:tint="?android:attr/colorForeground" />
+        android:layout_marginTop="20dp">
 
+        <ImageView
+            android:id="@+id/compass"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/content_compass_display"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_circle_single_tick"
+            android:tint="@android:color/darker_gray" />
+
+        <ImageView
+            android:id="@+id/sun"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/content_compass_display"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_offset_dot"
+            android:tint="@color/sun_yellow" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </RelativeLayout>

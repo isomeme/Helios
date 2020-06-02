@@ -73,7 +73,10 @@ class SunInfoUtil {
             .addAll(eventsAfterNext)
             .build();
 
-    return SunInfo.create(when, closestEventIndex, shownSunEvents);
+    double currentSunAzimuth =
+        SunPosition.compute().at(lat, lon).on(Date.from(when)).execute().getAzimuth();
+
+    return SunInfo.create(when, currentSunAzimuth, closestEventIndex, shownSunEvents);
   }
 
   private static SunTimes getSunTimes(double lat, double lon, Instant when) {

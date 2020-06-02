@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableMap;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
 import org.onereed.helios.logger.AppLogger;
+import org.shredzone.commons.suncalc.SunPosition;
 
 import java.util.Locale;
 import java.util.Map;
@@ -36,6 +37,8 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   private ActivityCompassBinding activityCompassBinding;
   private SensorManager sensorManager;
   float oldAzimuth = 0.0f;
+
+  float sunAzimuth = 0.0f;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +73,11 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
         rotationVectorSensor,
         SensorManager.SENSOR_DELAY_NORMAL,
         SensorManager.SENSOR_DELAY_UI);
+
+    // TODO: Hook up a LocationManager and SunInfoViewModel to keep this updated.
+
+    sunAzimuth = (float) SunPosition.compute().at(34.0, -118.5).now().execute().getAzimuth();
+    activityCompassBinding.sun.setRotation(sunAzimuth);
   }
 
   @Override
@@ -103,7 +111,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     activityCompassBinding.azimuth.setText(info);
 
     RotateAnimation rotateAnimation = createRotateAnimation(azimuth);
-    activityCompassBinding.compass.startAnimation(rotateAnimation);
+    activityCompassBinding.compassComposite.startAnimation(rotateAnimation);
     oldAzimuth = azimuth;
   }
 

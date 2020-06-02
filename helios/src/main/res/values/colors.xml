@@ -7,4 +7,5 @@
     <color name="bg_noon">#8A290B</color>
     <color name="bg_set">#1565C0</color>
     <color name="bg_nadir">#2E7D32</color>
+    <color name="sun_yellow">#FFFF00</color>
 </resources>
