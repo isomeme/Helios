@@ -88,10 +88,13 @@ class LocationManager implements DefaultLifecycleObserver {
 
   void requestLastLocation() {
     AppLogger.debug(TAG, "requestLastLocation");
-    fusedLocationClient
-        .getLastLocation()
-        .addOnSuccessListener(locationConsumer::accept)
-        .addOnFailureListener(e -> AppLogger.error(TAG, e, "getLastLocation failed."));
+
+    if (checkPermission()) {
+      fusedLocationClient
+          .getLastLocation()
+          .addOnSuccessListener(locationConsumer::accept)
+          .addOnFailureListener(e -> AppLogger.error(TAG, e, "getLastLocation failed."));
+    }
   }
 
   /**

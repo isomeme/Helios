@@ -9,12 +9,15 @@ import android.os.Bundle;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.google.common.collect.ImmutableMap;
 
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
 import org.onereed.helios.logger.AppLogger;
-import org.shredzone.commons.suncalc.SunPosition;
+import org.onereed.helios.sun.SunInfo;
 
 import java.util.Locale;
 import java.util.Map;
@@ -36,9 +39,9 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
   private ActivityCompassBinding activityCompassBinding;
   private SensorManager sensorManager;
-  float oldAzimuth = 0.0f;
+  private LocationManager locationManager;
 
-  float sunAzimuth = 0.0f;
+  float oldCompassAzimuth = 0.0f;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +53,15 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     checkNotNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
     sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
+    ViewModelProvider.Factory factory = new SunInfoViewModelFactory();
+    SunInfoViewModel sunInfoViewModel =
+        new ViewModelProvider(this, factory).get(SunInfoViewModel.class);
+
+    sunInfoViewModel.getSunInfoLiveData().observe(this, this::acceptSunInfo);
+
+    locationManager = new LocationManager(this, sunInfoViewModel::acceptLocation);
+    getLifecycle().addObserver(locationManager);
   }
 
   @Override
@@ -58,8 +70,11 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   }
 
   @Override
-  public void onAccuracyChanged(Sensor sensor, int accuracy) {
-    AppLogger.debug(TAG, "onAccuracyChanged: sensor=%s accuracy=%d", sensor, accuracy);
+  public void onRequestPermissionsResult(
+      int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+    AppLogger.debug(TAG, "onRequestPermissionsResult");
+    locationManager.acceptPermissionsResult(requestCode, permissions, grantResults);
   }
 
   @Override
@@ -73,17 +88,17 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
         rotationVectorSensor,
         SensorManager.SENSOR_DELAY_NORMAL,
         SensorManager.SENSOR_DELAY_UI);
-
-    // TODO: Hook up a LocationManager and SunInfoViewModel to keep this updated.
-
-    sunAzimuth = (float) SunPosition.compute().at(34.0, -118.5).now().execute().getAzimuth();
-    activityCompassBinding.sun.setRotation(sunAzimuth);
   }
 
   @Override
   protected void onPause() {
     super.onPause();
     sensorManager.unregisterListener(this);
+  }
+
+  @Override
+  public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    AppLogger.debug(TAG, "onAccuracyChanged: sensor=%s accuracy=%d", sensor, accuracy);
   }
 
   @Override
@@ -98,28 +113,35 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
     SensorManager.getOrientation(rotationMatrix, orientationAngles);
 
-    float azimuth = (float) toDegrees(orientationAngles[0]);
+    float compassAzimuth = (float) toDegrees(orientationAngles[0]);
 
     String info =
         String.format(
             Locale.ENGLISH,
-            "azimuth=%.4f pitch=%.4f roll=%.4f",
-            azimuth,
+            "azimuth=%.1f pitch=%.1f roll=%.1f",
+            compassAzimuth,
             toDegrees(orientationAngles[1]),
             toDegrees(orientationAngles[2]));
 
     activityCompassBinding.azimuth.setText(info);
 
-    RotateAnimation rotateAnimation = createRotateAnimation(azimuth);
-    activityCompassBinding.compassComposite.startAnimation(rotateAnimation);
-    oldAzimuth = azimuth;
+    updateCompassState(compassAzimuth);
   }
 
-  private RotateAnimation createRotateAnimation(float azimuth) {
+  /**
+   * Executes an animated sweep from the old compass rotation to the new one, and updates the old
+   * one to the new value to prepare for the next update.
+   */
+  private void updateCompassState(float compassAzimuth) {
+    animateCompassRotation(compassAzimuth);
+    oldCompassAzimuth = compassAzimuth;
+  }
+
+  private void animateCompassRotation(float compassAzimuth) {
     // When animating from e.g. -179 to +179, we don't want to go the long way around the circle.
 
-    float adjustedAzimuth = azimuth;
-    float azimuthDelta = azimuth - oldAzimuth;
+    float adjustedAzimuth = compassAzimuth;
+    float azimuthDelta = compassAzimuth - oldCompassAzimuth;
 
     if (azimuthDelta > 180.0f) {
       adjustedAzimuth -= 360.0f;
@@ -129,7 +151,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
     RotateAnimation rotateAnimation =
         new RotateAnimation(
-            -oldAzimuth,
+            -oldCompassAzimuth,
             -adjustedAzimuth,
             Animation.RELATIVE_TO_SELF,
             0.5f,
@@ -138,6 +160,11 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
     rotateAnimation.setDuration(ROTATION_ANIMATION_DURATION_MILLIS);
     rotateAnimation.setFillAfter(true); // Hold end position after animation
-    return rotateAnimation;
+
+    activityCompassBinding.compassComposite.startAnimation(rotateAnimation);
+  }
+
+  private void acceptSunInfo(SunInfo sunInfo) {
+    activityCompassBinding.sun.setRotation((float) sunInfo.currentSunAzimuth());
   }
 }
