@@ -9,8 +9,8 @@ import org.shredzone.commons.suncalc.SunTimes;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -33,9 +33,9 @@ public abstract class SunEvent implements Comparable<SunEvent> {
     SET(SunTimes::getSet),
     NADIR(SunTimes::getNadir);
 
-    private final Function<SunTimes, Date> dateExtractor;
+    private final Function<SunTimes, ZonedDateTime> dateExtractor;
 
-    Type(Function<SunTimes, Date> dateExtractor) {
+    Type(Function<SunTimes, ZonedDateTime> dateExtractor) {
       this.dateExtractor = dateExtractor;
     }
 
@@ -46,12 +46,12 @@ public abstract class SunEvent implements Comparable<SunEvent> {
      */
     Optional<SunEvent> createSunEvent(@NonNull SunTimes sunTimes, double lat, double lon) {
       return Optional.ofNullable(dateExtractor.apply(sunTimes))
-          .map(Date::toInstant)
+          .map(ZonedDateTime::toInstant)
           .map(when -> SunEvent.create(when, this, getAzimuth(when, lat, lon)));
     }
 
     private static Double getAzimuth(Instant when, double lat, double lon) {
-      return SunPosition.compute().on(Date.from(when)).at(lat, lon).execute().getAzimuth();
+      return SunPosition.compute().on(when).at(lat, lon).execute().getAzimuth();
     }
   }
 
