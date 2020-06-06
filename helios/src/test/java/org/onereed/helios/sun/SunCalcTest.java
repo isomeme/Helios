@@ -24,10 +24,9 @@ public class SunCalcTest {
   private static final Instant NOON = Instant.parse("2020-05-03T19:51:00Z");
   private static final Instant NADIR = Instant.parse("2020-05-04T07:51:00Z");
 
-  /**
-   * It happens that May 4 noon is at the exact same (minute-rounded) time as May 3.
-   */
+  /** It happens that May 4 noon is at the exact same (minute-rounded) time as May 3. */
   private static final Instant NOON_TOMORROW = NOON.plus(Duration.ofDays(1L));
+
   private static final double[] COORDS = {34.0, -118.5};
 
   private static final Duration SHORT_DURATION = Duration.ofMinutes(2L);
@@ -84,10 +83,11 @@ public class SunCalcTest {
     assertEquals(NOON, sunTimes.getNoon().toInstant());
   }
 
+  private static final Date NOON_NADIR_BAD_TIME = Date.from(Instant.parse("2020-06-02T03:40:00Z"));
+
   @Test
-  public void testNoonAzimuthNear180_bad() {
-    Date calcTime = Date.from(Instant.parse("2020-06-02T03:30:00Z"));
-    SunTimes sunTimes = SunTimes.compute().at(COORDS).on(calcTime).execute();
+  public void testAzimuthCloseNoon_bad() {
+    SunTimes sunTimes = SunTimes.compute().at(COORDS).on(NOON_NADIR_BAD_TIME).execute();
     Date noon = sunTimes.getNoon();
     SunPosition sunPosition = SunPosition.compute().at(COORDS).on(noon).execute();
 
@@ -99,6 +99,51 @@ public class SunCalcTest {
     // Based on cross-checking with online calculators, I believe that SunPosition is pretty
     // accurate, and SunTimes is doing something wrong with its interpolation or curve-fitting.
 
-    assertNotEquals(180.0, sunPosition.getAzimuth(), 1.0); // SHOULD BE EQUAL WITHIN DELTA
+    assertNotEquals(180.0, sunPosition.getAzimuth(), 0.25); // SHOULD BE EQUAL WITHIN DELTA
+  }
+
+  @Test
+  public void testAzimunthCloseNadir_bad() {
+    SunTimes sunTimes = SunTimes.compute().at(COORDS).on(NOON_NADIR_BAD_TIME).execute();
+    Date nadir = sunTimes.getNadir();
+    SunPosition sunPosition = SunPosition.compute().at(COORDS).on(nadir).execute();
+
+    // It seems reasonable to expect that northern temperate zone noon sun azimuth would be within
+    // 1 degree of +-180, given that the sun only moves 0.25 degree per minute and SunCalc says
+    // it's accurate to ~1 minute. Yet this example is off by nearly 5 degrees. Noon time (and
+    // azimuth) vary by around +- 5 deg (or +- 20 min) based on when the on() time is.
+    //
+    // Based on cross-checking with online calculators, I believe that SunPosition is pretty
+    // accurate, and SunTimes is doing something wrong with its interpolation or curve-fitting.
+
+    assertNotEquals(
+        0.0, toZeroCentered(sunPosition.getAzimuth()), 0.25); // SHOULD BE EQUAL WITHIN DELTA
+  }
+
+  @Test
+  public void testSunInfoCorrectorNoon() {
+    SunTimes sunTimes = SunTimes.compute().at(COORDS).on(NOON_NADIR_BAD_TIME).execute();
+    Date noon = sunTimes.getNoon();
+
+    Date correctedNoon = NoonNadirCorrector.correct(noon, COORDS);
+    SunPosition sunPosition = SunPosition.compute().at(COORDS).on(correctedNoon).execute();
+
+    assertEquals(180.0, sunPosition.getAzimuth(), 0.25);
+  }
+
+  @Test
+  public void testSunInfoCorrectorNadir() {
+    SunTimes sunTimes = SunTimes.compute().at(COORDS).on(NOON_NADIR_BAD_TIME).execute();
+    Date nadir = sunTimes.getNadir();
+
+    Date correctedNadir = NoonNadirCorrector.correct(nadir, COORDS);
+    SunPosition sunPosition = SunPosition.compute().at(COORDS).on(correctedNadir).execute();
+
+    assertEquals(0.0, toZeroCentered(sunPosition.getAzimuth()), 0.25);
+  }
+
+  /** Converts an angle in the range [0,360) to one in the range (-180,180]. */
+  private static double toZeroCentered(double angle) {
+    return angle > 180.0 ? angle - 360.0 : angle;
   }
 }
