@@ -15,8 +15,8 @@ public class SunInfoSource {
   private static final BackgroundThreadPoolExecutor sunInfoExecutor =
       BackgroundThreadPoolExecutor.create("sunInfo");
 
-  public static Task<SunInfo> request(double lat, double lon, @NonNull Instant when) {
-    return Tasks.call(sunInfoExecutor, () -> SunInfoUtil.getSunInfo(lat, lon, when));
+  public static Task<SunInfo> request(@NonNull LatLon latLon, @NonNull Instant when) {
+    return Tasks.call(sunInfoExecutor, () -> SunInfoUtil.getSunInfo(latLon, when));
   }
 
   private SunInfoSource() {}

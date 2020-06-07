@@ -18,8 +18,7 @@ import static org.junit.Assert.assertEquals;
 public class SunInfoUtilTest {
 
   // Coords for Santa Monica CA USA
-  private static final double LAT = 34.0;
-  private static final double LON = -118.5;
+  private static final LatLon LAT_LON = LatLon.of(34.0, -118.5);
 
   @Before
   public void setup() {
@@ -33,7 +32,7 @@ public class SunInfoUtilTest {
   @Test
   public void testEventOverlap() {
     Instant when = Instant.parse("2020-05-09T02:30:15Z");
-    SunInfo sunInfo = SunInfoUtil.getSunInfo(LAT, LON, when);
+    SunInfo sunInfo = SunInfoUtil.getSunInfo(LAT_LON, when);
 
     SunInfo expectedSunInfo =
         SunInfo.create(
@@ -41,11 +40,11 @@ public class SunInfoUtilTest {
             289.93357351191065,
             1,
             ImmutableList.of(
-                event("2020-05-08T19:52:00Z", Type.NOON, 181.25805009888),
-                event("2020-05-09T02:44:00Z", Type.SET, 291.8502225919628),
-                event("2020-05-09T07:50:00Z", Type.NADIR, 359.8568414354525),
-                event("2020-05-09T12:57:00Z", Type.RISE, 68.06762096768347),
-                event("2020-05-09T19:47:00Z", Type.NOON, 177.0827771863477)));
+                event("2020-05-08T19:50:31Z", Type.NOON, 180.02082324789518),
+                event("2020-05-09T02:43:51Z", Type.SET, 291.8290562827426),
+                event("2020-05-09T07:50:20Z", Type.NADIR, 359.9583729494134),
+                event("2020-05-09T12:56:55Z", Type.RISE, 68.05589238252242),
+                event("2020-05-09T19:50:29Z", Type.NOON, 180.02763142069227)));
 
     assertEquals(expectedSunInfo, sunInfo);
   }
@@ -57,7 +56,7 @@ public class SunInfoUtilTest {
   @Test
   public void testEventGap() {
     Instant when = Instant.parse("2020-05-18T02:50:50Z");
-    SunInfo sunInfo = SunInfoUtil.getSunInfo(LAT, LON, when);
+    SunInfo sunInfo = SunInfoUtil.getSunInfo(LAT_LON, when);
 
     SunInfo expectedSunInfo =
         SunInfo.create(
@@ -65,11 +64,11 @@ public class SunInfoUtilTest {
             294.5638405069754,
             0,
             ImmutableList.of(
-                event("2020-05-18T02:51:00Z", Type.SET, 294.5873847123942),
-                event("2020-05-18T07:50:00Z", Type.NADIR, 359.8582061019339),
-                event("2020-05-18T12:50:00Z", Type.RISE, 65.34461082274493),
-                event("2020-05-18T19:51:00Z", Type.NOON, 180.47091858781326),
-                event("2020-05-19T02:51:00Z", Type.SET, 294.7528076783142)));
+                event("2020-05-18T02:50:41Z", Type.SET, 294.54265762125186),
+                event("2020-05-18T07:50:21Z", Type.NADIR, 359.9604617342177),
+                event("2020-05-18T12:50:06Z", Type.RISE, 65.35870558986005),
+                event("2020-05-18T19:50:35Z", Type.NOON, 180.07176664466613),
+                event("2020-05-19T02:51:19Z", Type.SET, 294.79749942898354)));
 
     assertEquals(expectedSunInfo, sunInfo);
   }

@@ -10,6 +10,7 @@ import com.google.android.gms.tasks.Task;
 
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.logger.AppLogger;
+import org.onereed.helios.sun.LatLon;
 import org.onereed.helios.sun.SunInfo;
 import org.onereed.helios.sun.SunInfoSource;
 
@@ -30,8 +31,6 @@ class SunInfoViewModel extends ViewModel {
   /** This will always be updated for every {@link SunInfo} request, even if the request fails. */
   private final MutableLiveData<Instant> lastUpdateTimeMutableLiveData = new MutableLiveData<>();
 
-  private Location lastLocation = null;
-
   LiveData<SunInfo> getSunInfoLiveData() {
     return sunInfoMutableLiveData;
   }
@@ -45,14 +44,9 @@ class SunInfoViewModel extends ViewModel {
     // Play Store acceptance tests. So we will handle it gracefully.
 
     if (location != null) {
-      lastLocation = location;
-      updateSunInfo();
+      SunInfoSource.request(LatLon.from(location), CLOCK.instant())
+          .addOnCompleteListener(this::publishSunInfo);
     }
-  }
-
-  private void updateSunInfo() {
-    SunInfoSource.request(lastLocation.getLatitude(), lastLocation.getLongitude(), CLOCK.instant())
-        .addOnCompleteListener(this::publishSunInfo);
   }
 
   private void publishSunInfo(Task<SunInfo> sunInfoTask) {
