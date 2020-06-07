@@ -17,7 +17,7 @@ public class DirectionUtil {
     return new GeomagneticField(
             (float) where.getLatDeg(),
             (float) where.getLonDeg(),
-            /* altitudeMeters= */ 0.0f,
+            (float) where.getAltitudeMeters(),
             when.toEpochMilli())
         .getDeclination();
   }
