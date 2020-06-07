@@ -7,7 +7,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 
 import org.onereed.helios.common.FormattedVerifyException;
-import org.onereed.helios.common.LatLon;
+import org.onereed.helios.location.LatLon;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.logger.AppLogger;
 import org.shredzone.commons.suncalc.SunPosition;

@@ -5,6 +5,7 @@ import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.ForOverride;
 
 import java.util.Map;
@@ -38,8 +39,10 @@ abstract class AbstractMenuActivity extends AppCompatActivity {
   /**
    * Returns a {@link Map} from menu item resource IDs to the action which should be taken when that
    * menu item is selected. Only menu items with IDs that appear as keys in the map are made
-   * visible.
+   * visible. This default implementation returns an empty map, meaning no menu items are shown.
    */
   @ForOverride
-  protected abstract Map<Integer, Runnable> getMenuActions();
+  protected Map<Integer, Runnable> getMenuActions() {
+    return ImmutableMap.of();
+  }
 }

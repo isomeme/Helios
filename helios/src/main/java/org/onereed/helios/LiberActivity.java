@@ -25,7 +25,7 @@ public class LiberActivity extends AbstractMenuActivity {
     setSupportActionBar(activityLiberBinding.toolbar);
     checkNotNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-    int sunEventTypeOrdinal = getIntent().getIntExtra(Messages.SUN_EVENT_TYPE_MSG, -1);
+    int sunEventTypeOrdinal = getIntent().getIntExtra(IntentExtraTags.SUN_EVENT_TYPE, -1);
     SunEvent.Type type = SunEvent.Type.values()[sunEventTypeOrdinal];
 
     String inocationHtml =

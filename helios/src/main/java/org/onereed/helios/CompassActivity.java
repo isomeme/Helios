@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableMap;
 
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
+import org.onereed.helios.location.LocationManager;
 import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunInfo;
 
@@ -54,7 +55,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
     sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
-    ViewModelProvider.Factory factory = new SunInfoViewModelFactory();
+    ViewModelProvider.Factory factory = new ViewModelProvider.NewInstanceFactory();
     SunInfoViewModel sunInfoViewModel =
         new ViewModelProvider(this, factory).get(SunInfoViewModel.class);
 
@@ -62,11 +63,6 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
     locationManager = new LocationManager(this, sunInfoViewModel::acceptLatLon);
     getLifecycle().addObserver(locationManager);
-  }
-
-  @Override
-  protected Map<Integer, Runnable> getMenuActions() {
-    return ImmutableMap.of();
   }
 
   @Override

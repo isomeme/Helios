@@ -1,6 +1,7 @@
 package org.onereed.helios;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Typeface;
@@ -17,7 +18,7 @@ import org.onereed.helios.common.ResourceUtil;
 import org.onereed.helios.sun.SunEvent;
 import org.onereed.helios.sun.SunInfo;
 
-class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventHolder> {
+class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventViewHolder> {
 
   private static final int DATE_FORMAT_FLAGS =
       DateUtils.FORMAT_SHOW_DATE
@@ -26,23 +27,20 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventHolder>
           | DateUtils.FORMAT_SHOW_TIME
           | DateUtils.FORMAT_ABBREV_ALL;
 
-  static class SunEventHolder extends RecyclerView.ViewHolder {
+  static class SunEventViewHolder extends RecyclerView.ViewHolder {
     private final CardView cardView;
     private final TextView eventTimeView;
 
-    SunEventHolder(CardView cardView) {
+    SunEventViewHolder(CardView cardView) {
       super(cardView);
       this.cardView = cardView;
       this.eventTimeView = cardView.findViewById(R.id.eventTime);
     }
   }
 
-  private final Activity activity;
-
   private SunInfo sunInfo = null;
 
-  SunInfoAdapter(Activity activity) {
-    this.activity = activity;
+  SunInfoAdapter() {
     setHasStableIds(true);
   }
 
@@ -58,44 +56,48 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventHolder>
 
   @NonNull
   @Override
-  public SunEventHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+  public SunEventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
     CardView cardView = (CardView) layoutInflater.inflate(R.layout.sun_event, parent, false);
-    return new SunEventHolder(cardView);
+    return new SunEventViewHolder(cardView);
   }
 
   @Override
-  public void onBindViewHolder(@NonNull SunEventHolder holder, int position) {
+  public void onBindViewHolder(@NonNull SunEventViewHolder sunEventViewHolder, int position) {
+    Context context = sunEventViewHolder.itemView.getContext();
+    Resources resources = context.getResources();
+
     SunEvent sunEvent = sunInfo.getSunEvents().get(position);
     int sunEventTypeOrdinal = sunEvent.getType().ordinal();
-    Resources resources = activity.getResources();
 
     ResourceUtil.withTypedArray(
         resources,
         R.array.sun_event_colors,
         typedArray ->
-            holder.cardView.setCardBackgroundColor(typedArray.getColor(sunEventTypeOrdinal, 0)));
+            sunEventViewHolder.cardView.setCardBackgroundColor(
+                typedArray.getColor(sunEventTypeOrdinal, 0)));
 
     ResourceUtil.withTypedArray(
         resources,
         R.array.sun_event_icons,
         typedArray ->
-            holder.eventTimeView.setCompoundDrawablesWithIntrinsicBounds(
+            sunEventViewHolder.eventTimeView.setCompoundDrawablesWithIntrinsicBounds(
                 typedArray.getResourceId(sunEventTypeOrdinal, 0), 0, 0, 0));
 
     long eventTimeMillis = sunEvent.getTime().toEpochMilli();
-    String timeStr = DateUtils.formatDateTime(activity, eventTimeMillis, DATE_FORMAT_FLAGS);
-    holder.eventTimeView.setText(timeStr);
-    holder.eventTimeView.setTypeface(
+    String timeStr = DateUtils.formatDateTime(context, eventTimeMillis, DATE_FORMAT_FLAGS);
+    sunEventViewHolder.eventTimeView.setText(timeStr);
+    sunEventViewHolder.eventTimeView.setTypeface(
         null, position == sunInfo.closestEventIndex() ? Typeface.BOLD : Typeface.NORMAL);
 
-    holder.cardView.setOnClickListener(ignored -> sendToLiberActivity(sunEventTypeOrdinal));
+    sunEventViewHolder.cardView.setOnClickListener(
+        view -> sendToLiberActivity(view.getContext(), sunEventTypeOrdinal));
   }
 
-  private void sendToLiberActivity(int sunEventTypeOrdinal) {
-    Intent intent = new Intent(activity, LiberActivity.class);
-    intent.putExtra(Messages.SUN_EVENT_TYPE_MSG, sunEventTypeOrdinal);
-    activity.startActivity(intent);
+  private void sendToLiberActivity(Context context, int sunEventTypeOrdinal) {
+    Intent intent = new Intent(context, LiberActivity.class);
+    intent.putExtra(IntentExtraTags.SUN_EVENT_TYPE, sunEventTypeOrdinal);
+    context.startActivity(intent);
   }
 
   @Override

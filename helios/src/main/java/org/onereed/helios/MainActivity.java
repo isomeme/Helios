@@ -16,6 +16,7 @@ import org.onereed.helios.common.LocationServiceVerifier;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.PlayServicesVerifier;
 import org.onereed.helios.databinding.ActivityMainBinding;
+import org.onereed.helios.location.LocationManager;
 import org.onereed.helios.logger.AppLogger;
 
 import java.time.Instant;
@@ -29,7 +30,7 @@ public class MainActivity extends AbstractMenuActivity
 
   private final PlayServicesVerifier playServicesVerifier = new PlayServicesVerifier(this);
   private final LocationServiceVerifier locationServiceVerifier = new LocationServiceVerifier(this);
-  private final SunInfoAdapter sunInfoAdapter = new SunInfoAdapter(this);
+  private final SunInfoAdapter sunInfoAdapter = new SunInfoAdapter();
 
   private ActivityMainBinding activityMainBinding;
   private LocationManager locationManager;
@@ -54,7 +55,7 @@ public class MainActivity extends AbstractMenuActivity
 
     activityMainBinding.swipeRefresh.setOnRefreshListener(this);
 
-    ViewModelProvider.Factory factory = new SunInfoViewModelFactory();
+    ViewModelProvider.Factory factory = new ViewModelProvider.NewInstanceFactory();
     SunInfoViewModel sunInfoViewModel =
         new ViewModelProvider(this, factory).get(SunInfoViewModel.class);
 

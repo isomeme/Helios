@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.tasks.Task;
 
-import org.onereed.helios.common.LatLon;
+import org.onereed.helios.location.LatLon;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunInfo;
@@ -18,7 +18,8 @@ import java.time.Instant;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /** Stores and updates data needed for {@link SunInfo} display. */
-class SunInfoViewModel extends ViewModel {
+// Must be public to work with the default ViewModel provider factory.
+public class SunInfoViewModel extends ViewModel {
 
   private static final String TAG = LogUtil.makeTag(SunInfoViewModel.class);
 

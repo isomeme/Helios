@@ -1,4 +1,4 @@
-package org.onereed.helios;
+package org.onereed.helios.location;
 
 import android.Manifest;
 import android.app.Activity;
@@ -19,7 +19,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
-import org.onereed.helios.common.LatLon;
+import org.onereed.helios.R;
 import org.onereed.helios.common.LocationUtil;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.ToastUtil;
@@ -28,7 +28,7 @@ import org.onereed.helios.logger.AppLogger;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-class LocationManager implements DefaultLifecycleObserver {
+public class LocationManager implements DefaultLifecycleObserver {
 
   private static final String TAG = LogUtil.makeTag(LocationManager.class);
 
@@ -43,7 +43,7 @@ class LocationManager implements DefaultLifecycleObserver {
   private FusedLocationProviderClient fusedLocationClient;
   private HandlerThread locationHandlerThread;
 
-  LocationManager(Activity activity, Consumer<LatLon> latLonConsumer) {
+  public LocationManager(Activity activity, Consumer<LatLon> latLonConsumer) {
     this.activity = activity;
     this.latLonConsumer = latLonConsumer;
   }
@@ -88,7 +88,7 @@ class LocationManager implements DefaultLifecycleObserver {
     locationHandlerThread.quitSafely();
   }
 
-  void requestLastLocation() {
+  public void requestLastLocation() {
     AppLogger.debug(TAG, "requestLastLocation");
 
     if (checkPermission()) {
@@ -124,7 +124,7 @@ class LocationManager implements DefaultLifecycleObserver {
    * leads to the app being paused, and onResume in various components will issue new requests
    * needing location permission which should now succeed directly.
    */
-  void acceptPermissionsResult(
+  public void acceptPermissionsResult(
       int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
     if (requestCode != REQUEST_PERMISSION_CODE || !Arrays.equals(PERMISSIONS, permissions)) {
@@ -150,6 +150,8 @@ class LocationManager implements DefaultLifecycleObserver {
 
     if (location != null) {
       latLonConsumer.accept(LatLon.from(location));
+    } else {
+      AppLogger.warning(TAG, "Null location received.");
     }
   }
 
