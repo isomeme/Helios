@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.onereed.helios.common.LatLon;
 import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEvent.Type;
 

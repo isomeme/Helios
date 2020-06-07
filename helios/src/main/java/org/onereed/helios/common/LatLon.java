@@ -1,4 +1,4 @@
-package org.onereed.helios.sun;
+package org.onereed.helios.common;
 
 import android.location.Location;
 
@@ -11,7 +11,8 @@ public abstract class LatLon {
   abstract double getLat();
   abstract double getLon();
 
-  double[] asArray() {
+  /** Returns a primitive double array containing the latitude and longitude. */
+  public double[] asArray() {
     return new double[]{getLat(), getLon()};
   }
 
@@ -20,7 +21,7 @@ public abstract class LatLon {
   }
 
   /** Intended for testing. */
-  static LatLon of(double lat, double lon) {
+  public static LatLon of(double lat, double lon) {
     return new AutoValue_LatLon(lat, lon);
   }
 }

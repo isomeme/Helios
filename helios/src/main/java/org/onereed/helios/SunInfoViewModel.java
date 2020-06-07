@@ -1,16 +1,14 @@
 package org.onereed.helios;
 
-import android.location.Location;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.tasks.Task;
 
+import org.onereed.helios.common.LatLon;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.logger.AppLogger;
-import org.onereed.helios.sun.LatLon;
 import org.onereed.helios.sun.SunInfo;
 import org.onereed.helios.sun.SunInfoSource;
 
@@ -39,14 +37,8 @@ class SunInfoViewModel extends ViewModel {
     return lastUpdateTimeMutableLiveData;
   }
 
-  void acceptLocation(Location location) {
-    // Location has never been null in emulator or device tests, but it was null on all automated
-    // Play Store acceptance tests. So we will handle it gracefully.
-
-    if (location != null) {
-      SunInfoSource.request(LatLon.from(location), CLOCK.instant())
-          .addOnCompleteListener(this::publishSunInfo);
-    }
+  void acceptLatLon(LatLon latLon) {
+    SunInfoSource.request(latLon, CLOCK.instant()).addOnCompleteListener(this::publishSunInfo);
   }
 
   private void publishSunInfo(Task<SunInfo> sunInfoTask) {

@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.google.auto.value.AutoValue;
 
+import org.onereed.helios.common.LatLon;
 import org.shredzone.commons.suncalc.SunPosition;
 import org.shredzone.commons.suncalc.SunTimes;
 

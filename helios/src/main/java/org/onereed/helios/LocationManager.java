@@ -7,6 +7,7 @@ import android.location.Location;
 import android.os.HandlerThread;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.DefaultLifecycleObserver;
@@ -18,6 +19,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
+import org.onereed.helios.common.LatLon;
 import org.onereed.helios.common.LocationUtil;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.ToastUtil;
@@ -36,14 +38,14 @@ class LocationManager implements DefaultLifecycleObserver {
   private final LocationUpdateRecipient locationUpdateRecipient = new LocationUpdateRecipient();
 
   private final Activity activity;
-  private final Consumer<Location> locationConsumer;
+  private final Consumer<LatLon> latLonConsumer;
 
   private FusedLocationProviderClient fusedLocationClient;
   private HandlerThread locationHandlerThread;
 
-  LocationManager(Activity activity, Consumer<Location> locationConsumer) {
+  LocationManager(Activity activity, Consumer<LatLon> latLonConsumer) {
     this.activity = activity;
-    this.locationConsumer = locationConsumer;
+    this.latLonConsumer = latLonConsumer;
   }
 
   @Override
@@ -92,7 +94,7 @@ class LocationManager implements DefaultLifecycleObserver {
     if (checkPermission()) {
       fusedLocationClient
           .getLastLocation()
-          .addOnSuccessListener(locationConsumer::accept)
+          .addOnSuccessListener(this::relayLatLon)
           .addOnFailureListener(e -> AppLogger.error(TAG, e, "getLastLocation failed."));
     }
   }
@@ -138,6 +140,19 @@ class LocationManager implements DefaultLifecycleObserver {
     }
   }
 
+  /**
+   * Converts a received location update into a LatLon value and relays it to the registered
+   * consumer.
+   */
+  private void relayLatLon(@Nullable Location location) {
+    // Location has never been null in emulator or device tests, but it was null on all automated
+    // Play Store acceptance tests. So we will handle it gracefully.
+
+    if (location != null) {
+      latLonConsumer.accept(LatLon.from(location));
+    }
+  }
+
   private class LocationUpdateRecipient extends LocationCallback {
 
     @Override
@@ -149,7 +164,7 @@ class LocationManager implements DefaultLifecycleObserver {
 
     @Override
     public void onLocationResult(LocationResult locationResult) {
-      locationConsumer.accept(locationResult.getLastLocation());
+      relayLatLon(locationResult.getLastLocation());
     }
   }
 }
