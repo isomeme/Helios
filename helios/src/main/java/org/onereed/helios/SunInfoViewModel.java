@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.tasks.Task;
 
-import org.onereed.helios.location.LatLon;
+import org.onereed.helios.common.LatLon;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunInfo;
@@ -38,8 +38,8 @@ public class SunInfoViewModel extends ViewModel {
     return lastUpdateTimeMutableLiveData;
   }
 
-  void acceptLatLon(LatLon latLon) {
-    SunInfoSource.request(latLon, CLOCK.instant()).addOnCompleteListener(this::publishSunInfo);
+  void acceptLatLon(LatLon where) {
+    SunInfoSource.request(where, CLOCK.instant()).addOnCompleteListener(this::publishSunInfo);
   }
 
   private void publishSunInfo(Task<SunInfo> sunInfoTask) {

@@ -11,15 +11,33 @@ public abstract class SunInfo {
 
   public abstract Instant getTimestamp();
 
-  public abstract double currentSunAzimuth();
+  public abstract double getSunAzimuthDeg();
 
-  public abstract int closestEventIndex();
+  public abstract double getMagneticDeclinationDeg();
+
+  public abstract int getClosestEventIndex();
 
   public abstract ImmutableList<SunEvent> getSunEvents();
 
-  static SunInfo create(
-      Instant timestamp, double currentSunAzimuth, int closestEventIndex, ImmutableList<SunEvent> sunEvents) {
+  public static Builder builder() {
+    return new AutoValue_SunInfo.Builder();
+  }
 
-    return new AutoValue_SunInfo(timestamp, currentSunAzimuth, closestEventIndex, sunEvents);
+  /** Builder for {@link SunInfo} */
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract Builder setTimestamp(Instant timestamp);
+
+    public abstract Builder setSunAzimuthDeg(double sunAzimuthDeg);
+
+    public abstract Builder setMagneticDeclinationDeg(double magneticDeclinationDeg);
+
+    public abstract Builder setClosestEventIndex(int closestEventIndex);
+
+    public abstract Builder setSunEvents(ImmutableList<SunEvent> sunEvents);
+
+    public abstract Builder setSunEvents(SunEvent... sunEvents);
+
+    public abstract SunInfo build();
   }
 }

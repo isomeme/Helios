@@ -1,4 +1,4 @@
-package org.onereed.helios.location;
+package org.onereed.helios.common;
 
 import android.location.Location;
 

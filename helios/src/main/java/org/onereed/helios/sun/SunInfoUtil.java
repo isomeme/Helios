@@ -6,8 +6,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 
+import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.FormattedVerifyException;
-import org.onereed.helios.location.LatLon;
+import org.onereed.helios.common.LatLon;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.logger.AppLogger;
 import org.shredzone.commons.suncalc.SunPosition;
@@ -41,18 +42,18 @@ class SunInfoUtil {
    */
   private static final Duration FUTURE_EVENT_WINDOW = Duration.ofHours(36L);
 
-  static @NonNull SunInfo getSunInfo(@NonNull LatLon latLon, @NonNull Instant when) {
-    AppLogger.debug(TAG, "latLon=%s when=%s", latLon, when);
+  static @NonNull SunInfo getSunInfo(@NonNull LatLon where, @NonNull Instant when) {
+    AppLogger.debug(TAG, "where=%s when=%s", where, when);
 
-    SunTimes nextSunTimes = getSunTimes(latLon, when);
-    ImmutableList<SunEvent> nextEvents = toSunEvents(nextSunTimes, latLon, when);
+    SunTimes nextSunTimes = getSunTimes(where, when);
+    ImmutableList<SunEvent> nextEvents = toSunEvents(nextSunTimes, where, when);
 
     verify(!nextEvents.isEmpty(), "nextEvents empty for nextSunTimes=%s", nextSunTimes);
 
     SunEvent nextEvent = nextEvents.get(0);
     Instant precedingDay = nextEvent.getTime().minus(PRECEDING_OFFSET);
-    SunTimes precedingSunTimes = getSunTimes(latLon, precedingDay);
-    ImmutableList<SunEvent> precedingEvents = toSunEvents(precedingSunTimes, latLon, when);
+    SunTimes precedingSunTimes = getSunTimes(where, precedingDay);
+    ImmutableList<SunEvent> precedingEvents = toSunEvents(precedingSunTimes, where, when);
 
     verify(
         !precedingEvents.isEmpty(), "precedingEvents empty for precedingSunTimes=%s", nextSunTimes);
@@ -73,27 +74,34 @@ class SunInfoUtil {
             .addAll(eventsAfterNext)
             .build();
 
-    double currentSunAzimuth =
-        SunPosition.compute().at(latLon.asArray()).on(when).execute().getAzimuth();
+    double sunAzimuthDeg =
+        SunPosition.compute().at(where.asArray()).on(when).execute().getAzimuth();
+    double magneticDeclinationDeg = DirectionUtil.getMagneticDeclinationDeg(where, when);
 
-    return SunInfo.create(when, currentSunAzimuth, closestEventIndex, shownSunEvents);
+    return SunInfo.builder()
+        .setTimestamp(when)
+        .setSunAzimuthDeg(sunAzimuthDeg)
+        .setMagneticDeclinationDeg(magneticDeclinationDeg)
+        .setClosestEventIndex(closestEventIndex)
+        .setSunEvents(shownSunEvents)
+        .build();
   }
 
-  private static SunTimes getSunTimes(LatLon latLon, Instant when) {
+  private static SunTimes getSunTimes(LatLon where, Instant when) {
     // Full-cycle mode is needed when the current time is just after an event -- sunset, for
     // example -- and the next such event is more than 24 hours in the future, as happens throughout
     // winter and spring.
 
-    return SunTimes.compute().at(latLon.asArray()).on(when).fullCycle().execute();
+    return SunTimes.compute().at(where.asArray()).on(when).fullCycle().execute();
   }
 
   private static ImmutableList<SunEvent> toSunEvents(
-      SunTimes sunTimes, LatLon latLon, Instant when) {
+      SunTimes sunTimes, LatLon where, Instant when) {
 
     Instant futureEventLimit = when.plus(FUTURE_EVENT_WINDOW);
 
     return Arrays.stream(SunEvent.Type.values())
-        .map(type -> type.createSunEvent(sunTimes, latLon))
+        .map(type -> type.createSunEvent(sunTimes, where))
         .flatMap(Streams::stream)
         .filter(event -> event.getTime().isBefore(futureEventLimit))
         .sorted()

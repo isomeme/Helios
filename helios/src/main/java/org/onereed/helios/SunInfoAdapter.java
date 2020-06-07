@@ -1,6 +1,5 @@
 package org.onereed.helios;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -88,7 +87,7 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventViewHol
     String timeStr = DateUtils.formatDateTime(context, eventTimeMillis, DATE_FORMAT_FLAGS);
     sunEventViewHolder.eventTimeView.setText(timeStr);
     sunEventViewHolder.eventTimeView.setTypeface(
-        null, position == sunInfo.closestEventIndex() ? Typeface.BOLD : Typeface.NORMAL);
+        null, position == sunInfo.getClosestEventIndex() ? Typeface.BOLD : Typeface.NORMAL);
 
     sunEventViewHolder.cardView.setOnClickListener(
         view -> sendToLiberActivity(view.getContext(), sunEventTypeOrdinal));

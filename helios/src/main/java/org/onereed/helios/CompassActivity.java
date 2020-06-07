@@ -12,8 +12,7 @@ import android.view.animation.RotateAnimation;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.common.collect.ImmutableMap;
-
+import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
 import org.onereed.helios.location.LocationManager;
@@ -21,7 +20,6 @@ import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunInfo;
 
 import java.util.Locale;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Math.toDegrees;
@@ -42,7 +40,8 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   private SensorManager sensorManager;
   private LocationManager locationManager;
 
-  float oldCompassAzimuth = 0.0f;
+  double magneticDeclinationDeg = 0.0;
+  float oldCompassAzimuthDeg = 0.0f;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -109,58 +108,64 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
     SensorManager.getOrientation(rotationMatrix, orientationAngles);
 
-    float compassAzimuth = (float) toDegrees(orientationAngles[0]);
+    double magneticAzimuthDeg = toDegrees(orientationAngles[0]);
+    double pitchDeg = toDegrees(orientationAngles[1]);
+    double rollDeg = toDegrees(orientationAngles[2]);
+
+    // This is how much the compass face as a whole will rotate, based on the device's orientation
+    // with respect to true north.
+    float compassAzimuthDeg =
+        (float) DirectionUtil.zeroCenterDeg(magneticAzimuthDeg + magneticDeclinationDeg);
 
     String info =
         String.format(
             Locale.ENGLISH,
-            "azimuth=%.1f pitch=%.1f roll=%.1f",
-            compassAzimuth,
-            toDegrees(orientationAngles[1]),
-            toDegrees(orientationAngles[2]));
+            "magAz=%.1f comAz=%.1f pitch=%.1f roll=%.1f",
+            magneticAzimuthDeg,
+            compassAzimuthDeg,
+            pitchDeg,
+            rollDeg);
 
     activityCompassBinding.azimuth.setText(info);
 
-    updateCompassState(compassAzimuth);
+    updateCompassState(compassAzimuthDeg);
   }
 
   /**
    * Executes an animated sweep from the old compass rotation to the new one, and updates the old
    * one to the new value to prepare for the next update.
    */
-  private void updateCompassState(float compassAzimuth) {
-    animateCompassRotation(compassAzimuth);
-    oldCompassAzimuth = compassAzimuth;
-  }
+  private void updateCompassState(float compassAzimuthDeg) {
+     float azimuthDeltaDeg = compassAzimuthDeg - oldCompassAzimuthDeg;
 
-  private void animateCompassRotation(float compassAzimuth) {
     // When animating from e.g. -179 to +179, we don't want to go the long way around the circle.
 
-    float adjustedAzimuth = compassAzimuth;
-    float azimuthDelta = compassAzimuth - oldCompassAzimuth;
+    float adjustedAzimuthDeg = compassAzimuthDeg;
 
-    if (azimuthDelta > 180.0f) {
-      adjustedAzimuth -= 360.0f;
-    } else if (azimuthDelta < -180.0f) {
-      adjustedAzimuth += 360.0f;
+    if (azimuthDeltaDeg > 180.0f) {
+      adjustedAzimuthDeg -= 360.0f;
+    } else if (azimuthDeltaDeg < -180.0f) {
+      adjustedAzimuthDeg += 360.0f;
     }
 
     RotateAnimation rotateAnimation =
         new RotateAnimation(
-            -oldCompassAzimuth,
-            -adjustedAzimuth,
+            -oldCompassAzimuthDeg,
+            -adjustedAzimuthDeg,
             Animation.RELATIVE_TO_SELF,
-            0.5f,
+            /* pivotXValue= */ 0.5f,
             Animation.RELATIVE_TO_SELF,
-            0.5f);
+            /* pivotYValue= */ 0.5f);
 
     rotateAnimation.setDuration(ROTATION_ANIMATION_DURATION_MILLIS);
     rotateAnimation.setFillAfter(true); // Hold end position after animation
 
     activityCompassBinding.compassComposite.startAnimation(rotateAnimation);
+    oldCompassAzimuthDeg = compassAzimuthDeg;
   }
 
   private void acceptSunInfo(SunInfo sunInfo) {
-    activityCompassBinding.sun.setRotation((float) sunInfo.currentSunAzimuth());
+    activityCompassBinding.sun.setRotation((float) sunInfo.getSunAzimuthDeg());
+    magneticDeclinationDeg = sunInfo.getMagneticDeclinationDeg();
   }
 }

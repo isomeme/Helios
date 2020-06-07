@@ -1,12 +1,10 @@
 package org.onereed.helios.sun;
 
-import com.google.common.collect.ImmutableList;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.onereed.helios.location.LatLon;
+import org.onereed.helios.common.LatLon;
 import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEvent.Type;
 
@@ -36,16 +34,18 @@ public class SunInfoUtilTest {
     SunInfo sunInfo = SunInfoUtil.getSunInfo(LAT_LON, when);
 
     SunInfo expectedSunInfo =
-        SunInfo.create(
-            when,
-            289.93357351191065,
-            1,
-            ImmutableList.of(
+        SunInfo.builder()
+            .setTimestamp(when)
+            .setSunAzimuthDeg(289.93357351191065)
+            .setMagneticDeclinationDeg(0.0)
+            .setClosestEventIndex(1)
+            .setSunEvents(
                 event("2020-05-08T19:50:31Z", Type.NOON, 180.02082324789518),
                 event("2020-05-09T02:43:51Z", Type.SET, 291.8290562827426),
                 event("2020-05-09T07:50:20Z", Type.NADIR, 359.9583729494134),
                 event("2020-05-09T12:56:55Z", Type.RISE, 68.05589238252242),
-                event("2020-05-09T19:50:29Z", Type.NOON, 180.02763142069227)));
+                event("2020-05-09T19:50:29Z", Type.NOON, 180.02763142069227))
+            .build();
 
     assertEquals(expectedSunInfo, sunInfo);
   }
@@ -60,16 +60,18 @@ public class SunInfoUtilTest {
     SunInfo sunInfo = SunInfoUtil.getSunInfo(LAT_LON, when);
 
     SunInfo expectedSunInfo =
-        SunInfo.create(
-            when,
-            294.5638405069754,
-            0,
-            ImmutableList.of(
+        SunInfo.builder()
+            .setTimestamp(when)
+            .setSunAzimuthDeg(294.5638405069754)
+            .setMagneticDeclinationDeg(0.0)
+            .setClosestEventIndex(0)
+            .setSunEvents(
                 event("2020-05-18T02:50:41Z", Type.SET, 294.54265762125186),
                 event("2020-05-18T07:50:21Z", Type.NADIR, 359.9604617342177),
                 event("2020-05-18T12:50:06Z", Type.RISE, 65.35870558986005),
                 event("2020-05-18T19:50:35Z", Type.NOON, 180.07176664466613),
-                event("2020-05-19T02:51:19Z", Type.SET, 294.79749942898354)));
+                event("2020-05-19T02:51:19Z", Type.SET, 294.79749942898354))
+            .build();
 
     assertEquals(expectedSunInfo, sunInfo);
   }

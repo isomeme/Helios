@@ -1,10 +1,11 @@
 package org.onereed.helios.sun;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import com.google.auto.value.AutoValue;
 
-import org.onereed.helios.location.LatLon;
+import org.onereed.helios.common.LatLon;
 import org.shredzone.commons.suncalc.SunPosition;
 import org.shredzone.commons.suncalc.SunTimes;
 
@@ -45,19 +46,20 @@ public abstract class SunEvent implements Comparable<SunEvent> {
      * SunTimes} instance, if it is available. Rise and set events will not be available for arctic
      * summer and winter.
      */
-    Optional<SunEvent> createSunEvent(@NonNull SunTimes sunTimes, @NonNull LatLon latLon) {
+    Optional<SunEvent> createSunEvent(@NonNull SunTimes sunTimes, @NonNull LatLon where) {
       return Optional.ofNullable(dateExtractor.apply(sunTimes))
           .map(ZonedDateTime::toInstant)
-          .map(when -> SunEvent.create(when, this, getAzimuth(when, latLon)));
+          .map(when -> SunEvent.create(when, this, getAzimuth(where, when)));
     }
 
-    private static Double getAzimuth(Instant when, LatLon latLon) {
-      return SunPosition.compute().on(when).at(latLon.asArray()).execute().getAzimuth();
+    private static double getAzimuth(LatLon where, Instant when) {
+      return SunPosition.compute().at(where.asArray()).on(when).execute().getAzimuth();
     }
   }
 
-  static SunEvent create(Instant time, Type type, double azimuth) {
-    return new AutoValue_SunEvent(time, type, azimuth);
+  @VisibleForTesting
+  static SunEvent create(Instant time, Type type, double azimuthDeg) {
+    return new AutoValue_SunEvent(time, type, azimuthDeg);
   }
 
   @NonNull
@@ -66,7 +68,7 @@ public abstract class SunEvent implements Comparable<SunEvent> {
   @NonNull
   public abstract Type getType();
 
-  public abstract double getAzimuth();
+  public abstract double getAzimuthDeg();
 
   @Override
   public int compareTo(@NonNull SunEvent o) {

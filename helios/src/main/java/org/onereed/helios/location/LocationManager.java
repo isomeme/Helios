@@ -20,6 +20,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
 import org.onereed.helios.R;
+import org.onereed.helios.common.LatLon;
 import org.onereed.helios.common.LocationUtil;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.ToastUtil;
@@ -38,14 +39,14 @@ public class LocationManager implements DefaultLifecycleObserver {
   private final LocationUpdateRecipient locationUpdateRecipient = new LocationUpdateRecipient();
 
   private final Activity activity;
-  private final Consumer<LatLon> latLonConsumer;
+  private final Consumer<LatLon> whereConsumer;
 
   private FusedLocationProviderClient fusedLocationClient;
   private HandlerThread locationHandlerThread;
 
-  public LocationManager(Activity activity, Consumer<LatLon> latLonConsumer) {
+  public LocationManager(Activity activity, Consumer<LatLon> whereConsumer) {
     this.activity = activity;
-    this.latLonConsumer = latLonConsumer;
+    this.whereConsumer = whereConsumer;
   }
 
   @Override
@@ -149,7 +150,7 @@ public class LocationManager implements DefaultLifecycleObserver {
     // Play Store acceptance tests. So we will handle it gracefully.
 
     if (location != null) {
-      latLonConsumer.accept(LatLon.from(location));
+      whereConsumer.accept(LatLon.from(location));
     } else {
       AppLogger.warning(TAG, "Null location received.");
     }
