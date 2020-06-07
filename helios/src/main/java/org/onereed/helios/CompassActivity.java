@@ -60,7 +60,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
     sunInfoViewModel.getSunInfoLiveData().observe(this, this::acceptSunInfo);
 
-    locationManager = new LocationManager(this, sunInfoViewModel::acceptLatLon);
+    locationManager = new LocationManager(this, sunInfoViewModel::acceptPlace);
     getLifecycle().addObserver(locationManager);
   }
 

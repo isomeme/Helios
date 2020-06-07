@@ -13,10 +13,10 @@ public class DirectionUtil {
    */
   // TODO: Using GeomagneticField forces us to turn on unitTests.returnDefaultValues. More reason
   // to figure out Dagger.
-  public static double getMagneticDeclinationDeg(LatLon where, Instant when) {
+  public static double getMagneticDeclinationDeg(Place where, Instant when) {
     return new GeomagneticField(
-            (float) where.getLat(),
-            (float) where.getLon(),
+            (float) where.getLatDeg(),
+            (float) where.getLonDeg(),
             /* altitudeMeters= */ 0.0f,
             when.toEpochMilli())
         .getDeclination();

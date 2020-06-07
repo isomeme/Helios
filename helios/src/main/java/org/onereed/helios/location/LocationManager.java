@@ -20,9 +20,9 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
 import org.onereed.helios.R;
-import org.onereed.helios.common.LatLon;
 import org.onereed.helios.common.LocationUtil;
 import org.onereed.helios.common.LogUtil;
+import org.onereed.helios.common.Place;
 import org.onereed.helios.common.ToastUtil;
 import org.onereed.helios.logger.AppLogger;
 
@@ -39,14 +39,14 @@ public class LocationManager implements DefaultLifecycleObserver {
   private final LocationUpdateRecipient locationUpdateRecipient = new LocationUpdateRecipient();
 
   private final Activity activity;
-  private final Consumer<LatLon> whereConsumer;
+  private final Consumer<Place> placeConsumer;
 
   private FusedLocationProviderClient fusedLocationClient;
   private HandlerThread locationHandlerThread;
 
-  public LocationManager(Activity activity, Consumer<LatLon> whereConsumer) {
+  public LocationManager(Activity activity, Consumer<Place> placeConsumer) {
     this.activity = activity;
-    this.whereConsumer = whereConsumer;
+    this.placeConsumer = placeConsumer;
   }
 
   @Override
@@ -95,7 +95,7 @@ public class LocationManager implements DefaultLifecycleObserver {
     if (checkPermission()) {
       fusedLocationClient
           .getLastLocation()
-          .addOnSuccessListener(this::relayLatLon)
+          .addOnSuccessListener(this::relayPlace)
           .addOnFailureListener(e -> AppLogger.error(TAG, e, "getLastLocation failed."));
     }
   }
@@ -142,15 +142,15 @@ public class LocationManager implements DefaultLifecycleObserver {
   }
 
   /**
-   * Converts a received location update into a LatLon value and relays it to the registered
-   * consumer.
+   * Converts a received {@link Location} update into a {@link Place} value and relays it to the
+   * registered consumer.
    */
-  private void relayLatLon(@Nullable Location location) {
+  private void relayPlace(@Nullable Location location) {
     // Location has never been null in emulator or device tests, but it was null on all automated
     // Play Store acceptance tests. So we will handle it gracefully.
 
     if (location != null) {
-      whereConsumer.accept(LatLon.from(location));
+      placeConsumer.accept(Place.from(location));
     } else {
       AppLogger.warning(TAG, "Null location received.");
     }
@@ -167,7 +167,7 @@ public class LocationManager implements DefaultLifecycleObserver {
 
     @Override
     public void onLocationResult(LocationResult locationResult) {
-      relayLatLon(locationResult.getLastLocation());
+      relayPlace(locationResult.getLastLocation());
     }
   }
 }

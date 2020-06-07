@@ -54,7 +54,7 @@ dependencies {
 }
 
 dependencies {
-    implementation 'org.shredzone.commons:commons-suncalc:3.0'
+    implementation 'org.shredzone.commons:commons-suncalc:3.1'
 }
 
 dependencies {

@@ -61,7 +61,7 @@ public class MainActivity extends AbstractMenuActivity
 
     sunInfoViewModel.getSunInfoLiveData().observe(this, sunInfoAdapter::acceptSunInfo);
     sunInfoViewModel.getLastUpdateTimeLiveData().observe(this, this::updateCompleted);
-    locationManager = new LocationManager(this, sunInfoViewModel::acceptLatLon);
+    locationManager = new LocationManager(this, sunInfoViewModel::acceptPlace);
 
     getLifecycle().addObserver(playServicesVerifier);
     getLifecycle().addObserver(locationServiceVerifier);

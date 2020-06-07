@@ -8,10 +8,9 @@ import com.google.common.collect.Streams;
 
 import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.FormattedVerifyException;
-import org.onereed.helios.common.LatLon;
+import org.onereed.helios.common.Place;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.logger.AppLogger;
-import org.shredzone.commons.suncalc.SunPosition;
 import org.shredzone.commons.suncalc.SunTimes;
 
 import java.time.Duration;
@@ -42,17 +41,17 @@ class SunInfoUtil {
    */
   private static final Duration FUTURE_EVENT_WINDOW = Duration.ofHours(36L);
 
-  static @NonNull SunInfo getSunInfo(@NonNull LatLon where, @NonNull Instant when) {
+  static @NonNull SunInfo getSunInfo(@NonNull Place where, @NonNull Instant when) {
     AppLogger.debug(TAG, "where=%s when=%s", where, when);
 
-    SunTimes nextSunTimes = getSunTimes(where, when);
+    SunTimes nextSunTimes = SunCalcUtil.getSunTimes(where, when);
     ImmutableList<SunEvent> nextEvents = toSunEvents(nextSunTimes, where, when);
 
     verify(!nextEvents.isEmpty(), "nextEvents empty for nextSunTimes=%s", nextSunTimes);
 
     SunEvent nextEvent = nextEvents.get(0);
     Instant precedingDay = nextEvent.getTime().minus(PRECEDING_OFFSET);
-    SunTimes precedingSunTimes = getSunTimes(where, precedingDay);
+    SunTimes precedingSunTimes = SunCalcUtil.getSunTimes(where, precedingDay);
     ImmutableList<SunEvent> precedingEvents = toSunEvents(precedingSunTimes, where, when);
 
     verify(
@@ -74,8 +73,7 @@ class SunInfoUtil {
             .addAll(eventsAfterNext)
             .build();
 
-    double sunAzimuthDeg =
-        SunPosition.compute().at(where.asArray()).on(when).execute().getAzimuth();
+    double sunAzimuthDeg = SunCalcUtil.getSunAzimuthDeg(where, when);
     double magneticDeclinationDeg = DirectionUtil.getMagneticDeclinationDeg(where, when);
 
     return SunInfo.builder()
@@ -87,16 +85,8 @@ class SunInfoUtil {
         .build();
   }
 
-  private static SunTimes getSunTimes(LatLon where, Instant when) {
-    // Full-cycle mode is needed when the current time is just after an event -- sunset, for
-    // example -- and the next such event is more than 24 hours in the future, as happens throughout
-    // winter and spring.
-
-    return SunTimes.compute().at(where.asArray()).on(when).fullCycle().execute();
-  }
-
   private static ImmutableList<SunEvent> toSunEvents(
-      SunTimes sunTimes, LatLon where, Instant when) {
+      SunTimes sunTimes, Place where, Instant when) {
 
     Instant futureEventLimit = when.plus(FUTURE_EVENT_WINDOW);
 

@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.onereed.helios.common.LatLon;
+import org.onereed.helios.common.Place;
 import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEvent.Type;
 
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 public class SunInfoUtilTest {
 
   // Coords for Santa Monica CA USA
-  private static final LatLon LAT_LON = LatLon.of(34.0, -118.5);
+  private static final Place LAT_LON = Place.of(34.0, -118.5, 0.0);
 
   @Before
   public void setup() {
@@ -40,7 +40,7 @@ public class SunInfoUtilTest {
             .setMagneticDeclinationDeg(0.0)
             .setClosestEventIndex(1)
             .setSunEvents(
-                event("2020-05-08T19:50:31Z", Type.NOON, 180.02082324789518),
+                event("2020-05-08T19:50:35Z", Type.NOON, 180.0764353494024),
                 event("2020-05-09T02:43:51Z", Type.SET, 291.8290562827426),
                 event("2020-05-09T07:50:20Z", Type.NADIR, 359.9583729494134),
                 event("2020-05-09T12:56:55Z", Type.RISE, 68.05589238252242),
