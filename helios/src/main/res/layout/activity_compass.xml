@@ -17,32 +17,34 @@
         android:theme="?attr/actionBarTheme"
         app:maxButtonHeight="56dp" />
 
-    <TextView
-        android:id="@+id/azimuth"
+    <ImageView
+        android:id="@+id/view_line"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_below="@id/toolbar"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="false"
-        android:layout_marginTop="20dp"
-        tools:text="Azimuth" />
+        android:alpha="0.3"
+        android:contentDescription="@string/view_line"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_view_line"
+        android:tint="@android:color/darker_gray" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/compass_composite"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/azimuth"
+        android:layout_below="@id/toolbar"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="false"
-        android:layout_marginTop="20dp">
+        android:layout_alignParentTop="false">
 
         <ImageView
-            android:id="@+id/compass"
+            android:id="@+id/compass_face"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:contentDescription="@string/content_compass_display"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_circle_single_tick"
+            android:src="@drawable/ic_compass_face"
             android:tint="@android:color/darker_gray" />
 
         <ImageView
@@ -53,6 +55,46 @@
             android:scaleType="fitCenter"
             android:src="@drawable/ic_offset_dot"
             android:tint="@color/sun_yellow" />
+
+        <ImageView
+            android:id="@+id/rise"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/sunrise_position"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_offset_sol_symbol"
+            android:tint="@color/bg_rise"
+            android:visibility="invisible"/>
+
+        <ImageView
+            android:id="@+id/noon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/noon_position"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_offset_sol_symbol"
+            android:tint="@color/bg_noon"
+            android:visibility="invisible"/>
+
+        <ImageView
+            android:id="@+id/set"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/sunset_position"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_offset_sol_symbol"
+            android:tint="@color/bg_set"
+            android:visibility="invisible"/>
+
+        <ImageView
+            android:id="@+id/nadir"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/midnight_position"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_offset_sol_symbol"
+            android:tint="@color/bg_nadir"
+            android:visibility="invisible"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </RelativeLayout>

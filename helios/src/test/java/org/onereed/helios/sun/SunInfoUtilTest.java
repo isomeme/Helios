@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 public class SunInfoUtilTest {
 
   // Coords for Santa Monica CA USA
-  private static final Place LAT_LON = Place.of(34.0, -118.5, 0.0);
+  private static final Place PLACE = Place.of(34.0, -118.5, 0.0);
 
   @Before
   public void setup() {
@@ -31,7 +31,7 @@ public class SunInfoUtilTest {
   @Test
   public void testEventOverlap() {
     Instant when = Instant.parse("2020-05-09T02:30:15Z");
-    SunInfo sunInfo = SunInfoUtil.getSunInfo(LAT_LON, when);
+    SunInfo sunInfo = SunInfoUtil.getSunInfo(PLACE, when);
 
     SunInfo expectedSunInfo =
         SunInfo.builder()
@@ -57,7 +57,7 @@ public class SunInfoUtilTest {
   @Test
   public void testEventGap() {
     Instant when = Instant.parse("2020-05-18T02:50:50Z");
-    SunInfo sunInfo = SunInfoUtil.getSunInfo(LAT_LON, when);
+    SunInfo sunInfo = SunInfoUtil.getSunInfo(PLACE, when);
 
     SunInfo expectedSunInfo =
         SunInfo.builder()

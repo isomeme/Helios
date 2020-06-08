@@ -6,8 +6,10 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
@@ -17,9 +19,13 @@ import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
 import org.onereed.helios.location.LocationManager;
 import org.onereed.helios.logger.AppLogger;
+import org.onereed.helios.sun.SunEvent;
 import org.onereed.helios.sun.SunInfo;
 
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Math.toDegrees;
@@ -40,8 +46,10 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   private SensorManager sensorManager;
   private LocationManager locationManager;
 
-  double magneticDeclinationDeg = 0.0;
-  float oldCompassAzimuthDeg = 0.0f;
+  private Map<SunEvent.Type, ImageView> sunEventViews = new HashMap<>();
+
+  private double magneticDeclinationDeg = 0.0;
+  private float oldCompassAzimuthDeg = 0.0f;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +70,11 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
     locationManager = new LocationManager(this, sunInfoViewModel::acceptPlace);
     getLifecycle().addObserver(locationManager);
+
+    sunEventViews.put(SunEvent.Type.RISE, activityCompassBinding.rise);
+    sunEventViews.put(SunEvent.Type.NOON, activityCompassBinding.noon);
+    sunEventViews.put(SunEvent.Type.SET, activityCompassBinding.set);
+    sunEventViews.put(SunEvent.Type.NADIR, activityCompassBinding.nadir);
   }
 
   @Override
@@ -109,24 +122,11 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     SensorManager.getOrientation(rotationMatrix, orientationAngles);
 
     double magneticAzimuthDeg = toDegrees(orientationAngles[0]);
-    double pitchDeg = toDegrees(orientationAngles[1]);
-    double rollDeg = toDegrees(orientationAngles[2]);
 
     // This is how much the compass face as a whole will rotate, based on the device's orientation
     // with respect to true north.
     float compassAzimuthDeg =
         (float) DirectionUtil.zeroCenterDeg(magneticAzimuthDeg + magneticDeclinationDeg);
-
-    String info =
-        String.format(
-            Locale.ENGLISH,
-            "magAz=%.1f comAz=%.1f pitch=%.1f roll=%.1f",
-            magneticAzimuthDeg,
-            compassAzimuthDeg,
-            pitchDeg,
-            rollDeg);
-
-    activityCompassBinding.azimuth.setText(info);
 
     updateCompassState(compassAzimuthDeg);
   }
@@ -167,5 +167,21 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   private void acceptSunInfo(SunInfo sunInfo) {
     activityCompassBinding.sun.setRotation((float) sunInfo.getSunAzimuthDeg());
     magneticDeclinationDeg = sunInfo.getMagneticDeclinationDeg();
+
+    EnumSet<SunEvent.Type> unusedTypes = EnumSet.allOf(SunEvent.Type.class);
+
+    for (SunEvent sunEvent : sunInfo.getSunEvents()) {
+      SunEvent.Type type = sunEvent.getType();
+
+      if (unusedTypes.remove(type)) {
+        ImageView view = checkNotNull(sunEventViews.get(type));
+        view.setRotation((float) sunEvent.getAzimuthDeg());
+        view.setVisibility(View.VISIBLE);
+      }
+    }
+
+    for (SunEvent.Type type : unusedTypes) {
+      checkNotNull(sunEventViews.get(type)).setVisibility(View.INVISIBLE);
+    }
   }
 }

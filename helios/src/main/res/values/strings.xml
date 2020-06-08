@@ -9,4 +9,9 @@
     <string name="control_refresh">Refresh</string>
     <string name="control_directions">Directions</string>
     <string name="content_compass_display">Compass display</string>
+    <string name="sunrise_position">Sunrise position</string>
+    <string name="noon_position">Noon position</string>
+    <string name="sunset_position">Sunset position</string>
+    <string name="midnight_position">Midnight position</string>
+    <string name="view_line">View line</string>
 </resources>
