@@ -8,7 +8,6 @@ import com.google.auto.value.AutoValue;
 import org.onereed.helios.common.Place;
 import org.shredzone.commons.suncalc.SunTimes;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Comparator;
@@ -21,12 +20,6 @@ public abstract class SunEvent implements Comparable<SunEvent> {
 
   private static final Comparator<SunEvent> COMPARATOR =
       Comparator.comparing(SunEvent::getTime).thenComparing(SunEvent::getType);
-
-  /**
-   * If two events of the same type are at least this far apart, they are probably two different
-   * events, not differently-calculated copies of the same one.
-   */
-  private static final Duration DIFFERENT_EVENT_SEPARATION = Duration.ofHours(3L);
 
   public enum Type {
     RISE(SunTimes::getRise),
@@ -68,15 +61,5 @@ public abstract class SunEvent implements Comparable<SunEvent> {
   @Override
   public int compareTo(@NonNull SunEvent o) {
     return COMPARATOR.compare(this, o);
-  }
-
-  /**
-   * Our {@link SunEvent} calculations can result in two copies of the same event at slightly
-   * different times. This method returns true when this event is probably a duplicate of the
-   * argument.
-   */
-  boolean isDuplicateOf(SunEvent o) {
-    return getType().equals(o.getType())
-        && Duration.between(getTime(), o.getTime()).abs().compareTo(DIFFERENT_EVENT_SEPARATION) < 0;
   }
 }

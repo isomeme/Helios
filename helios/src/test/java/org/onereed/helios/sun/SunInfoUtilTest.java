@@ -40,7 +40,7 @@ public class SunInfoUtilTest {
             .setMagneticDeclinationDeg(0.0)
             .setClosestEventIndex(1)
             .setSunEvents(
-                event("2020-05-08T19:50:35Z", Type.NOON, 180.0764353494024),
+                event("2020-05-08T19:50:33Z", Type.NOON, 180.0486292899211),
                 event("2020-05-09T02:43:51Z", Type.SET, 291.8290562827426),
                 event("2020-05-09T07:50:20Z", Type.NADIR, 359.9583729494134),
                 event("2020-05-09T12:56:55Z", Type.RISE, 68.05589238252242),
@@ -66,7 +66,7 @@ public class SunInfoUtilTest {
             .setMagneticDeclinationDeg(0.0)
             .setClosestEventIndex(0)
             .setSunEvents(
-                event("2020-05-18T02:50:41Z", Type.SET, 294.54265762125186),
+                event("2020-05-18T02:50:35Z", Type.SET, 294.52853932175793),
                 event("2020-05-18T07:50:21Z", Type.NADIR, 359.9604617342177),
                 event("2020-05-18T12:50:06Z", Type.RISE, 65.35870558986005),
                 event("2020-05-18T19:50:35Z", Type.NOON, 180.07176664466613),
