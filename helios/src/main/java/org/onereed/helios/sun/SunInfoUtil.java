@@ -60,12 +60,7 @@ class SunInfoUtil {
         !precedingEvents.isEmpty(), "precedingEvents empty for precedingSunTimes=%s", nextSunTimes);
 
     SunEvent mostRecentEvent = getMostRecentEvent(precedingEvents, nextEvent);
-
-    Instant beforeTime = mostRecentEvent.getTime();
-    Instant afterTime = nextEvent.getTime();
-    Duration between = Duration.between(beforeTime, afterTime);
-    Instant halfway = beforeTime.plus(between.dividedBy(2L));
-    int closestEventIndex = when.isBefore(halfway) ? 0 : 1;
+    int closestEventIndex = getClosestEventIndex(when, mostRecentEvent, nextEvent);
 
     ImmutableList<SunEvent> shownSunEvents =
         ImmutableList.<SunEvent>builder().add(mostRecentEvent).addAll(nextEvents).build();
@@ -103,6 +98,16 @@ class SunInfoUtil {
                 new FormattedVerifyException(
                     "Nothing in precedingEvents=%s works as a preceding event for nextEvent=%s",
                     precedingEvents, nextEvent));
+  }
+
+  private static int getClosestEventIndex(
+      Instant when, SunEvent mostRecentEvent, SunEvent nextEvent) {
+
+    Instant beforeTime = mostRecentEvent.getTime();
+    Instant afterTime = nextEvent.getTime();
+    Duration between = Duration.between(beforeTime, afterTime);
+    Instant halfway = beforeTime.plus(between.dividedBy(2L));
+    return when.isBefore(halfway) ? 0 : 1;
   }
 
   private SunInfoUtil() {}

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "853056178984",
+    "firebase_url": "https://one-reed.firebaseio.com",
+    "project_id": "one-reed",
+    "storage_bucket": "one-reed.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:853056178984:android:dcda2ae04f645dfd065e1d",
+        "android_client_info": {
+          "package_name": "org.onereed.helios"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "853056178984-fgu49f8ekvauhjc7kdjtqq1og6mtvk4b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDF5JQnd9BMMXdnldJekj6VN62L1a6M2Q4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "853056178984-fgu49f8ekvauhjc7kdjtqq1og6mtvk4b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
