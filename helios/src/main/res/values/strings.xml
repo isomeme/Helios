@@ -14,4 +14,5 @@
     <string name="sunset_position">Sunset position</string>
     <string name="midnight_position">Midnight position</string>
     <string name="view_line">View line</string>
+    <string name="toast_no_compass_sensor">This device does not have the sensor needed to align the display with compass directions.</string>
 </resources>

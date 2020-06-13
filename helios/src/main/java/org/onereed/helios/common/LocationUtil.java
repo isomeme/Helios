@@ -8,7 +8,7 @@ import java.time.Duration;
 public final class LocationUtil {
 
   private static final long FASTEST_INTERVAL_MILLIS = Duration.ofSeconds(30L).toMillis();
-  private static final long INTERVAL_MILLIS = Duration.ofMinutes(2L).toMillis();
+  private static final long INTERVAL_MILLIS = Duration.ofMinutes(1L).toMillis();
 
   /** Standard request for repeated location updates. */
   public static final LocationRequest REPEATED_LOCATION_REQUEST =

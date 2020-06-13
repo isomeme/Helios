@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.LogUtil;
+import org.onereed.helios.common.ToastUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
 import org.onereed.helios.location.LocationManager;
 import org.onereed.helios.logger.AppLogger;
@@ -89,13 +90,24 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   protected void onResume() {
     super.onResume();
 
-    Sensor rotationVectorSensor =
-        checkNotNull(sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR));
-    sensorManager.registerListener(
-        this,
-        rotationVectorSensor,
-        SensorManager.SENSOR_DELAY_NORMAL,
-        SensorManager.SENSOR_DELAY_UI);
+    Sensor rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+
+    // I don't think that availability of the TYPE_ROTATION_VECTOR can change over the lifetime of
+    // the app, but just in case, we'll check each time we resume.
+
+    if (rotationVectorSensor == null) {
+      oldCompassAzimuthDeg = 0.0f;
+      activityCompassBinding.compassComposite.setRotation(0.0f);
+      activityCompassBinding.viewLine.setVisibility(View.INVISIBLE);
+      ToastUtil.longToast(this, R.string.toast_no_compass_sensor);
+    } else {
+      activityCompassBinding.viewLine.setVisibility(View.VISIBLE);
+      sensorManager.registerListener(
+          this,
+          rotationVectorSensor,
+          SensorManager.SENSOR_DELAY_NORMAL,
+          SensorManager.SENSOR_DELAY_UI);
+    }
   }
 
   @Override
@@ -106,7 +118,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
   @Override
   public void onAccuracyChanged(Sensor sensor, int accuracy) {
-    AppLogger.debug(TAG, "onAccuracyChanged: sensor=%s accuracy=%d", sensor, accuracy);
+    // Do nothing.
   }
 
   @Override
