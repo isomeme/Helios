@@ -9,11 +9,13 @@
     <string name="control_refresh">Refresh</string>
     <string name="control_directions">Directions</string>
     <string name="content_compass_display">Compass display</string>
-    <string name="sunrise_position">Sunrise position</string>
-    <string name="noon_position">Noon position</string>
-    <string name="sunset_position">Sunset position</string>
-    <string name="midnight_position">Midnight position</string>
+    <string name="content_sunrise_position">Sunrise position</string>
+    <string name="content_noon_position">Noon position</string>
+    <string name="content_sunset_position">Sunset position</string>
+    <string name="content_midnight_position">Midnight position</string>
     <string name="view_line">View line</string>
     <string name="toast_no_compass_sensor">This device does not have the sensor needed to align the display with compass directions.</string>
     <string name="control_help">Help</string>
+    <string name="content_sun_position">Sun position</string>
+    <string name="content_small_square">A small square</string>
 </resources>

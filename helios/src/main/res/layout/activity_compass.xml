@@ -51,7 +51,7 @@
             android:id="@+id/sun"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/content_compass_display"
+            android:contentDescription="@string/content_sun_position"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_offset_dot"
             android:tint="@color/sun_yellow" />
@@ -60,7 +60,7 @@
             android:id="@+id/rise"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/sunrise_position"
+            android:contentDescription="@string/content_sunrise_position"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_offset_sol_symbol"
             android:tint="@color/bg_rise"
@@ -70,7 +70,7 @@
             android:id="@+id/noon"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/noon_position"
+            android:contentDescription="@string/content_noon_position"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_offset_sol_symbol"
             android:tint="@color/bg_noon"
@@ -80,7 +80,7 @@
             android:id="@+id/set"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/sunset_position"
+            android:contentDescription="@string/content_sunset_position"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_offset_sol_symbol"
             android:tint="@color/bg_set"
@@ -90,11 +90,25 @@
             android:id="@+id/nadir"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/midnight_position"
+            android:contentDescription="@string/content_midnight_position"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_offset_sol_symbol"
             android:tint="@color/bg_nadir"
             android:visibility="invisible"/>
+
+        <ImageView
+            android:id="@+id/small_square"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/content_small_square"
+            app:layout_constraintCircle="@+id/compass_face"
+            app:layout_constraintCircleRadius="45dp"
+            app:layout_constraintCircleAngle="210"
+            android:tooltipText="Small square"
+            android:src="@drawable/ic_small_square"
+            android:tint="@color/bg_noon"
+            android:visibility="invisible"
+            tools:ignore="MissingConstraints" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </RelativeLayout>

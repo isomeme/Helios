@@ -12,6 +12,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.ViewModelProvider;
 
 import org.onereed.helios.common.DirectionUtil;
@@ -25,7 +26,6 @@ import org.onereed.helios.sun.SunInfo;
 
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -42,6 +42,10 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
    * visually smoother.
    */
   private static final long ROTATION_ANIMATION_DURATION_MILLIS = 200L;
+
+  private static final int COMPASS_SIDE_DP = 100;
+
+  private static final int COMPASS_RADIUS_DP = 44;
 
   private ActivityCompassBinding activityCompassBinding;
   private SensorManager sensorManager;
@@ -89,6 +93,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   @Override
   protected void onResume() {
     super.onResume();
+    activityCompassBinding.compassComposite.post(this::applyCompassRadius);
 
     Sensor rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
@@ -108,6 +113,20 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
           SensorManager.SENSOR_DELAY_NORMAL,
           SensorManager.SENSOR_DELAY_UI);
     }
+  }
+
+  private void applyCompassRadius() {
+    int widthPx = activityCompassBinding.compassFace.getWidth();
+    double pxPerDp = (double) widthPx / COMPASS_SIDE_DP;
+    int compassRadiusPx = (int) (pxPerDp * COMPASS_RADIUS_DP);
+    AppLogger.debug(TAG, "width=%d radius=%d pxPerDp=%.2f", widthPx, compassRadiusPx, pxPerDp);
+
+    ConstraintLayout.LayoutParams layoutParams =
+        (ConstraintLayout.LayoutParams) activityCompassBinding.smallSquare.getLayoutParams();
+    layoutParams.circleRadius = compassRadiusPx;
+    activityCompassBinding.smallSquare.setLayoutParams(layoutParams);
+
+    AppLogger.debug(TAG, "smallSquare widthPx=%d", activityCompassBinding.smallSquare.getWidth());
   }
 
   @Override
