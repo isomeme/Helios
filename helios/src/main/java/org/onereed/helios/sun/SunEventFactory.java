@@ -25,7 +25,7 @@ class SunEventFactory {
   private static final long INITIAL_DELTA_TIME_MILLIS = Duration.ofMinutes(5L).toMillis();
   private static final int MAX_STEPS = 5;
 
-  static SunEvent create(SunEvent.Type type, Place where, Instant when) {
+  static SunEvent from(SunEvent.Type type, Place where, Instant when) {
     double eventAzimuth = SunCalcUtil.getSunAzimuthDeg(where, when);
 
     if (!CORRECTED_TYPES.contains(type)) {
