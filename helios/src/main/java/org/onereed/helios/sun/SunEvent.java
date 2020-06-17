@@ -1,7 +1,6 @@
 package org.onereed.helios.sun;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 
 import com.google.auto.value.AutoValue;
 
@@ -41,20 +40,19 @@ public abstract class SunEvent implements Comparable<SunEvent> {
     Optional<SunEvent> createSunEvent(@NonNull SunTimes sunTimes, @NonNull Place where) {
       return Optional.ofNullable(dateExtractor.apply(sunTimes))
           .map(ZonedDateTime::toInstant)
-          .map(when -> SunEvent.create(when, this, SunCalcUtil.getSunAzimuthDeg(where, when)));
+          .map(when -> SunEventFactory.create(this, where, when));
     }
   }
 
-  @VisibleForTesting
-  static SunEvent create(Instant time, Type type, double azimuthDeg) {
-    return new AutoValue_SunEvent(time, type, azimuthDeg);
+  static SunEvent create(Type type, Instant time, double azimuthDeg) {
+    return new AutoValue_SunEvent(type, time, azimuthDeg);
   }
 
   @NonNull
-  public abstract Instant getTime();
+  public abstract Type getType();
 
   @NonNull
-  public abstract Type getType();
+  public abstract Instant getTime();
 
   public abstract double getAzimuthDeg();
 

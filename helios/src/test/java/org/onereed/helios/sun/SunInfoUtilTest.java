@@ -78,6 +78,6 @@ public class SunInfoUtilTest {
 
   private static SunEvent event(String whenText, Type type, double azimuth) {
     Instant when = Instant.parse(whenText);
-    return SunEvent.create(when, type, azimuth);
+    return SunEvent.create(type, when, azimuth);
   }
 }
