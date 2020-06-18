@@ -63,6 +63,7 @@ dependencies {
 
 dependencies {
     implementation 'org.shredzone.commons:commons-suncalc:3.2'
+//    implementation 'com.github.shred:commons-suncalc:master-SNAPSHOT'
 }
 
 dependencies {
