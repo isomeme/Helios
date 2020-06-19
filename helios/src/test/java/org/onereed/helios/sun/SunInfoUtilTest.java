@@ -42,9 +42,9 @@ public class SunInfoUtilTest {
             .setSunEvents(
                 event("2020-05-08T19:50:33Z", Type.NOON, 180.0486292899211),
                 event("2020-05-09T02:43:51Z", Type.SET, 291.8290562827426),
-                event("2020-05-09T07:50:20Z", Type.NADIR, 359.9583729494134),
+                event("2020-05-09T07:50:18Z", Type.NADIR, 359.9482197950236),
                 event("2020-05-09T12:56:55Z", Type.RISE, 68.05589238252242),
-                event("2020-05-09T19:50:29Z", Type.NOON, 180.02763142069227))
+                event("2020-05-09T19:50:31Z", Type.NOON, 180.05583201838022))
             .build();
 
     assertEquals(expectedSunInfo, sunInfo);
@@ -69,7 +69,7 @@ public class SunInfoUtilTest {
                 event("2020-05-18T02:50:35Z", Type.SET, 294.52853932175793),
                 event("2020-05-18T07:50:21Z", Type.NADIR, 359.9604617342177),
                 event("2020-05-18T12:50:06Z", Type.RISE, 65.35870558986005),
-                event("2020-05-18T19:50:35Z", Type.NOON, 180.07176664466613),
+                event("2020-05-18T19:50:33Z", Type.NOON, 180.03983395176928),
                 event("2020-05-19T02:51:19Z", Type.SET, 294.79749942898354))
             .build();
 

@@ -8,14 +8,13 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 /** Tests demonstrating bugs in SunCalc */
 public class SunCalcTest {
 
   @Test
-  public void noonNear180_bad() {
+  public void noonNear180_good() {
     double[] where = {34.0, -118.5};
     Instant when = Instant.parse("2020-06-16T04:11:00Z");
     SunTimes sunTimes = SunTimes.compute().at(where).on(when).execute();
@@ -25,6 +24,6 @@ public class SunCalcTest {
     SunPosition sunPosition = SunPosition.compute().at(where).on(noon).execute();
     double noonAzimuth = sunPosition.getAzimuth();
 
-    assertNotEquals(180.0, noonAzimuth, 0.25); // noonAzimuth = 187.21603358391476
+    assertEquals(180.0, noonAzimuth, 0.25); // noonAzimuth = 180.00725554668216
   }
 }

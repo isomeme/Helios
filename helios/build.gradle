@@ -19,6 +19,10 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            versionNameSuffix 'release'
+        }
+        debug {
+            versionNameSuffix 'debug'
         }
     }
 
@@ -62,8 +66,10 @@ dependencies {
 }
 
 dependencies {
-    implementation 'org.shredzone.commons:commons-suncalc:3.2'
+//    implementation 'org.shredzone.commons:commons-suncalc:3.2'
 //    implementation 'com.github.shred:commons-suncalc:master-SNAPSHOT'
+//    implementation 'org.shredzone.commons:commons-suncalc:3.3-SNAPSHOT'
+    implementation 'org.shredzone.commons:commons-suncalc:3.3-SNAPSHOT'
 }
 
 dependencies {
@@ -71,8 +77,8 @@ dependencies {
 }
 
 dependencies {
-    api 'com.google.auto.value:auto-value-annotations:1.7.2'
-    annotationProcessor 'com.google.auto.value:auto-value:1.7.2'
+    api 'com.google.auto.value:auto-value-annotations:1.7.3'
+    annotationProcessor 'com.google.auto.value:auto-value:1.7.3'
 }
 
 dependencies {
@@ -85,5 +91,6 @@ dependencies {
     annotationProcessor 'com.google.dagger:dagger-compiler:2.28'
 }
 
-repositories { jcenter() }
-dependencies { testImplementation "org.mockito:mockito-core:2.28.2" }
+dependencies {
+    testImplementation "org.mockito:mockito-core:2.28.2"
+}
