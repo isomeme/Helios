@@ -22,17 +22,22 @@ public class DirectionUtil {
         .getDeclination();
   }
 
-  /** Normalizes the argument angle into the range [-180..180). */
-  public static double zeroCenterDeg(double deg) {
-    while (deg < -180.0) {
-      deg += 360.0;
+  /**
+   * Normalizes the argument angle into the range [-180..180) as a float, since that's what all the
+   * Android rotation methods want.
+   */
+  public static float zeroCenterDeg(double deg) {
+    float centered = (float) deg;
+
+    while (centered < -180.0f) {
+      centered += 360.0f;
     }
 
-    while (deg >= 180.0) {
-      deg -= 360.0;
+    while (centered >= 180.0f) {
+      centered -= 360.0f;
     }
 
-    return deg;
+    return centered;
   }
 
   private DirectionUtil() {}

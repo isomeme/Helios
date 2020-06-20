@@ -59,7 +59,7 @@ public abstract class SunEvent implements Comparable<SunEvent> {
   }
 
   static SunEvent create(Type type, Instant time, double azimuthDeg) {
-    return new AutoValue_SunEvent(type, time, azimuthDeg, computeWeakId(type, time));
+    return new AutoValue_SunEvent(type, time, (float) azimuthDeg, computeWeakId(type, time));
   }
 
   private static long computeWeakId(Type type, Instant time) {
@@ -75,7 +75,7 @@ public abstract class SunEvent implements Comparable<SunEvent> {
   public abstract Instant getTime();
 
   /** Sun azimuth degrees, clockwise from north, [0..360). */
-  public abstract double getAzimuthDeg();
+  public abstract float getAzimuthDeg();
 
   /**
    * The RecyclerView we use to display the list of sun events can do some nice transition

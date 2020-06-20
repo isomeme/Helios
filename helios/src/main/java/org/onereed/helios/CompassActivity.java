@@ -1,5 +1,6 @@
 package org.onereed.helios;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -8,15 +9,13 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.ViewModelProvider;
 
 import org.onereed.helios.common.DirectionUtil;
+import org.onereed.helios.common.LayoutParamsUtil;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
 import org.onereed.helios.location.LocationManager;
@@ -24,8 +23,10 @@ import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEvent;
 import org.onereed.helios.sun.SunInfo;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -56,9 +57,10 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   private LocationManager locationManager;
 
   private Map<SunEvent.Type, ImageView> sunEventViews = new HashMap<>();
+  private List<ImageView> circleViews = new ArrayList<>();
 
   private double magneticDeclinationDeg = 0.0;
-  private float oldCompassAzimuthDeg = 0.0f;
+  private float lastRotationDeg = 0.0f;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +93,9 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     sunEventViews.put(SunEvent.Type.NOON, activityCompassBinding.noon);
     sunEventViews.put(SunEvent.Type.SET, activityCompassBinding.set);
     sunEventViews.put(SunEvent.Type.NADIR, activityCompassBinding.nadir);
+
+    circleViews.add(activityCompassBinding.sun);
+    circleViews.addAll(sunEventViews.values());
   }
 
   @Override
@@ -121,10 +126,8 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     int compassRadiusPx = (int) (pxPerDp * COMPASS_RADIUS_DP);
     AppLogger.debug(TAG, "radius=%d pxPerDp=%.2f", compassRadiusPx, pxPerDp);
 
-    ConstraintLayout.LayoutParams layoutParams =
-        (ConstraintLayout.LayoutParams) activityCompassBinding.smallSquare.getLayoutParams();
-    layoutParams.circleRadius = compassRadiusPx;
-    activityCompassBinding.smallSquare.setLayoutParams(layoutParams);
+    circleViews.forEach(
+        view -> LayoutParamsUtil.changeConstraintLayoutCircleRadius(view, compassRadiusPx));
   }
 
   @Override
@@ -159,7 +162,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     // This is how much the compass face as a whole will rotate, based on the device's orientation
     // with respect to true north.
     float compassAzimuthDeg =
-        (float) DirectionUtil.zeroCenterDeg(magneticAzimuthDeg + magneticDeclinationDeg);
+        DirectionUtil.zeroCenterDeg(magneticAzimuthDeg + magneticDeclinationDeg);
 
     updateCompassState(compassAzimuthDeg);
   }
@@ -169,37 +172,37 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
    * one to the new value to prepare for the next update.
    */
   private void updateCompassState(float compassAzimuthDeg) {
-    float azimuthDeltaDeg = compassAzimuthDeg - oldCompassAzimuthDeg;
+    float desiredRotationDeg = -compassAzimuthDeg;
+    float deltaDeg = desiredRotationDeg - lastRotationDeg;
 
     // When animating from e.g. -179 to +179, we don't want to go the long way around the circle.
 
-    float adjustedAzimuthDeg = compassAzimuthDeg;
+    float adjustedDesiredRotationDeg = desiredRotationDeg;
 
-    if (azimuthDeltaDeg > 180.0f) {
-      adjustedAzimuthDeg -= 360.0f;
-    } else if (azimuthDeltaDeg < -180.0f) {
-      adjustedAzimuthDeg += 360.0f;
+    if (deltaDeg > 180.0f) {
+      adjustedDesiredRotationDeg -= 360.0f;
+    } else if (deltaDeg < -180.0f) {
+      adjustedDesiredRotationDeg += 360.0f;
     }
 
-    RotateAnimation rotateAnimation =
-        new RotateAnimation(
-            -oldCompassAzimuthDeg,
-            -adjustedAzimuthDeg,
-            Animation.RELATIVE_TO_SELF,
-            /* pivotXValue= */ 0.5f,
-            Animation.RELATIVE_TO_SELF,
-            /* pivotYValue= */ 0.5f);
+    ObjectAnimator compassAnimator =
+        ObjectAnimator.ofFloat(
+            activityCompassBinding.compassRotating,
+            "rotation",
+            lastRotationDeg,
+            adjustedDesiredRotationDeg);
+    compassAnimator.setAutoCancel(true);
+    compassAnimator.setDuration(ROTATION_ANIMATION_DURATION_MILLIS);
+    compassAnimator.start();
 
-    rotateAnimation.setDuration(ROTATION_ANIMATION_DURATION_MILLIS);
-    rotateAnimation.setFillAfter(true); // Hold end position after animation
-
-    activityCompassBinding.compassRotating.startAnimation(rotateAnimation);
-    oldCompassAzimuthDeg = compassAzimuthDeg;
+    lastRotationDeg = desiredRotationDeg;
   }
 
   private void acceptSunInfo(SunInfo sunInfo) {
-    activityCompassBinding.sun.setRotation((float) sunInfo.getSunAzimuthDeg());
     magneticDeclinationDeg = sunInfo.getMagneticDeclinationDeg();
+
+    LayoutParamsUtil.changeConstraintLayoutCircleAngle(
+        activityCompassBinding.sun, sunInfo.getSunAzimuthDeg());
 
     EnumSet<SunEvent.Type> unusedTypes = EnumSet.allOf(SunEvent.Type.class);
 
@@ -208,7 +211,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
       if (unusedTypes.remove(type)) {
         ImageView view = checkNotNull(sunEventViews.get(type));
-        view.setRotation((float) sunEvent.getAzimuthDeg());
+        LayoutParamsUtil.changeConstraintLayoutCircleAngle(view, sunEvent.getAzimuthDeg());
         view.setVisibility(View.VISIBLE);
       }
     }
@@ -219,8 +222,6 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   }
 
   public void onCheckboxClicked(View view) {
-    AppLogger.debug(TAG, "onCheckboxClicked");
-
     // For now, there's just one checkbox, so we know what to do without checking further.
     applyCompassLockState();
   }
