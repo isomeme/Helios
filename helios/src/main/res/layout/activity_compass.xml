@@ -17,98 +17,129 @@
         android:theme="?attr/actionBarTheme"
         app:maxButtonHeight="56dp" />
 
-    <ImageView
-        android:id="@+id/view_line"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/toolbar"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="false"
-        android:alpha="0.3"
-        android:contentDescription="@string/view_line"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_view_line"
-        android:tint="@android:color/darker_gray" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/compass_composite"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@id/compass_mode_panel"
         android:layout_below="@id/toolbar"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="false">
 
         <ImageView
-            android:id="@+id/compass_face"
+            android:id="@+id/view_line"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/content_compass_display"
+            android:layout_alignParentTop="false"
+            android:alpha="0.3"
+            android:contentDescription="@string/content_view_line"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_compass_face"
+            android:src="@drawable/ic_view_line"
             android:tint="@android:color/darker_gray" />
 
-        <ImageView
-            android:id="@+id/sun"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/compass_rotating"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/content_sun_position"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_offset_dot"
-            android:tint="@color/sun_yellow" />
+            android:layout_alignParentTop="false">
 
-        <ImageView
-            android:id="@+id/rise"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/content_sunrise_position"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_offset_sol_symbol"
-            android:tint="@color/bg_rise"
-            android:visibility="invisible"/>
+            <ImageView
+                android:id="@+id/compass_face"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/content_compass_display"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_compass_face"
+                android:tint="@android:color/darker_gray" />
 
-        <ImageView
-            android:id="@+id/noon"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/content_noon_position"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_offset_sol_symbol"
-            android:tint="@color/bg_noon"
-            android:visibility="invisible"/>
+            <ImageView
+                android:id="@+id/sun"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/content_sun_position"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_offset_dot"
+                android:tint="@color/sun_yellow" />
 
-        <ImageView
-            android:id="@+id/set"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/content_sunset_position"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_offset_sol_symbol"
-            android:tint="@color/bg_set"
-            android:visibility="invisible"/>
+            <ImageView
+                android:id="@+id/rise"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/content_sunrise_position"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_offset_sol_symbol"
+                android:tint="@color/bg_rise"
+                android:visibility="invisible" />
 
-        <ImageView
-            android:id="@+id/nadir"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/content_midnight_position"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_offset_sol_symbol"
-            android:tint="@color/bg_nadir"
-            android:visibility="invisible"/>
+            <ImageView
+                android:id="@+id/noon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/content_noon_position"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_offset_sol_symbol"
+                android:tint="@color/bg_noon"
+                android:visibility="invisible" />
 
-        <ImageView
-            android:id="@+id/small_square"
+            <ImageView
+                android:id="@+id/set"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/content_sunset_position"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_offset_sol_symbol"
+                android:tint="@color/bg_set"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/nadir"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/content_midnight_position"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_offset_sol_symbol"
+                android:tint="@color/bg_nadir"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/small_square"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:contentDescription="@string/content_small_square"
+                android:src="@drawable/ic_small_square"
+                android:tint="@color/bg_noon"
+                android:tooltipText="Small square"
+                android:visibility="invisible"
+                app:layout_constraintCircle="@+id/compass_face"
+                app:layout_constraintCircleAngle="210"
+                app:layout_constraintCircleRadius="45dp"
+                app:layout_constraintHeight_default="percent"
+                app:layout_constraintHeight_percent="0.1"
+                app:layout_constraintWidth_default="percent"
+                app:layout_constraintWidth_percent="0.1"
+                tools:ignore="MissingConstraints" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/compass_mode_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:layout_margin="10dp">
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/lock_compass_control"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="@string/content_small_square"
-            app:layout_constraintCircle="@+id/compass_face"
-            app:layout_constraintCircleRadius="45dp"
-            app:layout_constraintCircleAngle="210"
-            android:tooltipText="Small square"
-            android:src="@drawable/ic_small_square"
-            android:tint="@color/bg_noon"
-            android:visibility="invisible"
-            tools:ignore="MissingConstraints" />
+            android:buttonTint="@android:color/darker_gray"
+            android:checked="false"
+            android:onClick="onCheckboxClicked"
+            android:text="@string/control_lock_compass"
+            android:textColor="@android:color/darker_gray"
+            tools:text="Lock compass" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 </RelativeLayout>

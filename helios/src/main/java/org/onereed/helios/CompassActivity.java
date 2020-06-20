@@ -6,6 +6,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
@@ -17,7 +18,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.LogUtil;
-import org.onereed.helios.common.ToastUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
 import org.onereed.helios.location.LocationManager;
 import org.onereed.helios.logger.AppLogger;
@@ -47,8 +47,12 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
   private static final int COMPASS_RADIUS_DP = 44;
 
+  /** Shared preference key for compass lock status. */
+  private static final String LOCK_COMPASS = "lockCompass";
+
   private ActivityCompassBinding activityCompassBinding;
   private SensorManager sensorManager;
+  private Sensor rotationVectorSensor = null;
   private LocationManager locationManager;
 
   private Map<SunEvent.Type, ImageView> sunEventViews = new HashMap<>();
@@ -66,6 +70,13 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     checkNotNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
     sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+    rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+
+    if (rotationVectorSensor == null) {
+      activityCompassBinding.lockCompassControl.setChecked(true);
+      activityCompassBinding.lockCompassControl.setEnabled(false);
+      activityCompassBinding.lockCompassControl.setVisibility(View.INVISIBLE);
+    }
 
     ViewModelProvider.Factory factory = new ViewModelProvider.NewInstanceFactory();
     SunInfoViewModel sunInfoViewModel =
@@ -95,44 +106,35 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     super.onResume();
     activityCompassBinding.compassComposite.post(this::applyCompassRadius);
 
-    Sensor rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-
-    // I don't think that availability of the TYPE_ROTATION_VECTOR can change over the lifetime of
-    // the app, but just in case, we'll check each time we resume.
-
-    if (rotationVectorSensor == null) {
-      oldCompassAzimuthDeg = 0.0f;
-      activityCompassBinding.compassComposite.setRotation(0.0f);
-      activityCompassBinding.viewLine.setVisibility(View.INVISIBLE);
-      ToastUtil.longToast(this, R.string.toast_no_compass_sensor);
-    } else {
-      activityCompassBinding.viewLine.setVisibility(View.VISIBLE);
-      sensorManager.registerListener(
-          this,
-          rotationVectorSensor,
-          SensorManager.SENSOR_DELAY_NORMAL,
-          SensorManager.SENSOR_DELAY_UI);
+    if (rotationVectorSensor != null) {
+      boolean isLocked =
+          PreferenceManager.getDefaultSharedPreferences(this).getBoolean(LOCK_COMPASS, false);
+      activityCompassBinding.lockCompassControl.setChecked(isLocked);
     }
+
+    applyCompassLockState();
   }
 
   private void applyCompassRadius() {
     int widthPx = activityCompassBinding.compassFace.getWidth();
     double pxPerDp = (double) widthPx / COMPASS_SIDE_DP;
     int compassRadiusPx = (int) (pxPerDp * COMPASS_RADIUS_DP);
-    AppLogger.debug(TAG, "width=%d radius=%d pxPerDp=%.2f", widthPx, compassRadiusPx, pxPerDp);
+    AppLogger.debug(TAG, "radius=%d pxPerDp=%.2f", compassRadiusPx, pxPerDp);
 
     ConstraintLayout.LayoutParams layoutParams =
         (ConstraintLayout.LayoutParams) activityCompassBinding.smallSquare.getLayoutParams();
     layoutParams.circleRadius = compassRadiusPx;
     activityCompassBinding.smallSquare.setLayoutParams(layoutParams);
-
-    AppLogger.debug(TAG, "smallSquare widthPx=%d", activityCompassBinding.smallSquare.getWidth());
   }
 
   @Override
   protected void onPause() {
     super.onPause();
     sensorManager.unregisterListener(this);
+    PreferenceManager.getDefaultSharedPreferences(this)
+        .edit()
+        .putBoolean(LOCK_COMPASS, activityCompassBinding.lockCompassControl.isChecked())
+        .apply();
   }
 
   @Override
@@ -167,7 +169,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
    * one to the new value to prepare for the next update.
    */
   private void updateCompassState(float compassAzimuthDeg) {
-     float azimuthDeltaDeg = compassAzimuthDeg - oldCompassAzimuthDeg;
+    float azimuthDeltaDeg = compassAzimuthDeg - oldCompassAzimuthDeg;
 
     // When animating from e.g. -179 to +179, we don't want to go the long way around the circle.
 
@@ -191,7 +193,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     rotateAnimation.setDuration(ROTATION_ANIMATION_DURATION_MILLIS);
     rotateAnimation.setFillAfter(true); // Hold end position after animation
 
-    activityCompassBinding.compassComposite.startAnimation(rotateAnimation);
+    activityCompassBinding.compassRotating.startAnimation(rotateAnimation);
     oldCompassAzimuthDeg = compassAzimuthDeg;
   }
 
@@ -213,6 +215,26 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
     for (SunEvent.Type type : unusedTypes) {
       checkNotNull(sunEventViews.get(type)).setVisibility(View.INVISIBLE);
+    }
+  }
+
+  public void onCheckboxClicked(View view) {
+    AppLogger.debug(TAG, "onCheckboxClicked");
+
+    // For now, there's just one checkbox, so we know what to do without checking further.
+    applyCompassLockState();
+  }
+
+  private void applyCompassLockState() {
+    if (activityCompassBinding.lockCompassControl.isChecked()) {
+      sensorManager.unregisterListener(this);
+      updateCompassState(0.0f);
+    } else {
+      sensorManager.registerListener(
+          this,
+          rotationVectorSensor,
+          SensorManager.SENSOR_DELAY_NORMAL,
+          SensorManager.SENSOR_DELAY_UI);
     }
   }
 }

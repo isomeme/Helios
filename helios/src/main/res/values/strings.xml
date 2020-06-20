@@ -2,20 +2,20 @@
     <string name="app_name">Helios</string>
 
     <string name="toast_playservices_unrecoverable">Helios requires Google Play Services.</string>
-    <string name="toast_location_failure">Unable to determine location.</string>
     <string name="toast_location_permission_needed">Helios needs permission to access your device\'s location.</string>
     <string name="toast_locationservice_not_available">Helios requires location services to be enabled.</string>
 
     <string name="control_refresh">Refresh</string>
     <string name="control_directions">Directions</string>
+    <string name="control_lock_compass">Lock compass</string>
+    <string name="control_help">Help</string>
+
     <string name="content_compass_display">Compass display</string>
     <string name="content_sunrise_position">Sunrise position</string>
     <string name="content_noon_position">Noon position</string>
     <string name="content_sunset_position">Sunset position</string>
     <string name="content_midnight_position">Midnight position</string>
-    <string name="view_line">View line</string>
-    <string name="toast_no_compass_sensor">This device does not have the sensor needed to align the display with compass directions.</string>
-    <string name="control_help">Help</string>
+    <string name="content_view_line">View line</string>
     <string name="content_sun_position">Sun position</string>
     <string name="content_small_square">A small square</string>
 </resources>
