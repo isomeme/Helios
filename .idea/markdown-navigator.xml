@@ -34,9 +34,9 @@
         <option name="SIM_TOC_BLANK_LINE_SPACER" value="true" />
       </ParserOptions>
     </ParserSettings>
-    <HtmlSettings headerTopEnabled="false" headerBottomEnabled="false" bodyTopEnabled="false" bodyBottomEnabled="false" addPageHeader="false" imageUriSerials="false" addDocTypeHtml="true" noParaTags="false" plantUmlConversion="0">
+    <HtmlSettings headerTopEnabled="false" headerBottomEnabled="false" bodyTopEnabled="false" bodyBottomEnabled="false" addPageHeader="true" imageUriSerials="false" addDocTypeHtml="true" noParaTags="false" plantUmlConversion="0">
       <GeneratorProvider>
-        <provider providerId="com.vladsch.md.nav.editor.text.html.generator" providerName="Unmodified HTML Generator" />
+        <provider providerId="com.vladsch.md.nav.editor.swing.html.generator" providerName="Default Swing HTML Generator" />
       </GeneratorProvider>
       <headerTop />
       <headerBottom />
@@ -45,10 +45,13 @@
     </HtmlSettings>
     <CssSettings previewScheme="UI_SCHEME" cssUri="" isCssUriEnabled="false" isCssUriSerial="true" isCssTextEnabled="false" isDynamicPageWidth="true">
       <StylesheetProvider>
-        <provider providerId="com.vladsch.md.nav.editor.text.html.css" providerName="No Stylesheet" />
+        <provider providerId="com.vladsch.md.nav.editor.swing.html.css" providerName="Default Swing Stylesheet" />
       </StylesheetProvider>
       <ScriptProviders />
-      <cssText />
+      <cssText>body.multimarkdown-preview {
+  background-color: #cccccc;
+  color: #ff0000;
+}</cssText>
       <cssUriHistory />
     </CssSettings>
   </component>
