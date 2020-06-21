@@ -2,12 +2,14 @@ package org.onereed.helios;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.TouchDelegate;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -19,7 +21,6 @@ import org.onereed.helios.common.LayoutParamsUtil;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
 import org.onereed.helios.location.LocationManager;
-import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEvent;
 import org.onereed.helios.sun.SunInfo;
 
@@ -102,7 +103,6 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   public void onRequestPermissionsResult(
       int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-    AppLogger.debug(TAG, "onRequestPermissionsResult");
     locationManager.acceptPermissionsResult(requestCode, permissions, grantResults);
   }
 
@@ -118,16 +118,36 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     }
 
     applyCompassLockState();
+    expandLockCheckboxHitRect();
   }
 
   private void applyCompassRadius() {
     int widthPx = activityCompassBinding.compassFace.getWidth();
     double pxPerDp = (double) widthPx / COMPASS_SIDE_DP;
     int compassRadiusPx = (int) (pxPerDp * COMPASS_RADIUS_DP);
-    AppLogger.debug(TAG, "radius=%d pxPerDp=%.2f", compassRadiusPx, pxPerDp);
 
     circleViews.forEach(
         view -> LayoutParamsUtil.changeConstraintLayoutCircleRadius(view, compassRadiusPx));
+  }
+
+  /**
+   * Google Play Store accessibility testing complained that the hit rect for the lock-compass
+   * checkbox is too small, so expand it using a {@link TouchDelegate}.
+   */
+  private void expandLockCheckboxHitRect() {
+    View parent = (View) activityCompassBinding.lockCompassControl.getParent();
+    parent.post(
+        () -> {
+          Rect rect = new Rect();
+          activityCompassBinding.lockCompassControl.getHitRect(rect);
+          int extraPadding = rect.height();
+          rect.top -= extraPadding;
+          rect.left -= extraPadding;
+          rect.right += extraPadding;
+          rect.bottom += extraPadding;
+          parent.setTouchDelegate(
+              new TouchDelegate(rect, activityCompassBinding.lockCompassControl));
+        });
   }
 
   @Override
@@ -187,12 +207,12 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
     ObjectAnimator compassAnimator =
         ObjectAnimator.ofFloat(
-            activityCompassBinding.compassRotating,
-            "rotation",
-            lastRotationDeg,
-            adjustedDesiredRotationDeg);
+                activityCompassBinding.compassRotating,
+                "rotation",
+                lastRotationDeg,
+                adjustedDesiredRotationDeg)
+            .setDuration(ROTATION_ANIMATION_DURATION_MILLIS);
     compassAnimator.setAutoCancel(true);
-    compassAnimator.setDuration(ROTATION_ANIMATION_DURATION_MILLIS);
     compassAnimator.start();
 
     lastRotationDeg = desiredRotationDeg;

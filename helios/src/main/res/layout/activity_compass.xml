@@ -10,9 +10,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:alpha="1.0"
         android:background="@color/colorPrimaryDark"
-        android:longClickable="false"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
         app:maxButtonHeight="56dp" />
@@ -21,7 +19,7 @@
         android:id="@+id/compass_composite"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/compass_mode_panel"
+        android:layout_above="@id/lock_compass_control"
         android:layout_below="@id/toolbar"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="false">
@@ -31,11 +29,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentTop="false"
-            android:scaleType="fitCenter"
+            android:alpha="0.3"
             android:contentDescription="@string/content_view_line"
+            android:scaleType="fitCenter"
             android:src="@drawable/ic_view_line"
-            android:tint="@android:color/darker_gray"
-            android:alpha="0.3" />
+            android:tint="@android:color/darker_gray" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/compass_rotating"
@@ -57,9 +55,9 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:contentDescription="@string/content_sun_position"
-                android:tooltipText="@string/content_sun_position"
                 android:src="@drawable/ic_solid_dot"
                 android:tint="@color/sun_yellow"
+                android:tooltipText="@string/content_sun_position"
                 app:layout_constraintCircle="@+id/compass_face"
                 app:layout_constraintCircleAngle="0"
                 app:layout_constraintCircleRadius="45dp"
@@ -74,9 +72,9 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:contentDescription="@string/content_sunrise_position"
-                android:tooltipText="@string/content_sunrise_position"
                 android:src="@drawable/ic_sol_symbol"
                 android:tint="@color/bg_rise"
+                android:tooltipText="@string/content_sunrise_position"
                 app:layout_constraintCircle="@+id/compass_face"
                 app:layout_constraintCircleAngle="30"
                 app:layout_constraintCircleRadius="45dp"
@@ -91,9 +89,9 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:contentDescription="@string/content_noon_position"
-                android:tooltipText="@string/content_noon_position"
                 android:src="@drawable/ic_sol_symbol"
                 android:tint="@color/bg_noon"
+                android:tooltipText="@string/content_noon_position"
                 app:layout_constraintCircle="@+id/compass_face"
                 app:layout_constraintCircleAngle="60"
                 app:layout_constraintCircleRadius="45dp"
@@ -108,9 +106,9 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:contentDescription="@string/content_sunset_position"
-                android:tooltipText="@string/content_sunset_position"
                 android:src="@drawable/ic_sol_symbol"
                 android:tint="@color/bg_set"
+                android:tooltipText="@string/content_sunset_position"
                 app:layout_constraintCircle="@+id/compass_face"
                 app:layout_constraintCircleAngle="90"
                 app:layout_constraintCircleRadius="45dp"
@@ -125,9 +123,9 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:contentDescription="@string/content_midnight_position"
-                android:tooltipText="@string/content_midnight_position"
                 android:src="@drawable/ic_sol_symbol"
                 android:tint="@color/bg_nadir"
+                android:tooltipText="@string/content_midnight_position"
                 app:layout_constraintCircle="@+id/compass_face"
                 app:layout_constraintCircleAngle="120"
                 app:layout_constraintCircleRadius="45dp"
@@ -140,24 +138,17 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout
-        android:id="@+id/compass_mode_panel"
-        android:layout_width="match_parent"
+    <CheckBox
+        android:id="@+id/lock_compass_control"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        android:layout_margin="10dp">
+        android:layout_margin="10dp"
+        android:buttonTint="@android:color/darker_gray"
+        android:checked="false"
+        android:onClick="onCheckboxClicked"
+        android:text="@string/control_lock_compass"
+        android:textColor="@android:color/darker_gray"
+        tools:text="Lock compass" />
 
-        <androidx.appcompat.widget.AppCompatCheckBox
-            android:id="@+id/lock_compass_control"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:buttonTint="@android:color/darker_gray"
-            android:checked="false"
-            android:onClick="onCheckboxClicked"
-            android:text="@string/control_lock_compass"
-            android:textColor="@android:color/darker_gray"
-            tools:text="Lock compass" />
-
-    </LinearLayout>
 </RelativeLayout>
