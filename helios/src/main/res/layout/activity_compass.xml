@@ -33,7 +33,7 @@
             android:contentDescription="@string/content_view_line"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_view_line"
-            android:tint="@android:color/darker_gray" />
+            android:tint="@color/compass_dial" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/compass_rotating"
@@ -48,7 +48,7 @@
                 android:contentDescription="@string/content_compass_display"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_compass_face"
-                android:tint="@android:color/darker_gray" />
+                android:tint="@color/compass_dial" />
 
             <ImageView
                 android:id="@+id/sun"
@@ -73,7 +73,7 @@
                 android:layout_height="0dp"
                 android:contentDescription="@string/content_sunrise_position"
                 android:src="@drawable/ic_sol_symbol"
-                android:tint="@color/bg_rise"
+                android:tint="@color/fg_rise"
                 android:tooltipText="@string/content_sunrise_position"
                 app:layout_constraintCircle="@+id/compass_face"
                 app:layout_constraintCircleAngle="30"
@@ -90,7 +90,7 @@
                 android:layout_height="0dp"
                 android:contentDescription="@string/content_noon_position"
                 android:src="@drawable/ic_sol_symbol"
-                android:tint="@color/bg_noon"
+                android:tint="@color/fg_noon"
                 android:tooltipText="@string/content_noon_position"
                 app:layout_constraintCircle="@+id/compass_face"
                 app:layout_constraintCircleAngle="60"
@@ -107,7 +107,7 @@
                 android:layout_height="0dp"
                 android:contentDescription="@string/content_sunset_position"
                 android:src="@drawable/ic_sol_symbol"
-                android:tint="@color/bg_set"
+                android:tint="@color/fg_set"
                 android:tooltipText="@string/content_sunset_position"
                 app:layout_constraintCircle="@+id/compass_face"
                 app:layout_constraintCircleAngle="90"
@@ -124,7 +124,7 @@
                 android:layout_height="0dp"
                 android:contentDescription="@string/content_midnight_position"
                 android:src="@drawable/ic_sol_symbol"
-                android:tint="@color/bg_nadir"
+                android:tint="@color/fg_nadir"
                 android:tooltipText="@string/content_midnight_position"
                 app:layout_constraintCircle="@+id/compass_face"
                 app:layout_constraintCircleAngle="120"

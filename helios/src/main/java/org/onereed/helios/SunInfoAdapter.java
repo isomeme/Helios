@@ -67,7 +67,7 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventViewHol
     Context context = sunEventViewHolder.itemView.getContext();
     TypedArrayAccessor typedArrayAccessor = TypedArrayAccessor.create(context, typeOrdinal);
 
-    int bgColor = typedArrayAccessor.getColor(R.array.sun_event_colors);
+    int bgColor = typedArrayAccessor.getColor(R.array.sun_event_bg_colors);
     sunEventViewHolder.cardView.setCardBackgroundColor(bgColor);
 
     int iconId = typedArrayAccessor.getResourceId(R.array.sun_event_icons);

@@ -115,19 +115,10 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
       boolean isLocked =
           PreferenceManager.getDefaultSharedPreferences(this).getBoolean(LOCK_COMPASS, false);
       activityCompassBinding.lockCompassControl.setChecked(isLocked);
+      expandLockCheckboxHitRect();
     }
 
     applyCompassLockState();
-    expandLockCheckboxHitRect();
-  }
-
-  private void applyCompassRadius() {
-    int widthPx = activityCompassBinding.compassFace.getWidth();
-    double pxPerDp = (double) widthPx / COMPASS_SIDE_DP;
-    int compassRadiusPx = (int) (pxPerDp * COMPASS_RADIUS_DP);
-
-    circleViews.forEach(
-        view -> LayoutParamsUtil.changeConstraintLayoutCircleRadius(view, compassRadiusPx));
   }
 
   /**
@@ -148,6 +139,15 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
           parent.setTouchDelegate(
               new TouchDelegate(rect, activityCompassBinding.lockCompassControl));
         });
+  }
+
+  private void applyCompassRadius() {
+    int widthPx = activityCompassBinding.compassFace.getWidth();
+    double pxPerDp = (double) widthPx / COMPASS_SIDE_DP;
+    int compassRadiusPx = (int) (pxPerDp * COMPASS_RADIUS_DP);
+
+    circleViews.forEach(
+        view -> LayoutParamsUtil.changeConstraintLayoutCircleRadius(view, compassRadiusPx));
   }
 
   @Override

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <integer-array name="sun_event_colors">
+    <integer-array name="sun_event_bg_colors">
         <item>@color/bg_rise</item>
         <item>@color/bg_noon</item>
         <item>@color/bg_set</item>
