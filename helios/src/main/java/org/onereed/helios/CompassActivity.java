@@ -16,11 +16,14 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.common.collect.ImmutableSet;
+
 import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.LayoutParamsUtil;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
 import org.onereed.helios.location.LocationManager;
+import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEvent;
 import org.onereed.helios.sun.SunInfo;
 
@@ -49,6 +52,13 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
   private static final int COMPASS_RADIUS_DP = 44;
 
+  private static final double RADIUS_INSET_SCALE = 0.82;
+
+  private static final int INSET_ALPHA_PCT = 50;
+
+  private static final ImmutableSet<SunEvent.Type> REQUIRED_EVENT_TYPES =
+      ImmutableSet.of(SunEvent.Type.NOON, SunEvent.Type.NADIR);
+
   /** Shared preference key for compass lock status. */
   private static final String LOCK_COMPASS = "lockCompass";
 
@@ -62,6 +72,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
   private double magneticDeclinationDeg = 0.0;
   private float lastRotationDeg = 0.0f;
+  int compassRadiusPx;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +120,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   @Override
   protected void onResume() {
     super.onResume();
-    activityCompassBinding.compassComposite.post(this::applyCompassRadius);
+    activityCompassBinding.compassComposite.post(this::obtainCompassRadius);
 
     if (rotationVectorSensor != null) {
       boolean isLocked =
@@ -141,10 +152,10 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
         });
   }
 
-  private void applyCompassRadius() {
+  private void obtainCompassRadius() {
     int widthPx = activityCompassBinding.compassFace.getWidth();
     double pxPerDp = (double) widthPx / COMPASS_SIDE_DP;
-    int compassRadiusPx = (int) (pxPerDp * COMPASS_RADIUS_DP);
+    compassRadiusPx = (int) (pxPerDp * COMPASS_RADIUS_DP);
 
     circleViews.forEach(
         view -> LayoutParamsUtil.changeConstraintLayoutCircleRadius(view, compassRadiusPx));
@@ -224,21 +235,62 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     LayoutParamsUtil.changeConstraintLayoutCircleAngle(
         activityCompassBinding.sun, sunInfo.getSunAzimuthDeg());
 
-    EnumSet<SunEvent.Type> unusedTypes = EnumSet.allOf(SunEvent.Type.class);
+    Map<SunEvent.Type, SunEvent> shownEvents = new HashMap<>();
 
     for (SunEvent sunEvent : sunInfo.getSunEvents()) {
       SunEvent.Type type = sunEvent.getType();
 
-      if (unusedTypes.remove(type)) {
+      if (!shownEvents.containsKey(type)) {
+        shownEvents.put(type, sunEvent);
         ImageView view = checkNotNull(sunEventViews.get(type));
         LayoutParamsUtil.changeConstraintLayoutCircleAngle(view, sunEvent.getAzimuthDeg());
         view.setVisibility(View.VISIBLE);
       }
     }
 
-    for (SunEvent.Type type : unusedTypes) {
-      checkNotNull(sunEventViews.get(type)).setVisibility(View.INVISIBLE);
+    EnumSet<SunEvent.Type> shownTypes = EnumSet.copyOf(shownEvents.keySet());
+    EnumSet<SunEvent.Type> missingTypes = EnumSet.complementOf(shownTypes);
+
+    missingTypes.forEach(
+        type -> checkNotNull(sunEventViews.get(type)).setVisibility(View.INVISIBLE));
+
+    if (!shownTypes.containsAll(REQUIRED_EVENT_TYPES)) {
+      AppLogger.error(TAG, "Noon or nadir missing; shownEvents=%s", shownEvents);
     }
+
+    // In the tropics, noon and nadir can be at the same azimuth, so inset and dim the icon for
+    // the one that comes later. We also explicitly reset the non-offset event(s) to correct
+    // previous later-event status.
+
+    int noonRadiusPx = compassRadiusPx;
+    int nadirRadiusPx = compassRadiusPx;
+
+    int noonAlphaPct = 100;
+    int nadirAlphaPct = 100;
+
+    SunEvent noonEvent = checkNotNull(shownEvents.get(SunEvent.Type.NOON));
+    NoonNadirWrapper noonWrapper = new NoonNadirWrapper(noonEvent);
+    SunEvent nadirEvent = checkNotNull(shownEvents.get(SunEvent.Type.NADIR));
+    NoonNadirWrapper nadirWrapper = new NoonNadirWrapper(nadirEvent);
+
+    if (noonWrapper.isNorth == nadirWrapper.isNorth) {
+      int insetRadiusPx = (int) (compassRadiusPx * RADIUS_INSET_SCALE);
+
+      if (noonEvent.compareTo(nadirEvent) < 1) {
+        nadirRadiusPx = insetRadiusPx;
+        nadirAlphaPct = INSET_ALPHA_PCT;
+      } else {
+        noonRadiusPx = insetRadiusPx;
+        noonAlphaPct = INSET_ALPHA_PCT;
+      }
+    }
+
+    // TODO: Animate these transitions.
+
+    noonWrapper.setRadiusPx(noonRadiusPx);
+    noonWrapper.setAlphaPct(noonAlphaPct);
+    nadirWrapper.setRadiusPx(nadirRadiusPx);
+    nadirWrapper.setAlphaPct(nadirAlphaPct);
   }
 
   public void onCheckboxClicked(View view) {
@@ -256,6 +308,42 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
           rotationVectorSensor,
           SensorManager.SENSOR_DELAY_NORMAL,
           SensorManager.SENSOR_DELAY_UI);
+    }
+  }
+
+  /**
+   * Wrapper providing properties for noon-nadir collision handling. We represent alpha as an
+   * integer percent to simplify equality comparison.
+   */
+  private class NoonNadirWrapper {
+
+    private final ImageView view;
+
+    private final boolean isNorth;
+
+    private NoonNadirWrapper(SunEvent sunEvent) {
+      this.view = sunEventViews.get(sunEvent.getType());
+
+      // If we're starting near north (0 az), we'll end up near 90. If we start off near south
+      // (180 az), we'll end up near -90.
+      float offsetDeg = DirectionUtil.zeroCenterDeg(sunEvent.getAzimuthDeg() + 90.0);
+      this.isNorth = Math.abs(offsetDeg - 90.0f) < 45.0f;
+    }
+
+    private int getAlphaPct() {
+      return Math.round(100 * view.getAlpha());
+    }
+
+    private void setAlphaPct(int alphaPct) {
+      view.setAlpha(alphaPct / 100.0f);
+    }
+
+    private int getRadiusPx() {
+      return LayoutParamsUtil.getConstraintLayoutCircleRadius(view);
+    }
+
+    private void setRadiusPx(int radiusPx) {
+      LayoutParamsUtil.changeConstraintLayoutCircleRadius(view, radiusPx);
     }
   }
 }
