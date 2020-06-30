@@ -15,14 +15,24 @@
         android:theme="?attr/actionBarTheme"
         app:maxButtonHeight="56dp" />
 
+    <Button
+        android:id="@+id/button_text_select"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/toolbar"
+        android:text="@string/button_text_select" />
+
     <WebView
         android:id="@+id/invocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar"
+        android:layout_below="@id/button_text_select"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="false"
-        android:layout_marginTop="20dp"
-        tools:text="Invocation"/>
+        android:layout_marginTop="10dp"
+        tools:text="Invocation">
+
+    </WebView>
 
 </RelativeLayout>

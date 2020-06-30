@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 /**
  * Simplifies access to {@link TypedArray} resource data which will all be retrieved from the same
- * index..
+ * index. Use the static methods in {@link TypedArrayUtil} to get the full array.
  */
 public class TypedArrayAccessor {
 

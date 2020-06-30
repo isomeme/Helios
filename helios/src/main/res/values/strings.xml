@@ -5,10 +5,14 @@
     <string name="toast_location_permission_needed">Helios needs permission to access your device\'s location.</string>
     <string name="toast_locationservice_not_available">Helios requires location services to be enabled.</string>
 
+    <string name="button_text_select">Select</string>
+
     <string name="control_refresh">Refresh</string>
     <string name="control_directions">Directions</string>
     <string name="control_lock_compass">Lock compass</string>
     <string name="control_help">Help</string>
+
+    <string name="dialog_select_text">Select text</string>
 
     <string name="content_compass_display">Compass display</string>
     <string name="content_sunrise_position">Sunrise position</string>
