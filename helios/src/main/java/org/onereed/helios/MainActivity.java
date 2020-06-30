@@ -69,18 +69,6 @@ public class MainActivity extends AbstractMenuActivity
   }
 
   @Override
-  public void onResume() {
-    super.onResume();
-    AppLogger.debug(TAG, "onResume");
-  }
-
-  @Override
-  public void onPause() {
-    super.onPause();
-    AppLogger.debug(TAG, "onPause");
-  }
-
-  @Override
   protected Map<Integer, Runnable> getMenuActions() {
     return ImmutableMap.of(
         R.id.action_refresh,
@@ -94,7 +82,6 @@ public class MainActivity extends AbstractMenuActivity
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-    AppLogger.debug(TAG, "onActivityResult");
     super.onActivityResult(requestCode, resultCode, intent);
     locationServiceVerifier.acceptActivityResult(requestCode, resultCode);
   }
@@ -103,11 +90,10 @@ public class MainActivity extends AbstractMenuActivity
   public void onRequestPermissionsResult(
       int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-    AppLogger.debug(TAG, "onRequestPermissionsResult");
     locationManager.acceptPermissionsResult(requestCode, permissions, grantResults);
   }
 
-  /** This is called from swipe-up gesture refresh. Menu-driven refresh is handled separately. */
+  /** This is called from swipe-down gesture refresh. Menu-driven refresh is handled separately. */
   @Override
   public void onRefresh() {
     requestLocationUpdate();

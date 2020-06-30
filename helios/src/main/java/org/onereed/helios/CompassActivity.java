@@ -13,9 +13,12 @@ import android.view.TouchDelegate;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import org.onereed.helios.common.DirectionUtil;
@@ -27,10 +30,8 @@ import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEvent;
 import org.onereed.helios.sun.SunInfo;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -48,13 +49,20 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
    */
   private static final long ROTATION_ANIMATION_DURATION_MILLIS = 200L;
 
+  /** How long it takes to swap the noon and nadir inset positions. */
+  private static final long INSET_ANIMATION_DURATION_MILLIS = 1000L;
+
   private static final int COMPASS_SIDE_DP = 100;
 
   private static final int COMPASS_RADIUS_DP = 44;
 
   private static final double RADIUS_INSET_SCALE = 0.82;
 
-  private static final int INSET_ALPHA_PCT = 50;
+  private static final float OPAQUE_ALPHA = 1.0f;
+
+  private static final float INSET_ALPHA = 0.5f;
+
+  private static final float ALPHA_RANGE = OPAQUE_ALPHA - INSET_ALPHA;
 
   private static final ImmutableSet<SunEvent.Type> REQUIRED_EVENT_TYPES =
       ImmutableSet.of(SunEvent.Type.NOON, SunEvent.Type.NADIR);
@@ -67,12 +75,15 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   private Sensor rotationVectorSensor = null;
   private LocationManager locationManager;
 
-  private Map<SunEvent.Type, ImageView> sunEventViews = new HashMap<>();
-  private List<ImageView> circleViews = new ArrayList<>();
+  private ImmutableMap<SunEvent.Type, ImageView> sunEventViews = null;
+  private ImmutableList<ImageView> compassRadiusViews = null;
+  private NoonNadirWrapper noonWrapper = null;
+  private NoonNadirWrapper nadirWrapper = null;
 
   private double magneticDeclinationDeg = 0.0;
   private float lastRotationDeg = 0.0f;
-  int compassRadiusPx;
+  private int compassRadiusPx;
+  private int radiusPxRange;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -101,13 +112,24 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     locationManager = new LocationManager(this, sunInfoViewModel::acceptPlace);
     getLifecycle().addObserver(locationManager);
 
-    sunEventViews.put(SunEvent.Type.RISE, activityCompassBinding.rise);
-    sunEventViews.put(SunEvent.Type.NOON, activityCompassBinding.noon);
-    sunEventViews.put(SunEvent.Type.SET, activityCompassBinding.set);
-    sunEventViews.put(SunEvent.Type.NADIR, activityCompassBinding.nadir);
+    sunEventViews =
+        ImmutableMap.of(
+            SunEvent.Type.RISE,
+            activityCompassBinding.rise,
+            SunEvent.Type.NOON,
+            activityCompassBinding.noon,
+            SunEvent.Type.SET,
+            activityCompassBinding.set,
+            SunEvent.Type.NADIR,
+            activityCompassBinding.nadir);
 
-    circleViews.add(activityCompassBinding.sun);
-    circleViews.addAll(sunEventViews.values());
+    // Note that noon and nadir can be inset, so they're handled differently.
+    compassRadiusViews =
+        ImmutableList.of(
+            activityCompassBinding.sun, activityCompassBinding.rise, activityCompassBinding.set);
+
+    noonWrapper = new NoonNadirWrapper(activityCompassBinding.noon);
+    nadirWrapper = new NoonNadirWrapper(activityCompassBinding.nadir);
   }
 
   @Override
@@ -120,6 +142,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   @Override
   protected void onResume() {
     super.onResume();
+
     activityCompassBinding.compassComposite.post(this::obtainCompassRadius);
 
     if (rotationVectorSensor != null) {
@@ -156,19 +179,35 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     int widthPx = activityCompassBinding.compassFace.getWidth();
     double pxPerDp = (double) widthPx / COMPASS_SIDE_DP;
     compassRadiusPx = (int) (pxPerDp * COMPASS_RADIUS_DP);
+    int insetRadiusPx = (int) (compassRadiusPx * RADIUS_INSET_SCALE);
+    radiusPxRange = compassRadiusPx - insetRadiusPx;
 
-    circleViews.forEach(
+    compassRadiusViews.forEach(
         view -> LayoutParamsUtil.changeConstraintLayoutCircleRadius(view, compassRadiusPx));
+
+    noonWrapper.redraw();
+    nadirWrapper.redraw();
   }
 
   @Override
   protected void onPause() {
     super.onPause();
+
     sensorManager.unregisterListener(this);
     PreferenceManager.getDefaultSharedPreferences(this)
         .edit()
         .putBoolean(LOCK_COMPASS, activityCompassBinding.lockCompassControl.isChecked())
         .apply();
+  }
+
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+
+    // NoonNadirWrapper instances hold references to views, so explicitly free them up for
+    // garbage collection.
+    noonWrapper = null;
+    nadirWrapper = null;
   }
 
   @Override
@@ -262,35 +301,16 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     // the one that comes later. We also explicitly reset the non-offset event(s) to correct
     // previous later-event status.
 
-    int noonRadiusPx = compassRadiusPx;
-    int nadirRadiusPx = compassRadiusPx;
-
-    int noonAlphaPct = 100;
-    int nadirAlphaPct = 100;
-
     SunEvent noonEvent = checkNotNull(shownEvents.get(SunEvent.Type.NOON));
-    NoonNadirWrapper noonWrapper = new NoonNadirWrapper(noonEvent);
     SunEvent nadirEvent = checkNotNull(shownEvents.get(SunEvent.Type.NADIR));
-    NoonNadirWrapper nadirWrapper = new NoonNadirWrapper(nadirEvent);
 
-    if (noonWrapper.isNorth == nadirWrapper.isNorth) {
-      int insetRadiusPx = (int) (compassRadiusPx * RADIUS_INSET_SCALE);
+    boolean isOverlap = noonNadirOverlap(noonEvent, nadirEvent);
+    boolean isNoonEarlier = noonEvent.compareTo(nadirEvent) < 1;
+    boolean isNoonInset = isOverlap && !isNoonEarlier;
+    boolean isNadirInset = isOverlap && isNoonEarlier;
 
-      if (noonEvent.compareTo(nadirEvent) < 1) {
-        nadirRadiusPx = insetRadiusPx;
-        nadirAlphaPct = INSET_ALPHA_PCT;
-      } else {
-        noonRadiusPx = insetRadiusPx;
-        noonAlphaPct = INSET_ALPHA_PCT;
-      }
-    }
-
-    // TODO: Animate these transitions.
-
-    noonWrapper.setRadiusPx(noonRadiusPx);
-    noonWrapper.setAlphaPct(noonAlphaPct);
-    nadirWrapper.setRadiusPx(nadirRadiusPx);
-    nadirWrapper.setAlphaPct(nadirAlphaPct);
+    noonWrapper.selectInset(isNoonInset);
+    nadirWrapper.selectInset(isNadirInset);
   }
 
   public void onCheckboxClicked(View view) {
@@ -311,39 +331,63 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     }
   }
 
+  /** Returns true iff noon and nadir are either both in the north or both in the south. */
+  private static boolean noonNadirOverlap(SunEvent noonEvent, SunEvent nadirEvent) {
+    // If we're starting near north (0 az), we'll end up near 90. If we start off near south
+    // (180 az), we'll end up near -90.
+    float noonOffsetDeg = DirectionUtil.zeroCenterDeg(noonEvent.getAzimuthDeg() + 90.0);
+    float nadirOffsetDeg = DirectionUtil.zeroCenterDeg(nadirEvent.getAzimuthDeg() + 90.0);
+    return Math.abs(noonOffsetDeg - nadirOffsetDeg) < 45.0;
+  }
+
   /**
-   * Wrapper providing properties for noon-nadir collision handling. We represent alpha as an
-   * integer percent to simplify equality comparison.
+   * Wrapper for noon and nadir {@link ImageView} objects which provides a single object and
+   * property for ObjectAnimator to use in doing overlap inset swaps.
    */
   private class NoonNadirWrapper {
 
     private final ImageView view;
+    private int insetPct = 0;
 
-    private final boolean isNorth;
-
-    private NoonNadirWrapper(SunEvent sunEvent) {
-      this.view = sunEventViews.get(sunEvent.getType());
-
-      // If we're starting near north (0 az), we'll end up near 90. If we start off near south
-      // (180 az), we'll end up near -90.
-      float offsetDeg = DirectionUtil.zeroCenterDeg(sunEvent.getAzimuthDeg() + 90.0);
-      this.isNorth = Math.abs(offsetDeg - 90.0f) < 45.0f;
+    private NoonNadirWrapper(ImageView view) {
+      this.view = view;
     }
 
-    private int getAlphaPct() {
-      return Math.round(100 * view.getAlpha());
+    private void selectInset(boolean isInset) {
+      int targetPct = isInset ? 100 : 0;
+
+      if (targetPct != insetPct) {
+        ObjectAnimator insetAnimator =
+            ObjectAnimator.ofInt(this, "insetPct", targetPct)
+                .setDuration(INSET_ANIMATION_DURATION_MILLIS);
+        insetAnimator.setAutoCancel(true);
+        insetAnimator.start();
+      }
     }
 
-    private void setAlphaPct(int alphaPct) {
-      view.setAlpha(alphaPct / 100.0f);
+    @Keep
+    int getInsetPct() {
+      return insetPct;
     }
 
-    private int getRadiusPx() {
-      return LayoutParamsUtil.getConstraintLayoutCircleRadius(view);
-    }
+    @Keep
+    void setInsetPct(int pct) {
+      insetPct = pct;
 
-    private void setRadiusPx(int radiusPx) {
+      float insetFraction = pct / 100.0f;
+      float alpha = OPAQUE_ALPHA - insetFraction * ALPHA_RANGE;
+      int radiusPx = (int) (compassRadiusPx - insetFraction * radiusPxRange);
+
+      view.setAlpha(alpha);
       LayoutParamsUtil.changeConstraintLayoutCircleRadius(view, radiusPx);
+    }
+
+    /**
+     * Called from {@link CompassActivity#obtainCompassRadius()} to redraw this event at the
+     * appropriate radius and alpha for its saved state.
+     */
+    private void redraw() {
+      setInsetPct(insetPct);
     }
   }
 }

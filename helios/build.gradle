@@ -67,7 +67,7 @@ dependencies {
     // SunCalc
 
 //    implementation 'org.shredzone.commons:commons-suncalc:3.2'
-    implementation 'org.shredzone.commons:commons-suncalc:3.3-SNAPSHOT'
+    implementation 'org.shredzone.commons:commons-suncalc:3.3'
 
     // Guava
 

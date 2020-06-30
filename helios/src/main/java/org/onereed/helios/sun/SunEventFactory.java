@@ -45,11 +45,6 @@ class SunEventFactory {
     int stepCount;
 
     for (stepCount = 0; stepCount <= MAX_STEPS; ++stepCount) {
-      AppLogger.debug(
-          TAG,
-          "lastOffsetAzimuth=%.3f lastTime=%s stepCount=%d",
-          lastOffsetAzimuth, lastTime, stepCount);
-
       double lastAzimuthError = 180.0 - lastOffsetAzimuth;
 
       if (Math.abs(lastAzimuthError) < AZIMUTH_EPSILON) {
@@ -66,6 +61,10 @@ class SunEventFactory {
       lastOffsetAzimuth = nextOffsetAzimuth;
       lastTime = nextTime;
       deltaTimeMillis = (long) (deltaTimeMillis * (nextAzimuthError / deltaAzimuth));
+    }
+
+    if (stepCount > 0) {
+      AppLogger.warning(TAG, "Correction needed, stepCount=%d", stepCount);
     }
 
     if (stepCount > MAX_STEPS) {
