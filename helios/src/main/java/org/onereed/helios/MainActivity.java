@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 import org.onereed.helios.common.LocationServiceVerifier;
 import org.onereed.helios.common.LogUtil;
@@ -20,7 +20,7 @@ import org.onereed.helios.location.LocationManager;
 import org.onereed.helios.logger.AppLogger;
 
 import java.time.Instant;
-import java.util.Map;
+import java.util.Set;
 
 /** Main activity for Helios. */
 public class MainActivity extends AbstractMenuActivity
@@ -69,15 +69,14 @@ public class MainActivity extends AbstractMenuActivity
   }
 
   @Override
-  protected Map<Integer, Runnable> getMenuActions() {
-    return ImmutableMap.of(
-        R.id.action_refresh,
-        () -> {
-          activityMainBinding.swipeRefresh.setRefreshing(true);
-          requestLocationUpdate();
-        },
-        R.id.action_direction,
-        () -> startActivity(new Intent(this, CompassActivity.class)));
+  protected Set<Integer> getOptionsMenuItems() {
+    return ImmutableSet.of(R.id.action_text, R.id.action_direction, R.id.action_refresh);
+  }
+
+  @Override
+  protected void handleRefresh() {
+    activityMainBinding.swipeRefresh.setRefreshing(true);
+    requestLocationUpdate();
   }
 
   @Override

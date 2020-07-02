@@ -33,6 +33,7 @@ import org.onereed.helios.sun.SunInfo;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Math.toDegrees;
@@ -130,6 +131,11 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
     noonWrapper = new NoonNadirWrapper(activityCompassBinding.noon);
     nadirWrapper = new NoonNadirWrapper(activityCompassBinding.nadir);
+  }
+
+  @Override
+  protected Set<Integer> getOptionsMenuItems() {
+    return ImmutableSet.of(R.id.action_text);
   }
 
   @Override

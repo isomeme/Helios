@@ -1,18 +1,16 @@
 package org.onereed.helios;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
-import org.onereed.helios.common.TypedArrayUtil;
 import org.onereed.helios.databinding.ActivityLiberBinding;
 import org.onereed.helios.sun.SunEvent;
 
-import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -34,18 +32,17 @@ public class LiberActivity extends AbstractMenuActivity {
 
     activityLiberBinding.invocation.setBackgroundColor(Color.TRANSPARENT);
 
-    int sunEventTypeOrdinal = getIntent().getIntExtra(IntentExtraTags.SUN_EVENT_TYPE, -1);
-    displayInvocation(sunEventTypeOrdinal);
+    int typeOrdinal =
+        getIntent().getIntExtra(IntentExtraTags.SUN_EVENT_TYPE, SunEvent.Type.RISE.ordinal());
+    displayInvocation(typeOrdinal);
 
-    sunEventNames = TypedArrayUtil.getStringArray(this, R.array.sun_event_names);
-
+    sunEventNames = getResources().getStringArray(R.array.sun_event_names);
     activityLiberBinding.buttonTextSelect.setOnClickListener(this::textSelectDialog);
   }
 
   @Override
-  protected Map<Integer, Runnable> getMenuActions() {
-    return ImmutableMap.of(
-        R.id.action_direction, () -> startActivity(new Intent(this, CompassActivity.class)));
+  protected Set<Integer> getOptionsMenuItems() {
+    return ImmutableSet.of(R.id.action_direction);
   }
 
   private void textSelectDialog(View unused) {

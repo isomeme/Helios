@@ -7,19 +7,28 @@ import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.ForOverride;
 
-import java.util.Map;
+import java.util.Set;
 
 /** Parent class for activities sharing the common Helios menu. */
 abstract class AbstractMenuActivity extends AppCompatActivity {
+
+  private static final ImmutableSet<Integer> MENU_ITEM_IDS =
+      ImmutableSet.of(
+          R.id.action_direction,
+          R.id.action_refresh,
+          R.id.action_text,
+          R.id.action_help);
+
+  public static final Uri HELP_URI = Uri.parse("https://www.one-reed.org/helios");
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.options_menu, menu);
 
-    getMenuActions().keySet().stream()
+    getOptionsMenuItems().stream()
         .map(menu::findItem)
         .forEach(menuItem -> menuItem.setVisible(true));
 
@@ -28,17 +37,31 @@ abstract class AbstractMenuActivity extends AppCompatActivity {
 
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
-    Runnable action = getMenuActions().get(item.getItemId());
+    int itemId = item.getItemId();
 
-    if (action != null) {
-      action.run();
-      return true;
-    }
+    if (MENU_ITEM_IDS.contains(itemId)) {
+      switch (itemId) {
+        case R.id.action_help:
+          Intent browserIntent = new Intent(Intent.ACTION_VIEW, HELP_URI);
+          startActivity(browserIntent);
+          break;
 
-    if (item.getItemId() == R.id.action_help) {
-      Intent browserIntent =
-          new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.one-reed.org/helios"));
-      startActivity(browserIntent);
+        case R.id.action_refresh:
+          handleRefresh();
+          break;
+
+        case R.id.action_direction:
+          startActivity(new Intent(this, CompassActivity.class));
+          break;
+
+        case R.id.action_text:
+          startActivity(new Intent(this, LiberActivity.class));
+          break;
+
+        default:
+          throw new AssertionError("Impossible switch default");
+      }
+
       return true;
     }
 
@@ -46,15 +69,18 @@ abstract class AbstractMenuActivity extends AppCompatActivity {
   }
 
   /**
-   * Returns a {@link Map} from menu item resource IDs to the action which should be taken when that
-   * menu item is selected. Only menu items with IDs that appear as keys in the map are made
-   * visible. This default implementation returns an empty map.
-   *
-   * <p>In addition to whatever is specified in this call, all menus have the 'Help' menu item,
-   * which links to the Helios webpage.
+   * Subclass implementations of this method are called to determine what options menu items should
+   * be visible. The 'Help' menu item is always visible, so it need not be included in this set.
    */
   @ForOverride
-  protected Map<Integer, Runnable> getMenuActions() {
-    return ImmutableMap.of();
+  protected abstract Set<Integer> getOptionsMenuItems();
+
+  /**
+   * Subclasses which enable the 'Refresh' menu item must override this method with the action to
+   * be taken when that item is selected.
+   */
+  @ForOverride
+  protected void handleRefresh() {
+    // Do nothing.
   }
 }

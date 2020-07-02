@@ -18,6 +18,12 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_text"
+        android:title="@string/action_text"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_help"
         android:title="@string/control_help"
         android:visible="true"

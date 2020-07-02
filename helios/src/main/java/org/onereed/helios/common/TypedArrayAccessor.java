@@ -1,6 +1,5 @@
 package org.onereed.helios.common;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 
@@ -8,15 +7,15 @@ import java.util.function.Function;
 
 /**
  * Simplifies access to {@link TypedArray} resource data which will all be retrieved from the same
- * index. Use the static methods in {@link TypedArrayUtil} to get the full array.
+ * index.
  */
 public class TypedArrayAccessor {
 
   private final Resources resources;
   private final int index;
 
-  public static TypedArrayAccessor create(Context context, int index) {
-    return new TypedArrayAccessor(context.getResources(), index);
+  public static TypedArrayAccessor create(Resources resources, int index) {
+    return new TypedArrayAccessor(resources, index);
   }
 
   private TypedArrayAccessor(Resources resources, int index) {
