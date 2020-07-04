@@ -11,7 +11,7 @@ public abstract class SunInfo {
 
   public abstract Instant getTimestamp();
 
-  public abstract float getSunAzimuthDeg();
+  public abstract SunAzimuthInfo getSunAzimuthInfo();
 
   public abstract double getMagneticDeclinationDeg();
 
@@ -28,7 +28,7 @@ public abstract class SunInfo {
   public abstract static class Builder {
     public abstract Builder setTimestamp(Instant timestamp);
 
-    public abstract Builder setSunAzimuthDeg(float sunAzimuthDeg);
+    public abstract Builder setSunAzimuthInfo(SunAzimuthInfo info);
 
     public abstract Builder setMagneticDeclinationDeg(double magneticDeclinationDeg);
 
@@ -37,10 +37,6 @@ public abstract class SunInfo {
     public abstract Builder setSunEvents(ImmutableList<SunEvent> sunEvents);
 
     public abstract Builder setSunEvents(SunEvent... sunEvents);
-
-    public Builder setSunAzimuthDeg(double sunAzimuthDeg) {
-      return setSunAzimuthDeg((float) sunAzimuthDeg);
-    }
 
     public abstract SunInfo build();
   }

@@ -23,4 +23,5 @@
     <string name="content_view_line">View line</string>
     <string name="content_sun_position">Sun position</string>
     <string name="content_sun_event_list">List of sun events</string>
+    <string name="content_sun_movement_direction">Sun movement direction</string>
 </resources>

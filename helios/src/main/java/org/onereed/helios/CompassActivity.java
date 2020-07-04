@@ -27,6 +27,7 @@ import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
 import org.onereed.helios.location.LocationManager;
 import org.onereed.helios.logger.AppLogger;
+import org.onereed.helios.sun.SunAzimuthInfo;
 import org.onereed.helios.sun.SunEvent;
 import org.onereed.helios.sun.SunInfo;
 
@@ -58,6 +59,8 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   private static final int COMPASS_RADIUS_DP = 44;
 
   private static final double RADIUS_INSET_SCALE = 0.82;
+
+  private static final double RADIUS_SUN_MOVEMENT_SCALE = 0.6;
 
   private static final float OPAQUE_ALPHA = 1.0f;
 
@@ -124,7 +127,8 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
             SunEvent.Type.NADIR,
             activityCompassBinding.nadir);
 
-    // Note that noon and nadir can be inset, so they're handled differently.
+    // Note that noon and nadir can be inset, and sunMovement is at a fraction of the compass
+    // radius, so they're handled differently.
     compassRadiusViews =
         ImmutableList.of(
             activityCompassBinding.sun, activityCompassBinding.rise, activityCompassBinding.set);
@@ -190,6 +194,10 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
     compassRadiusViews.forEach(
         view -> LayoutParamsUtil.changeConstraintLayoutCircleRadius(view, compassRadiusPx));
+
+    int sunMovementRadiusPx = (int) (compassRadiusPx * RADIUS_SUN_MOVEMENT_SCALE);
+    LayoutParamsUtil.changeConstraintLayoutCircleRadius(
+        activityCompassBinding.sunMovement, sunMovementRadiusPx);
 
     noonWrapper.redraw();
     nadirWrapper.redraw();
@@ -276,9 +284,16 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
   private void acceptSunInfo(SunInfo sunInfo) {
     magneticDeclinationDeg = sunInfo.getMagneticDeclinationDeg();
+    SunAzimuthInfo sunAzimuthInfo = sunInfo.getSunAzimuthInfo();
+    float sunAzimuthDeg = sunAzimuthInfo.getAzimuthDeg();
 
+    LayoutParamsUtil.changeConstraintLayoutCircleAngle(activityCompassBinding.sun, sunAzimuthDeg);
     LayoutParamsUtil.changeConstraintLayoutCircleAngle(
-        activityCompassBinding.sun, sunInfo.getSunAzimuthDeg());
+        activityCompassBinding.sunMovement, sunAzimuthDeg);
+
+    float sunMovementRotation =
+        sunAzimuthInfo.isClockwise() ? sunAzimuthDeg : sunAzimuthDeg + 180.0f;
+    activityCompassBinding.sunMovement.setRotation(sunMovementRotation);
 
     Map<SunEvent.Type, SunEvent> shownEvents = new HashMap<>();
 
@@ -301,6 +316,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
     if (!shownTypes.containsAll(REQUIRED_EVENT_TYPES)) {
       AppLogger.error(TAG, "Noon or nadir missing; shownEvents=%s", shownEvents);
+      return;
     }
 
     // In the tropics, noon and nadir can be at the same azimuth, so inset and dim the icon for

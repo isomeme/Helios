@@ -68,6 +68,23 @@
                 tools:ignore="MissingConstraints" />
 
             <ImageView
+                android:id="@+id/sun_movement"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:contentDescription="@string/content_sun_movement_direction"
+                android:src="@drawable/ic_baseline_arrow_forward_24"
+                android:tint="@color/sun_yellow"
+                android:tooltipText="@string/content_sun_movement_direction"
+                app:layout_constraintCircle="@+id/compass_face"
+                app:layout_constraintCircleAngle="0"
+                app:layout_constraintCircleRadius="23dp"
+                app:layout_constraintHeight_default="percent"
+                app:layout_constraintHeight_percent="0.06"
+                app:layout_constraintWidth_default="percent"
+                app:layout_constraintWidth_percent="0.06"
+                tools:ignore="MissingConstraints" />
+
+            <ImageView
                 android:id="@+id/rise"
                 android:layout_width="0dp"
                 android:layout_height="0dp"

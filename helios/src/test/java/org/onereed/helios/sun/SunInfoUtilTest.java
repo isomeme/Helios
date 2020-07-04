@@ -36,7 +36,8 @@ public class SunInfoUtilTest {
     SunInfo expectedSunInfo =
         SunInfo.builder()
             .setTimestamp(when)
-            .setSunAzimuthDeg(289.93357351191065)
+            .setSunAzimuthInfo(
+                SunAzimuthInfo.create(289.93357351191065f, true))
             .setMagneticDeclinationDeg(0.0)
             .setClosestEventIndex(1)
             .setSunEvents(
@@ -62,7 +63,8 @@ public class SunInfoUtilTest {
     SunInfo expectedSunInfo =
         SunInfo.builder()
             .setTimestamp(when)
-            .setSunAzimuthDeg(294.5638405069754)
+            .setSunAzimuthInfo(
+                SunAzimuthInfo.create(294.5638405069754f, true))
             .setMagneticDeclinationDeg(0.0)
             .setClosestEventIndex(0)
             .setSunEvents(

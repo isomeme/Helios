@@ -65,12 +65,12 @@ class SunInfoUtil {
     ImmutableList<SunEvent> shownSunEvents =
         ImmutableList.<SunEvent>builder().add(mostRecentEvent).addAll(nextEvents).build();
 
-    double sunAzimuthDeg = SunCalcUtil.getSunAzimuthDeg(where, when);
+    SunAzimuthInfo sunAzimuthInfo = SunAzimuthInfo.from(where, when);
     double magneticDeclinationDeg = DirectionUtil.getMagneticDeclinationDeg(where, when);
 
     return SunInfo.builder()
         .setTimestamp(when)
-        .setSunAzimuthDeg(sunAzimuthDeg)
+        .setSunAzimuthInfo(sunAzimuthInfo)
         .setMagneticDeclinationDeg(magneticDeclinationDeg)
         .setClosestEventIndex(closestEventIndex)
         .setSunEvents(shownSunEvents)

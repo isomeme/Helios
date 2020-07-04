@@ -9,8 +9,8 @@ android {
         applicationId "org.onereed.helios"
         minSdkVersion 26
         targetSdkVersion 29
-        versionCode 8
-        versionName "1.0 alpha 08"
+        versionCode 9
+        versionName "1.0 beta 01"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
