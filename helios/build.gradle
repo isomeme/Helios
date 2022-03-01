@@ -2,15 +2,14 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
+    compileSdkVersion 31
 
     defaultConfig {
         applicationId "org.onereed.helios"
         minSdkVersion 26
-        targetSdkVersion 30
-        versionCode 10
-        versionName "1.1"
+        targetSdkVersion 31
+        versionCode 11
+        versionName "1.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -19,7 +18,7 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            versionNameSuffix ' (release)'
+            versionNameSuffix ''
         }
         debug {
             versionNameSuffix ' (debug)'
@@ -27,8 +26,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = 1.11
+        targetCompatibility = 1.11
     }
 
     buildFeatures {
@@ -37,6 +36,12 @@ android {
 
     testOptions {
         unitTests.returnDefaultValues = true
+    }
+
+    allprojects {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+        }
     }
 }
 
@@ -47,20 +52,20 @@ dependencies {
 
     // Firebase
 
-    implementation 'com.google.firebase:firebase-analytics:19.0.1'
+    implementation 'com.google.firebase:firebase-analytics:20.1.0'
     // add SDKs for any other desired Firebase products
     // https://firebase.google.com/docs/android/setup#available-libraries
 
     // Google Mobile Services (GMS) components
 
-    implementation 'com.google.android.gms:play-services-location:18.0.0'
+    implementation 'com.google.android.gms:play-services-location:19.0.1'
 
     // Android components
 
-    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
-    implementation 'androidx.lifecycle:lifecycle-common-java8:2.3.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
+    implementation 'androidx.lifecycle:lifecycle-common-java8:2.4.1'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
 
@@ -70,17 +75,17 @@ dependencies {
 
     // Guava
 
-    implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
+    implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre'
 
     // @AutoValue
 
-    implementation 'com.google.auto.value:auto-value-annotations:1.8.2'
-    annotationProcessor 'com.google.auto.value:auto-value:1.8.2'
+    implementation 'com.google.auto.value:auto-value-annotations:1.9'
+    annotationProcessor 'com.google.auto.value:auto-value:1.9'
 
     // Testing
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.mockito:mockito-core:3.12.4'
+    testImplementation 'org.mockito:mockito-core:4.3.1'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'

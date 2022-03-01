@@ -1,14 +1,17 @@
 package org.onereed.helios;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.Math.toDegrees;
+
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.TouchDelegate;
 import android.view.View;
 import android.widget.ImageView;
@@ -35,9 +38,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.Math.toDegrees;
 
 /** Displays directions to sun events. */
 public class CompassActivity extends AbstractMenuActivity implements SensorEventListener {
@@ -146,6 +146,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   public void onRequestPermissionsResult(
       int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     locationManager.acceptPermissionsResult(requestCode, permissions, grantResults);
   }
 
@@ -156,8 +157,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     activityCompassBinding.compassComposite.post(this::obtainCompassRadius);
 
     if (rotationVectorSensor != null) {
-      boolean isLocked =
-          PreferenceManager.getDefaultSharedPreferences(this).getBoolean(LOCK_COMPASS, false);
+      boolean isLocked = getPreferences().getBoolean(LOCK_COMPASS, false);
       activityCompassBinding.lockCompassControl.setChecked(isLocked);
       expandLockCheckboxHitRect();
     }
@@ -208,7 +208,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     super.onPause();
 
     sensorManager.unregisterListener(this);
-    PreferenceManager.getDefaultSharedPreferences(this)
+    getPreferences()
         .edit()
         .putBoolean(LOCK_COMPASS, activityCompassBinding.lockCompassControl.isChecked())
         .apply();
@@ -411,5 +411,10 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     private void redraw() {
       setInsetPct(insetPct);
     }
+  }
+
+  /** Obtains user preferences using the same path as the deprecated older way of doing this. */
+  private SharedPreferences getPreferences() {
+    return getSharedPreferences(getPackageName() + "_preferences", Context.MODE_PRIVATE);
   }
 }

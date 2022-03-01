@@ -2,17 +2,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.onereed.helios">
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
-        android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher4"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher4_round"
         android:supportsRtl="false"
         android:theme="@style/Theme.AppCompat.NoActionBar">
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
