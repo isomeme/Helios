@@ -107,9 +107,8 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
       activityCompassBinding.lockCompassControl.setVisibility(View.INVISIBLE);
     }
 
-    ViewModelProvider.Factory factory = new ViewModelProvider.NewInstanceFactory();
-    SunInfoViewModel sunInfoViewModel =
-        new ViewModelProvider(this, factory).get(SunInfoViewModel.class);
+    var sunInfoViewModel =
+        new ViewModelProvider(this).get(SunInfoViewModel.class);
 
     sunInfoViewModel.getSunInfoLiveData().observe(this, this::acceptSunInfo);
 
@@ -269,7 +268,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
       adjustedDesiredRotationDeg += 360.0f;
     }
 
-    ObjectAnimator compassAnimator =
+    var compassAnimator =
         ObjectAnimator.ofFloat(
                 activityCompassBinding.compassRotating,
                 "rotation",
@@ -284,7 +283,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
   private void acceptSunInfo(SunInfo sunInfo) {
     magneticDeclinationDeg = sunInfo.getMagneticDeclinationDeg();
-    SunAzimuthInfo sunAzimuthInfo = sunInfo.getSunAzimuthInfo();
+    var sunAzimuthInfo = sunInfo.getSunAzimuthInfo();
     float sunAzimuthDeg = sunAzimuthInfo.getAzimuthDeg();
 
     LayoutParamsUtil.changeConstraintLayoutCircleAngle(activityCompassBinding.sun, sunAzimuthDeg);
@@ -295,21 +294,21 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
         sunAzimuthInfo.isClockwise() ? sunAzimuthDeg : sunAzimuthDeg + 180.0f;
     activityCompassBinding.sunMovement.setRotation(sunMovementRotation);
 
-    Map<SunEvent.Type, SunEvent> shownEvents = new HashMap<>();
+    var shownEvents = new HashMap<SunEvent.Type, SunEvent>();
 
     for (SunEvent sunEvent : sunInfo.getSunEvents()) {
       SunEvent.Type type = sunEvent.getType();
 
       if (!shownEvents.containsKey(type)) {
         shownEvents.put(type, sunEvent);
-        ImageView view = checkNotNull(sunEventViews.get(type));
+        var view = checkNotNull(sunEventViews.get(type));
         LayoutParamsUtil.changeConstraintLayoutCircleAngle(view, sunEvent.getAzimuthDeg());
         view.setVisibility(View.VISIBLE);
       }
     }
 
-    EnumSet<SunEvent.Type> shownTypes = EnumSet.copyOf(shownEvents.keySet());
-    EnumSet<SunEvent.Type> missingTypes = EnumSet.complementOf(shownTypes);
+    var shownTypes = EnumSet.copyOf(shownEvents.keySet());
+    var missingTypes = EnumSet.complementOf(shownTypes);
 
     missingTypes.forEach(
         type -> checkNotNull(sunEventViews.get(type)).setVisibility(View.INVISIBLE));
@@ -323,8 +322,8 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     // the one that comes later. We also explicitly reset the non-offset event(s) to correct
     // previous later-event status.
 
-    SunEvent noonEvent = checkNotNull(shownEvents.get(SunEvent.Type.NOON));
-    SunEvent nadirEvent = checkNotNull(shownEvents.get(SunEvent.Type.NADIR));
+    var noonEvent = checkNotNull(shownEvents.get(SunEvent.Type.NOON));
+    var nadirEvent = checkNotNull(shownEvents.get(SunEvent.Type.NADIR));
 
     boolean isOverlap = noonNadirOverlap(noonEvent, nadirEvent);
     boolean isNoonEarlier = noonEvent.compareTo(nadirEvent) < 1;
