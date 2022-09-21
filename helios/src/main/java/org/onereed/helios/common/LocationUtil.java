@@ -1,6 +1,7 @@
 package org.onereed.helios.common;
 
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.Priority;
 
 import java.time.Duration;
 
@@ -12,8 +13,8 @@ public final class LocationUtil {
 
   /** Standard request for repeated location updates. */
   public static final LocationRequest REPEATED_LOCATION_REQUEST =
-      new LocationRequest()
+      LocationRequest.create()
           .setFastestInterval(FASTEST_INTERVAL_MILLIS)
           .setInterval(INTERVAL_MILLIS)
-          .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+          .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY);
 }
