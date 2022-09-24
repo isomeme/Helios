@@ -33,7 +33,7 @@
             android:contentDescription="@string/content_view_line"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_view_line"
-            android:tint="@color/compass_dial" />
+            app:tint="@color/compass_dial" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/compass_rotating"
@@ -48,7 +48,7 @@
                 android:contentDescription="@string/content_compass_display"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_compass_face"
-                android:tint="@color/compass_dial" />
+                app:tint="@color/compass_dial" />
 
             <ImageView
                 android:id="@+id/sun"
@@ -56,7 +56,6 @@
                 android:layout_height="0dp"
                 android:contentDescription="@string/content_sun_position"
                 android:src="@drawable/ic_solid_dot"
-                android:tint="@color/sun_yellow"
                 android:tooltipText="@string/content_sun_position"
                 app:layout_constraintCircle="@+id/compass_face"
                 app:layout_constraintCircleAngle="0"
@@ -65,6 +64,7 @@
                 app:layout_constraintHeight_percent="0.1"
                 app:layout_constraintWidth_default="percent"
                 app:layout_constraintWidth_percent="0.1"
+                app:tint="@color/sun_yellow"
                 tools:ignore="MissingConstraints" />
 
             <ImageView
@@ -73,7 +73,6 @@
                 android:layout_height="0dp"
                 android:contentDescription="@string/content_sun_movement_direction"
                 android:src="@drawable/ic_baseline_arrow_forward_24"
-                android:tint="@color/sun_yellow"
                 android:tooltipText="@string/content_sun_movement_direction"
                 app:layout_constraintCircle="@+id/compass_face"
                 app:layout_constraintCircleAngle="0"
@@ -82,6 +81,7 @@
                 app:layout_constraintHeight_percent="0.06"
                 app:layout_constraintWidth_default="percent"
                 app:layout_constraintWidth_percent="0.06"
+                app:tint="@color/sun_yellow"
                 tools:ignore="MissingConstraints" />
 
             <ImageView
@@ -90,7 +90,6 @@
                 android:layout_height="0dp"
                 android:contentDescription="@string/content_sunrise_position"
                 android:src="@drawable/ic_sol_symbol"
-                android:tint="@color/fg_rise"
                 android:tooltipText="@string/content_sunrise_position"
                 app:layout_constraintCircle="@+id/compass_face"
                 app:layout_constraintCircleAngle="30"
@@ -99,6 +98,7 @@
                 app:layout_constraintHeight_percent="0.1"
                 app:layout_constraintWidth_default="percent"
                 app:layout_constraintWidth_percent="0.1"
+                app:tint="@color/fg_rise"
                 tools:ignore="MissingConstraints" />
 
             <ImageView
@@ -107,7 +107,6 @@
                 android:layout_height="0dp"
                 android:contentDescription="@string/content_noon_position"
                 android:src="@drawable/ic_sol_symbol"
-                android:tint="@color/fg_noon"
                 android:tooltipText="@string/content_noon_position"
                 app:layout_constraintCircle="@+id/compass_face"
                 app:layout_constraintCircleAngle="60"
@@ -116,6 +115,7 @@
                 app:layout_constraintHeight_percent="0.1"
                 app:layout_constraintWidth_default="percent"
                 app:layout_constraintWidth_percent="0.1"
+                app:tint="@color/fg_noon"
                 tools:ignore="MissingConstraints" />
 
             <ImageView
@@ -124,7 +124,6 @@
                 android:layout_height="0dp"
                 android:contentDescription="@string/content_sunset_position"
                 android:src="@drawable/ic_sol_symbol"
-                android:tint="@color/fg_set"
                 android:tooltipText="@string/content_sunset_position"
                 app:layout_constraintCircle="@+id/compass_face"
                 app:layout_constraintCircleAngle="90"
@@ -133,6 +132,7 @@
                 app:layout_constraintHeight_percent="0.1"
                 app:layout_constraintWidth_default="percent"
                 app:layout_constraintWidth_percent="0.1"
+                app:tint="@color/fg_set"
                 tools:ignore="MissingConstraints" />
 
             <ImageView
@@ -141,7 +141,6 @@
                 android:layout_height="0dp"
                 android:contentDescription="@string/content_midnight_position"
                 android:src="@drawable/ic_sol_symbol"
-                android:tint="@color/fg_nadir"
                 android:tooltipText="@string/content_midnight_position"
                 app:layout_constraintCircle="@+id/compass_face"
                 app:layout_constraintCircleAngle="120"
@@ -150,6 +149,7 @@
                 app:layout_constraintHeight_percent="0.1"
                 app:layout_constraintWidth_default="percent"
                 app:layout_constraintWidth_percent="0.1"
+                app:tint="@color/fg_nadir"
                 tools:ignore="MissingConstraints" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

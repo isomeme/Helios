@@ -7,7 +7,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.common.collect.ImmutableSet;
@@ -49,15 +48,14 @@ public class MainActivity extends AbstractMenuActivity
     setContentView(activityMainBinding.getRoot());
     setSupportActionBar(activityMainBinding.toolbar);
 
-    RecyclerView.LayoutManager sunEventsLayoutManager = new LinearLayoutManager(this);
+    var sunEventsLayoutManager = new LinearLayoutManager(this);
     activityMainBinding.sunEventsRecyclerView.setLayoutManager(sunEventsLayoutManager);
     activityMainBinding.sunEventsRecyclerView.setAdapter(sunInfoAdapter);
 
     activityMainBinding.swipeRefresh.setOnRefreshListener(this);
 
-    ViewModelProvider.Factory factory = new ViewModelProvider.NewInstanceFactory();
-    SunInfoViewModel sunInfoViewModel =
-        new ViewModelProvider(this, factory).get(SunInfoViewModel.class);
+    var sunInfoViewModel =
+        new ViewModelProvider(this).get(SunInfoViewModel.class);
 
     sunInfoViewModel.getSunInfoLiveData().observe(this, sunInfoAdapter::acceptSunInfo);
     sunInfoViewModel.getLastUpdateTimeLiveData().observe(this, this::updateCompleted);
@@ -70,13 +68,7 @@ public class MainActivity extends AbstractMenuActivity
 
   @Override
   protected Set<Integer> getOptionsMenuItems() {
-    return ImmutableSet.of(R.id.action_text, R.id.action_direction, R.id.action_refresh);
-  }
-
-  @Override
-  protected void handleRefresh() {
-    activityMainBinding.swipeRefresh.setRefreshing(true);
-    requestLocationUpdate();
+    return ImmutableSet.of(R.id.action_text, R.id.action_direction);
   }
 
   @Override
@@ -90,15 +82,11 @@ public class MainActivity extends AbstractMenuActivity
       int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
     locationManager.acceptPermissionsResult(requestCode, permissions, grantResults);
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
   }
 
-  /** This is called from swipe-down gesture refresh. Menu-driven refresh is handled separately. */
   @Override
   public void onRefresh() {
-    requestLocationUpdate();
-  }
-
-  private void requestLocationUpdate() {
     locationManager.requestLastLocation();
   }
 

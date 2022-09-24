@@ -20,13 +20,13 @@
             android:id="@+id/eventTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_centerVertical="true"
-            android:gravity="start|center_vertical"
+            android:layout_marginStart="8dp"
             android:drawablePadding="10dp"
-            android:drawableTint="@android:color/white"
-            android:drawableTintMode="src_atop"
+            android:gravity="start|center_vertical"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            card_view:drawableTint="@android:color/white"
+            card_view:drawableTintMode="src_atop"
             tools:text="37 o'clock" />
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

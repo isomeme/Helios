@@ -30,13 +30,11 @@ import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
 import org.onereed.helios.location.LocationManager;
 import org.onereed.helios.logger.AppLogger;
-import org.onereed.helios.sun.SunAzimuthInfo;
 import org.onereed.helios.sun.SunEvent;
 import org.onereed.helios.sun.SunInfo;
 
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /** Displays directions to sun events. */

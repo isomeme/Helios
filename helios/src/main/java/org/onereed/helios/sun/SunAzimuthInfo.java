@@ -25,7 +25,7 @@ public abstract class SunAzimuthInfo {
     double azimuthSoon = SunCalcUtil.getSunAzimuthDeg(where, when.plus(DELTA_TIME));
     double deltaAzimuth = DirectionUtil.zeroCenterDeg(azimuthSoon - azimuthNow);
 
-    return new AutoValue_SunAzimuthInfo((float) azimuthNow, /* clockwise= */ deltaAzimuth >= 0.0);
+    return create((float) azimuthNow, /* clockwise= */ deltaAzimuth >= 0.0);
   }
 
   @VisibleForTesting
