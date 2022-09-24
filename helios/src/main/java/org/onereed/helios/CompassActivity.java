@@ -87,6 +87,15 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   private int compassRadiusPx;
   private int radiusPxRange;
 
+  /** Returns true iff noon and nadir are either both in the north or both in the south. */
+  private static boolean noonNadirOverlap(SunEvent noonEvent, SunEvent nadirEvent) {
+    // If we're starting near north (0 az), we'll end up near 90. If we start off near south
+    // (180 az), we'll end up near -90.
+    float noonOffsetDeg = DirectionUtil.zeroCenterDeg(noonEvent.getAzimuthDeg() + 90.0);
+    float nadirOffsetDeg = DirectionUtil.zeroCenterDeg(nadirEvent.getAzimuthDeg() + 90.0);
+    return Math.abs(noonOffsetDeg - nadirOffsetDeg) < 45.0;
+  }
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -105,8 +114,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
       activityCompassBinding.lockCompassControl.setVisibility(View.INVISIBLE);
     }
 
-    var sunInfoViewModel =
-        new ViewModelProvider(this).get(SunInfoViewModel.class);
+    var sunInfoViewModel = new ViewModelProvider(this).get(SunInfoViewModel.class);
 
     sunInfoViewModel.getSunInfoLiveData().observe(this, this::acceptSunInfo);
 
@@ -350,13 +358,9 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     }
   }
 
-  /** Returns true iff noon and nadir are either both in the north or both in the south. */
-  private static boolean noonNadirOverlap(SunEvent noonEvent, SunEvent nadirEvent) {
-    // If we're starting near north (0 az), we'll end up near 90. If we start off near south
-    // (180 az), we'll end up near -90.
-    float noonOffsetDeg = DirectionUtil.zeroCenterDeg(noonEvent.getAzimuthDeg() + 90.0);
-    float nadirOffsetDeg = DirectionUtil.zeroCenterDeg(nadirEvent.getAzimuthDeg() + 90.0);
-    return Math.abs(noonOffsetDeg - nadirOffsetDeg) < 45.0;
+  /** Obtains user preferences using the same path as the deprecated older way of doing this. */
+  private SharedPreferences getPreferences() {
+    return getSharedPreferences(getPackageName() + "_preferences", Context.MODE_PRIVATE);
   }
 
   /**
@@ -408,10 +412,5 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     private void redraw() {
       setInsetPct(insetPct);
     }
-  }
-
-  /** Obtains user preferences using the same path as the deprecated older way of doing this. */
-  private SharedPreferences getPreferences() {
-    return getSharedPreferences(getPackageName() + "_preferences", Context.MODE_PRIVATE);
   }
 }

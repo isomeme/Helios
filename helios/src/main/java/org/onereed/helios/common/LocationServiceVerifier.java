@@ -1,5 +1,7 @@
 package org.onereed.helios.common;
 
+import static org.onereed.helios.common.ToastUtil.longToastAndFinish;
+
 import android.app.Activity;
 import android.content.IntentSender;
 import android.util.Log;
@@ -65,13 +67,13 @@ public class LocationServiceVerifier implements DefaultLifecycleObserver {
                       resolvable.startResolutionForResult(activity, REQUEST_CHECK_SETTINGS_CODE);
                     } catch (IntentSender.SendIntentException | ClassCastException e) {
                       Log.e(TAG, "Unexpected exception", e);
-                      ToastUtil.longToastAndFinish(
+                      longToastAndFinish(
                           activity, R.string.toast_locationservice_not_available);
                     }
                     break;
                   case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                     Log.e(TAG, "Location settings change unavailable.");
-                    ToastUtil.longToastAndFinish(
+                    longToastAndFinish(
                         activity, R.string.toast_locationservice_not_available);
                     break;
                 }
@@ -85,7 +87,7 @@ public class LocationServiceVerifier implements DefaultLifecycleObserver {
         Log.i(TAG, "User enabled LocationServices.");
       } else {
         Log.e(TAG, "resultCode != RESULT_OK : " + resultCode);
-        ToastUtil.longToastAndFinish(activity, R.string.toast_locationservice_not_available);
+        longToastAndFinish(activity, R.string.toast_locationservice_not_available);
       }
     }
   }

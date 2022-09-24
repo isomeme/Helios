@@ -1,8 +1,8 @@
 package org.onereed.helios.concurrent;
 
-import androidx.annotation.NonNull;
+import static com.google.common.base.MoreObjects.toStringHelper;
 
-import com.google.common.base.MoreObjects;
+import androidx.annotation.NonNull;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -35,7 +35,7 @@ public class BackgroundThreadPoolExecutor extends ThreadPoolExecutor {
   @NonNull
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this)
+    return toStringHelper(this)
         .add("name", name)
         .add("super", super.toString())
         .toString();

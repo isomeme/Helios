@@ -1,5 +1,6 @@
 package org.onereed.helios;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -24,24 +25,19 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventViewHol
           | DateUtils.FORMAT_SHOW_WEEKDAY
           | DateUtils.FORMAT_SHOW_TIME
           | DateUtils.FORMAT_ABBREV_ALL;
-
-  static class SunEventViewHolder extends RecyclerView.ViewHolder {
-    private final CardView cardView;
-    private final TextView eventTimeView;
-
-    SunEventViewHolder(CardView cardView) {
-      super(cardView);
-      this.cardView = cardView;
-      this.eventTimeView = cardView.findViewById(R.id.eventTime);
-    }
-  }
-
   private SunInfo sunInfo = null;
 
   SunInfoAdapter() {
     setHasStableIds(true);
   }
 
+  private static void sendToLiberActivity(Context context, int typeOrdinal) {
+    var intent = new Intent(context, LiberActivity.class);
+    intent.putExtra(IntentExtraTags.SUN_EVENT_TYPE, typeOrdinal);
+    context.startActivity(intent);
+  }
+
+  @SuppressLint("NotifyDataSetChanged")
   void acceptSunInfo(SunInfo newSunInfo) {
     sunInfo = newSunInfo;
     notifyDataSetChanged();
@@ -55,18 +51,18 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventViewHol
   @NonNull
   @Override
   public SunEventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-    CardView cardView = (CardView) layoutInflater.inflate(R.layout.sun_event, parent, false);
+    var layoutInflater = LayoutInflater.from(parent.getContext());
+    var cardView =
+        (CardView) layoutInflater.inflate(R.layout.sun_event, parent, /* attachToRoot= */ false);
     return new SunEventViewHolder(cardView);
   }
 
   @Override
   public void onBindViewHolder(@NonNull SunEventViewHolder sunEventViewHolder, int position) {
-    SunEvent sunEvent = getSunEvent(position);
+    var sunEvent = getSunEvent(position);
     int typeOrdinal = sunEvent.getType().ordinal();
-    Context context = sunEventViewHolder.itemView.getContext();
-    TypedArrayAccessor typedArrayAccessor =
-        TypedArrayAccessor.create(context.getResources(), typeOrdinal);
+    var context = sunEventViewHolder.itemView.getContext();
+    var typedArrayAccessor = TypedArrayAccessor.create(context.getResources(), typeOrdinal);
 
     int bgColor = typedArrayAccessor.getColor(R.array.sun_event_bg_colors);
     sunEventViewHolder.cardView.setCardBackgroundColor(bgColor);
@@ -93,9 +89,14 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventViewHol
     return sunInfo.getSunEvents().get(position);
   }
 
-  private static void sendToLiberActivity(Context context, int typeOrdinal) {
-    Intent intent = new Intent(context, LiberActivity.class);
-    intent.putExtra(IntentExtraTags.SUN_EVENT_TYPE, typeOrdinal);
-    context.startActivity(intent);
+  static class SunEventViewHolder extends RecyclerView.ViewHolder {
+    private final CardView cardView;
+    private final TextView eventTimeView;
+
+    SunEventViewHolder(CardView cardView) {
+      super(cardView);
+      this.cardView = cardView;
+      this.eventTimeView = cardView.findViewById(R.id.eventTime);
+    }
   }
 }

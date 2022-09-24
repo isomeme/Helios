@@ -1,21 +1,21 @@
 package org.onereed.helios;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.tasks.Task;
 
-import org.onereed.helios.common.Place;
 import org.onereed.helios.common.LogUtil;
+import org.onereed.helios.common.Place;
 import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunInfo;
 import org.onereed.helios.sun.SunInfoSource;
 
 import java.time.Clock;
 import java.time.Instant;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /** Stores and updates data needed for {@link SunInfo} display. */
 // Must be public to work with the default ViewModel provider factory.
@@ -46,7 +46,7 @@ public class SunInfoViewModel extends ViewModel {
     lastUpdateTimeMutableLiveData.postValue(CLOCK.instant());
 
     if (sunInfoTask.isSuccessful()) {
-      SunInfo sunInfo = checkNotNull(sunInfoTask.getResult());
+      var sunInfo = checkNotNull(sunInfoTask.getResult());
       sunInfoMutableLiveData.postValue(sunInfo);
     } else {
       AppLogger.error(TAG, sunInfoTask.getException(), "Failure obtaining SunInfo.");

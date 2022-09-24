@@ -1,5 +1,8 @@
 package org.onereed.helios.common;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.onereed.helios.common.ToastUtil.longToastAndFinish;
+
 import android.app.Activity;
 import android.util.Log;
 
@@ -35,19 +38,19 @@ public class PlayServicesVerifier implements DefaultLifecycleObserver {
    */
   @Override
   public void onResume(@NonNull LifecycleOwner owner) {
-    GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
-    int code = googleApiAvailability.isGooglePlayServicesAvailable(activity);
+    var availability = GoogleApiAvailability.getInstance();
+    int code = availability.isGooglePlayServicesAvailable(activity);
 
     if (code != ConnectionResult.SUCCESS) {
-      if (googleApiAvailability.isUserResolvableError(code)) {
+      if (availability.isUserResolvableError(code)) {
         Log.w(TAG, "Play Services requires user setup, code=" + code);
-        googleApiAvailability
-            .getErrorDialog(
-                activity, code, PLAY_SERVICE_RESOLUTION_REQUEST, unused -> activity.finish())
-            .show();
+        var errorDialog =
+            availability.getErrorDialog(
+                activity, code, PLAY_SERVICE_RESOLUTION_REQUEST, unused -> activity.finish());
+        checkNotNull(errorDialog).show();
       } else {
         Log.e(TAG, "Play Services not available, code=" + code);
-        ToastUtil.longToastAndFinish(activity, R.string.toast_playservices_unrecoverable);
+        longToastAndFinish(activity, R.string.toast_playservices_unrecoverable);
       }
     }
   }

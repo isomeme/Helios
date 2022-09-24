@@ -1,5 +1,8 @@
 package org.onereed.helios;
 
+import static org.onereed.helios.common.ToastUtil.longToast;
+
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.Menu;
@@ -15,7 +18,8 @@ import java.util.Set;
 /** Parent class for activities sharing the common Helios menu. */
 abstract class AbstractMenuActivity extends AppCompatActivity {
 
-  public static final Uri HELP_URI = Uri.parse("https://www.one-reed.org/helios");
+  private static final String HELP_PAGE = "https://www.one-reed.org/helios";
+  private static final Intent HELP_INTENT = new Intent(Intent.ACTION_VIEW, Uri.parse(HELP_PAGE));
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -30,7 +34,11 @@ abstract class AbstractMenuActivity extends AppCompatActivity {
 
   @Keep // Called via onClick
   public final void openHelp(MenuItem unused) {
-    startActivity(new Intent(Intent.ACTION_VIEW, HELP_URI));
+    try {
+      startActivity(HELP_INTENT);
+    } catch (ActivityNotFoundException e) {
+      longToast(this, R.string.toast_no_browser);
+    }
   }
 
   @Keep // Called via onClick

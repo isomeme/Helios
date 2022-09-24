@@ -4,10 +4,10 @@
     <string name="toast_playservices_unrecoverable">Helios requires Google Play Services.</string>
     <string name="toast_location_permission_needed">Helios needs permission to access your device\'s location.</string>
     <string name="toast_locationservice_not_available">Helios requires location services to be enabled.</string>
+    <string name="toast_no_browser">No web browser available.</string>
 
     <string name="button_text_select">Select</string>
 
-    <string name="control_refresh">Refresh</string>
     <string name="control_directions">Directions</string>
     <string name="control_lock_compass">Lock compass</string>
     <string name="control_help">Help</string>

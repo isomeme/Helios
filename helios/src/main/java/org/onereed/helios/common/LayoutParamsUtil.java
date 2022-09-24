@@ -9,12 +9,6 @@ import java.util.function.Consumer;
 /** Utility methods for dealing with {@code LayoutParams}. */
 public class LayoutParamsUtil {
 
-  public static int getConstraintLayoutCircleRadius(View view) {
-    ConstraintLayout.LayoutParams layoutParams =
-        (ConstraintLayout.LayoutParams) view.getLayoutParams();
-    return layoutParams.circleRadius;
-  }
-
   /** Sets the radius of a view that is using circle-constrained layout. */
   public static void changeConstraintLayoutCircleRadius(View view, int radius) {
     changeConstraintLayoutParams(view, layoutParams -> layoutParams.circleRadius = radius);
@@ -32,8 +26,7 @@ public class LayoutParamsUtil {
   private static void changeConstraintLayoutParams(
       View view, Consumer<ConstraintLayout.LayoutParams> modifier) {
 
-    ConstraintLayout.LayoutParams layoutParams =
-        (ConstraintLayout.LayoutParams) view.getLayoutParams();
+    var layoutParams = (ConstraintLayout.LayoutParams) view.getLayoutParams();
     modifier.accept(layoutParams);
     view.setLayoutParams(layoutParams);
   }

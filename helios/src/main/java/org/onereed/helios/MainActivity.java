@@ -54,8 +54,7 @@ public class MainActivity extends AbstractMenuActivity
 
     activityMainBinding.swipeRefresh.setOnRefreshListener(this);
 
-    var sunInfoViewModel =
-        new ViewModelProvider(this).get(SunInfoViewModel.class);
+    var sunInfoViewModel = new ViewModelProvider(this).get(SunInfoViewModel.class);
 
     sunInfoViewModel.getSunInfoLiveData().observe(this, sunInfoAdapter::acceptSunInfo);
     sunInfoViewModel.getLastUpdateTimeLiveData().observe(this, this::updateCompleted);

@@ -1,5 +1,7 @@
 package org.onereed.helios.location;
 
+import static org.onereed.helios.common.ToastUtil.longToast;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
@@ -23,7 +25,6 @@ import org.onereed.helios.R;
 import org.onereed.helios.common.LocationUtil;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.Place;
-import org.onereed.helios.common.ToastUtil;
 import org.onereed.helios.logger.AppLogger;
 
 import java.util.Arrays;
@@ -137,7 +138,7 @@ public class LocationManager implements DefaultLifecycleObserver {
       AppLogger.debug(TAG, "User granted request for location permission.");
     } else {
       AppLogger.warning(TAG, "User refused request for location permission.");
-      ToastUtil.longToast(activity, R.string.toast_location_permission_needed);
+      longToast(activity, R.string.toast_location_permission_needed);
     }
   }
 

@@ -53,7 +53,7 @@ public class LiberActivity extends AbstractMenuActivity {
   }
 
   private void displayInvocation(int sunEventTypeOrdinal) {
-    SunEvent.Type type = SunEvent.Type.values()[sunEventTypeOrdinal];
+    var type = SunEvent.Type.values()[sunEventTypeOrdinal];
     String invocationHtml =
         String.format("file:///android_asset/invocation_%s.html", type.toString().toLowerCase());
     activityLiberBinding.invocation.loadUrl(invocationHtml);
