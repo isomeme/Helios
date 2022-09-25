@@ -20,6 +20,8 @@ public class AppLogger {
 
   private static GeneralLogger delegate = NullLogger.create();
 
+  private AppLogger() {}
+
   public static void useAndroidLogger() {
     delegate = AndroidLogger.create();
   }
@@ -28,16 +30,8 @@ public class AppLogger {
     delegate = JavaLogger.create();
   }
 
-  public static void verbose(String tag, @FormatString String message, Object... args) {
-    delegate.verbose(tag, format(message, args));
-  }
-
   public static void debug(String tag, @FormatString String message, Object... args) {
     delegate.debug(tag, format(message, args));
-  }
-
-  public static void info(String tag, @FormatString String message, Object... args) {
-    delegate.info(tag, format(message, args));
   }
 
   public static void warning(String tag, @FormatString String message, Object... args) {
@@ -48,17 +42,11 @@ public class AppLogger {
     delegate.error(tag, format(message, args));
   }
 
-  public static void error(String tag, Throwable tr, @FormatString String message, Object... args) {
-    delegate.error(tag, format(message, args), tr);
-  }
-
-  public static void silent(String tag, @FormatString String message, Object... args) {
-    // Do nothing.
+  public static void error(String tag, Throwable t, @FormatString String message, Object... args) {
+    delegate.error(tag, format(message, args), t);
   }
 
   private static String format(@FormatString String message, Object[] args) {
     return (args.length == 0) ? message : String.format(Locale.ENGLISH, message, args);
   }
-
-  private AppLogger() {}
 }

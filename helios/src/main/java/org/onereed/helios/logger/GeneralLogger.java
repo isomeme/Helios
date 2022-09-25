@@ -7,15 +7,11 @@ package org.onereed.helios.logger;
  */
 interface GeneralLogger {
 
-  void verbose(String tag, String message);
-
   void debug(String tag, String message);
-
-  void info(String tag, String message);
 
   void warning(String tag, String message);
 
   void error(String tag, String message);
 
-  void error(String tag, String message, Throwable tr);
+  void error(String tag, String message, Throwable t);
 }
