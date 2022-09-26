@@ -11,4 +11,5 @@
     <color name="fg_nadir">#66BB6A</color>
     <color name="sun_yellow">#FFFF00</color>
     <color name="compass_dial">#787878</color>
+    <color name="ic_launcher4_background">#82C9DC</color>
 </resources>
