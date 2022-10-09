@@ -70,7 +70,10 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
       ImmutableSet.of(SunEvent.Type.NOON, SunEvent.Type.NADIR);
 
   /** Shared preference key for compass lock status. */
-  private static final String LOCK_COMPASS = "lockCompass";
+  private static final String PREF_LOCK_COMPASS = "lockCompass";
+
+  /** Shared preference key for (locked) compass south-at-top status. */
+  private static final String PREF_SOUTH_AT_TOP = "southAtTop";
 
   private ActivityCompassBinding activityCompassBinding;
   private SensorManager sensorManager;
@@ -111,7 +114,6 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     if (rotationVectorSensor == null) {
       activityCompassBinding.lockCompassControl.setChecked(true);
       activityCompassBinding.lockCompassControl.setEnabled(false);
-      activityCompassBinding.lockCompassControl.setVisibility(View.INVISIBLE);
     }
 
     var sunInfoViewModel = new ViewModelProvider(this).get(SunInfoViewModel.class);
@@ -161,33 +163,38 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
 
     activityCompassBinding.compassComposite.post(this::obtainCompassRadius);
 
-    if (rotationVectorSensor != null) {
-      boolean isLocked = getPreferences().getBoolean(LOCK_COMPASS, false);
-      activityCompassBinding.lockCompassControl.setChecked(isLocked);
-      expandLockCheckboxHitRect();
-    }
+    var prefs = getPreferences();
+    boolean isLocked = prefs.getBoolean(PREF_LOCK_COMPASS, false) || rotationVectorSensor == null;
+    boolean southAtTop = prefs.getBoolean(PREF_SOUTH_AT_TOP, false);
 
+    activityCompassBinding.lockCompassControl.setChecked(isLocked);
+    activityCompassBinding.southAtTopControl.setChecked(southAtTop);
+    activityCompassBinding.southAtTopControl.setEnabled(isLocked);
+
+    expandCheckboxHitRects();
     applyCompassLockState();
   }
 
-  /**
-   * Google Play Store accessibility testing complained that the hit rect for the lock-compass
-   * checkbox is too small, so expand it using a {@link TouchDelegate}.
-   */
-  private void expandLockCheckboxHitRect() {
-    View parent = (View) activityCompassBinding.lockCompassControl.getParent();
-    parent.post(
-        () -> {
-          Rect rect = new Rect();
-          activityCompassBinding.lockCompassControl.getHitRect(rect);
-          int extraPadding = rect.height();
-          rect.top -= extraPadding;
-          rect.left -= extraPadding;
-          rect.right += extraPadding;
-          rect.bottom += extraPadding;
-          parent.setTouchDelegate(
-              new TouchDelegate(rect, activityCompassBinding.lockCompassControl));
-        });
+  /** Make the checkbox hit rects larger for accessibility. */
+  private void expandCheckboxHitRects() {
+    var checkboxControls =
+        ImmutableList.of(
+            activityCompassBinding.lockCompassControl, activityCompassBinding.southAtTopControl);
+
+    for (var control : checkboxControls) {
+      View parent = (View) control.getParent();
+      parent.post(
+          () -> {
+            Rect rect = new Rect();
+            control.getHitRect(rect);
+            int extraPadding = rect.height();
+            rect.top -= extraPadding;
+            rect.left -= extraPadding;
+            rect.right += extraPadding;
+            rect.bottom += extraPadding;
+            parent.setTouchDelegate(new TouchDelegate(rect, control));
+          });
+    }
   }
 
   private void obtainCompassRadius() {
@@ -215,7 +222,8 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     sensorManager.unregisterListener(this);
     getPreferences()
         .edit()
-        .putBoolean(LOCK_COMPASS, activityCompassBinding.lockCompassControl.isChecked())
+        .putBoolean(PREF_LOCK_COMPASS, activityCompassBinding.lockCompassControl.isChecked())
+        .putBoolean(PREF_SOUTH_AT_TOP, activityCompassBinding.southAtTopControl.isChecked())
         .apply();
   }
 
@@ -341,15 +349,17 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   }
 
   public void onCheckboxClicked(View view) {
-    // For now, there's just one checkbox, so we know what to do without checking further.
+    // This call handles both checkboxes.
     applyCompassLockState();
   }
 
   private void applyCompassLockState() {
     if (activityCompassBinding.lockCompassControl.isChecked()) {
+      activityCompassBinding.southAtTopControl.setEnabled(true);
       sensorManager.unregisterListener(this);
-      updateCompassState(0.0f);
+      updateCompassState(activityCompassBinding.southAtTopControl.isChecked() ? 180.0f : 0.0f);
     } else {
+      activityCompassBinding.southAtTopControl.setEnabled(false);
       sensorManager.registerListener(
           this,
           rotationVectorSensor,

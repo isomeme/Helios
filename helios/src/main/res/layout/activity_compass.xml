@@ -159,13 +159,26 @@
         android:id="@+id/lock_compass_control"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:layout_margin="10dp"
-        android:buttonTint="@android:color/darker_gray"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="10dp"
         android:checked="false"
         android:onClick="onCheckboxClicked"
         android:text="@string/control_lock_compass"
-        android:textColor="@android:color/darker_gray"
         tools:text="Lock compass" />
+
+    <CheckBox
+        android:id="@+id/south_at_top_control"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@id/compass_composite"
+        android:layout_alignParentBottom="true"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="10dp"
+        android:checked="false"
+        android:onClick="onCheckboxClicked"
+        android:text="@string/south_at_top"
+        tools:text="South at top" />
 
 </RelativeLayout>
