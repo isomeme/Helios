@@ -6,13 +6,11 @@ import static java.lang.Math.toDegrees;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.view.TouchDelegate;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -171,30 +169,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     activityCompassBinding.southAtTopControl.setChecked(southAtTop);
     activityCompassBinding.southAtTopControl.setEnabled(isLocked);
 
-    expandCheckboxHitRects();
     applyCompassLockState();
-  }
-
-  /** Make the checkbox hit rects larger for accessibility. */
-  private void expandCheckboxHitRects() {
-    var checkboxControls =
-        ImmutableList.of(
-            activityCompassBinding.lockCompassControl, activityCompassBinding.southAtTopControl);
-
-    for (var control : checkboxControls) {
-      View parent = (View) control.getParent();
-      parent.post(
-          () -> {
-            Rect rect = new Rect();
-            control.getHitRect(rect);
-            int extraPadding = rect.height();
-            rect.top -= extraPadding;
-            rect.left -= extraPadding;
-            rect.right += extraPadding;
-            rect.bottom += extraPadding;
-            parent.setTouchDelegate(new TouchDelegate(rect, control));
-          });
-    }
   }
 
   private void obtainCompassRadius() {
