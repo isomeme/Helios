@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@color/ic_launcher4_background"/>
-    <foreground android:drawable="@mipmap/ic_launcher4_foreground"/>
-    <monochrome android:drawable="@drawable/ic_launcher4_monochrome"/>
+    <background android:drawable="@color/helios_logo_bg"/>
+    <foreground android:drawable="@drawable/helios_logo_color"/>
+    <monochrome android:drawable="@drawable/helios_logo_mono"/>
 </adaptive-icon>
