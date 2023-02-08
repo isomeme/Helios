@@ -13,8 +13,7 @@ public final class LocationUtil {
 
   /** Standard request for repeated location updates. */
   public static final LocationRequest REPEATED_LOCATION_REQUEST =
-      LocationRequest.create()
-          .setFastestInterval(FASTEST_INTERVAL_MILLIS)
-          .setInterval(INTERVAL_MILLIS)
-          .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY);
+      new LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, INTERVAL_MILLIS)
+          .setMinUpdateIntervalMillis(FASTEST_INTERVAL_MILLIS)
+          .build();
 }
