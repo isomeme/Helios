@@ -78,21 +78,21 @@ dependencies {
 
     // SunCalc
 
-    implementation 'org.shredzone.commons:commons-suncalc:3.5'
+    implementation 'org.shredzone.commons:commons-suncalc:3.7'
 
     // Guava
 
-    implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre'
+    implementation 'com.google.guava:guava:31.1-jre'
 
     // @AutoValue
 
-    implementation 'com.google.auto.value:auto-value-annotations:1.9'
-    annotationProcessor 'com.google.auto.value:auto-value:1.9'
+    implementation 'com.google.auto.value:auto-value-annotations:1.10.2'
+    annotationProcessor 'com.google.auto.value:auto-value:1.10.2'
 
     // Testing
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.mockito:mockito-core:4.3.1'
+    testImplementation 'org.mockito:mockito-core:5.4.0'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
@@ -100,5 +100,5 @@ dependencies {
     // Kotlin dependency repair
     // https://stackoverflow.com/a/75719642/331864
 
-    implementation (platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
+    implementation (platform('org.jetbrains.kotlin:kotlin-bom:1.9.0'))
 }
