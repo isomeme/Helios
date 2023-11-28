@@ -21,4 +21,4 @@
 #-renamesourcefileattribute SourceFile
 
 # Recommended by APK bundle build
-# -dontwarn edu.umd.cs.findbugs.annotations.Nullable
+-dontwarn edu.umd.cs.findbugs.annotations.Nullable
