@@ -1,24 +1,21 @@
 package org.onereed.helios.sun;
 
+import static com.google.common.base.Verify.verify;
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static java.util.Collections.reverseOrder;
+
 import androidx.annotation.NonNull;
-
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Streams;
-
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Optional;
 import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.FormattedVerifyException;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.Place;
 import org.onereed.helios.logger.AppLogger;
 import org.shredzone.commons.suncalc.SunTimes;
-
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Arrays;
-
-import static com.google.common.base.Verify.verify;
-import static com.google.common.collect.ImmutableList.toImmutableList;
-import static java.util.Collections.reverseOrder;
 
 /** Implements a static method which produces {@link SunInfo} instances. */
 class SunInfoUtil {
@@ -80,7 +77,8 @@ class SunInfoUtil {
   private static ImmutableList<SunEvent> toSunEvents(SunTimes sunTimes, Place where) {
     return Arrays.stream(SunEvent.Type.values())
         .map(type -> type.createSunEvent(sunTimes, where))
-        .flatMap(Streams::stream)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
         .sorted()
         .collect(toImmutableList());
   }

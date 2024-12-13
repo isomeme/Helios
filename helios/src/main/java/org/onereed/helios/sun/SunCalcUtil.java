@@ -13,7 +13,7 @@ class SunCalcUtil {
   static double getSunAzimuthDeg(Place where, Instant when) {
     return SunPosition.compute()
         .at(where.getLatDeg(), where.getLonDeg())
-        .height(where.getAltitudeMeters())
+        .elevation(where.getAltitudeMeters())
         .on(when)
         .execute()
         .getAzimuth();
@@ -22,7 +22,7 @@ class SunCalcUtil {
   static SunTimes getSunTimes(Place where, Instant when, Duration limit) {
     return SunTimes.compute()
         .at(where.getLatDeg(), where.getLonDeg())
-        .height(where.getAltitudeMeters())
+        .elevation(where.getAltitudeMeters())
         .on(when)
         .limit(limit)
         .execute();
