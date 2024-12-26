@@ -35,6 +35,8 @@ android {
     compileOptions {
         sourceCompatibility = 1.11
         targetCompatibility = 1.11
+
+        coreLibraryDesugaringEnabled true
     }
 
     buildFeatures {
@@ -55,6 +57,10 @@ android {
 }
 
 dependencies {
+    // Desugaring
+
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+
     // Library jars
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -84,7 +90,7 @@ dependencies {
 
     // Guava
 
-    implementation 'com.google.guava:guava:33.3.1-android'
+    implementation 'com.google.guava:guava:33.4.0-android'
 
     // @AutoValue
 

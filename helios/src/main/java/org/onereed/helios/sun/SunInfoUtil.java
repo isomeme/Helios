@@ -43,26 +43,27 @@ class SunInfoUtil {
   static @NonNull SunInfo getSunInfo(@NonNull Place where, @NonNull Instant when) {
     AppLogger.debug(TAG, "where=%s when=%s", where, when);
 
-    SunTimes nextSunTimes = SunCalcUtil.getSunTimes(where, when, FUTURE_LIMIT);
-    ImmutableList<SunEvent> nextEvents = toSunEvents(nextSunTimes, where);
+    SunTimes.Parameters parameters = where.asTimesParameters();
+    SunTimes nextSunTimes = parameters.on(when).limit(FUTURE_LIMIT).execute();
+    var nextEvents = toSunEvents(nextSunTimes, where);
 
     verify(!nextEvents.isEmpty(), "nextEvents empty for nextSunTimes=%s", nextSunTimes);
 
     SunEvent nextEvent = nextEvents.get(0);
     Instant precedingTime = nextEvent.getTime().minus(PRECEDING_OFFSET);
-    SunTimes precedingSunTimes = SunCalcUtil.getSunTimes(where, precedingTime, PRECEDING_LIMIT);
-    ImmutableList<SunEvent> precedingEvents = toSunEvents(precedingSunTimes, where);
+    SunTimes precedingSunTimes = parameters.on(precedingTime).limit(PRECEDING_LIMIT).execute();
+    var precedingEvents = toSunEvents(precedingSunTimes, where);
 
     verify(
         !precedingEvents.isEmpty(), "precedingEvents empty for precedingSunTimes=%s", nextSunTimes);
 
-    SunEvent mostRecentEvent = getMostRecentEvent(precedingEvents, nextEvent);
+    var mostRecentEvent = getMostRecentEvent(precedingEvents, nextEvent);
     int closestEventIndex = getClosestEventIndex(when, mostRecentEvent, nextEvent);
 
-    ImmutableList<SunEvent> shownSunEvents =
+    var shownSunEvents =
         ImmutableList.<SunEvent>builder().add(mostRecentEvent).addAll(nextEvents).build();
 
-    SunAzimuthInfo sunAzimuthInfo = SunAzimuthInfo.from(where, when);
+    var sunAzimuthInfo = SunAzimuthInfo.from(where, when);
     double magneticDeclinationDeg = DirectionUtil.getMagneticDeclinationDeg(where, when);
 
     return SunInfo.builder()
@@ -77,8 +78,7 @@ class SunInfoUtil {
   private static ImmutableList<SunEvent> toSunEvents(SunTimes sunTimes, Place where) {
     return Arrays.stream(SunEvent.Type.values())
         .map(type -> type.createSunEvent(sunTimes, where))
-        .filter(Optional::isPresent)
-        .map(Optional::get)
+        .flatMap(Optional::stream)
         .sorted()
         .collect(toImmutableList());
   }

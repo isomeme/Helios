@@ -1,18 +1,15 @@
 package org.onereed.helios.sun;
 
 import androidx.annotation.NonNull;
-
 import com.google.auto.value.AutoValue;
-
-import org.onereed.helios.common.Place;
-import org.shredzone.commons.suncalc.SunTimes;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Function;
+import org.onereed.helios.common.Place;
+import org.shredzone.commons.suncalc.SunTimes;
 
 /** Represents one sun event -- rise, noon, set, or nadir. */
 @AutoValue
@@ -26,8 +23,8 @@ public abstract class SunEvent implements Comparable<SunEvent> {
 
   /**
    * The ordinal of the this event's {@link Type} is multiplied by this value before being added to
-   * the time bucket to yield a weak event ID. This must be >> than the largest expected time
-   * bucket value.
+   * the time bucket to yield a weak event ID. This must be >> than the largest expected time bucket
+   * value.
    */
   private static final long TYPE_ORDINAL_SCALE = 10_000_000L;
 
@@ -52,9 +49,12 @@ public abstract class SunEvent implements Comparable<SunEvent> {
      * summer and winter.
      */
     Optional<SunEvent> createSunEvent(@NonNull SunTimes sunTimes, @NonNull Place where) {
-      return Optional.ofNullable(timeExtractor.apply(sunTimes))
+        return Optional.ofNullable(timeExtractor.apply(sunTimes))
           .map(ZonedDateTime::toInstant)
-          .map(when -> SunEventFactory.from(this, where, when));
+          .map(
+              when ->
+                  SunEvent.create(
+                      this, when, where.asPositionParameters().on(when).execute().getAzimuth()));
     }
   }
 
