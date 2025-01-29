@@ -5,18 +5,15 @@ import static org.onereed.helios.common.ToastUtil.longToastAndFinish;
 import android.app.Activity;
 import android.content.IntentSender;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
-
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
-
 import org.onereed.helios.R;
 
 /**

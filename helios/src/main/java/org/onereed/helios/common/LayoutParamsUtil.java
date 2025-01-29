@@ -1,9 +1,7 @@
 package org.onereed.helios.common;
 
 import android.view.View;
-
 import androidx.constraintlayout.widget.ConstraintLayout;
-
 import java.util.function.Consumer;
 
 /** Utility methods for dealing with {@code LayoutParams}. */

@@ -1,14 +1,13 @@
 package org.onereed.helios.sun;
 
-import org.junit.Test;
-import org.shredzone.commons.suncalc.SunPosition;
-import org.shredzone.commons.suncalc.SunTimes;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
+import org.shredzone.commons.suncalc.SunPosition;
+import org.shredzone.commons.suncalc.SunTimes;
 
 /** Tests demonstrating bugs in SunCalc */
 public class SunCalcTest {

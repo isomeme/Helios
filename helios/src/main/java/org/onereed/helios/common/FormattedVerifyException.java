@@ -2,7 +2,6 @@ package org.onereed.helios.common;
 
 import com.google.common.base.VerifyException;
 import com.google.errorprone.annotations.FormatString;
-
 import java.util.Locale;
 
 /** A {@link VerifyException} with message formatting. */

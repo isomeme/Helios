@@ -2,7 +2,6 @@ package org.onereed.helios.common;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-
 import java.util.function.Function;
 
 /**

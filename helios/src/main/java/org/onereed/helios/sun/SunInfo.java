@@ -2,7 +2,6 @@ package org.onereed.helios.sun;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
-
 import java.time.Instant;
 
 /** Information about the most recent sun event, and upcoming ones. */

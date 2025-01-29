@@ -2,7 +2,6 @@ package org.onereed.helios.common;
 
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.Priority;
-
 import java.time.Duration;
 
 /** Static utility constants and methods for working with locations. */

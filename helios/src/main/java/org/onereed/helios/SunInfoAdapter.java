@@ -8,11 +8,9 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
-
 import org.onereed.helios.common.TypedArrayAccessor;
 import org.onereed.helios.sun.SunEvent;
 import org.onereed.helios.sun.SunInfo;
@@ -25,6 +23,7 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventViewHol
           | DateUtils.FORMAT_SHOW_WEEKDAY
           | DateUtils.FORMAT_SHOW_TIME
           | DateUtils.FORMAT_ABBREV_ALL;
+
   private SunInfo sunInfo = null;
 
   SunInfoAdapter() {

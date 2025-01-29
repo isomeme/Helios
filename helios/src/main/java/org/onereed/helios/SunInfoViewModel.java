@@ -5,17 +5,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-
 import com.google.android.gms.tasks.Task;
-
+import java.time.Clock;
+import java.time.Instant;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.Place;
 import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunInfo;
 import org.onereed.helios.sun.SunInfoSource;
-
-import java.time.Clock;
-import java.time.Instant;
 
 /** Stores and updates data needed for {@link SunInfo} display. */
 // Must be public to work with the default ViewModel provider factory.

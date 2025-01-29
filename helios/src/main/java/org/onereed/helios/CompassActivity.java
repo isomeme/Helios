@@ -13,15 +13,15 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
-
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Set;
 import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.LayoutParamsUtil;
 import org.onereed.helios.common.LogUtil;
@@ -30,10 +30,6 @@ import org.onereed.helios.location.LocationManager;
 import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEvent;
 import org.onereed.helios.sun.SunInfo;
-
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Set;
 
 /** Displays directions to sun events. */
 public class CompassActivity extends AbstractMenuActivity implements SensorEventListener {

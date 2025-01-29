@@ -1,7 +1,6 @@
 package org.onereed.helios.logger;
 
 import com.google.errorprone.annotations.FormatString;
-
 import java.util.Locale;
 
 /**

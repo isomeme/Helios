@@ -7,28 +7,24 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.HandlerThread;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
-
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-
+import java.util.Arrays;
+import java.util.function.Consumer;
 import org.onereed.helios.R;
 import org.onereed.helios.common.LocationUtil;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.Place;
 import org.onereed.helios.logger.AppLogger;
-
-import java.util.Arrays;
-import java.util.function.Consumer;
 
 public class LocationManager implements DefaultLifecycleObserver {
 

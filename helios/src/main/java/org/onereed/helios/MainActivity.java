@@ -3,23 +3,19 @@ package org.onereed.helios;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import com.google.common.collect.ImmutableSet;
-
+import java.time.Instant;
+import java.util.Set;
 import org.onereed.helios.common.LocationServiceVerifier;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.PlayServicesVerifier;
 import org.onereed.helios.databinding.ActivityMainBinding;
 import org.onereed.helios.location.LocationManager;
 import org.onereed.helios.logger.AppLogger;
-
-import java.time.Instant;
-import java.util.Set;
 
 /** Main activity for Helios. */
 public class MainActivity extends AbstractMenuActivity

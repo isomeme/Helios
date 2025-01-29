@@ -1,5 +1,8 @@
 package org.onereed.helios.sun;
 
+import static org.junit.Assert.assertEquals;
+
+import java.time.Instant;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,10 +10,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.onereed.helios.common.Place;
 import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEvent.Type;
-
-import java.time.Instant;
-
-import static org.junit.Assert.assertEquals;
 
 /** Tests for {@link SunInfoUtil}. */
 @RunWith(MockitoJUnitRunner.StrictStubs.class)

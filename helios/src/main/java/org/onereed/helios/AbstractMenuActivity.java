@@ -7,12 +7,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import androidx.annotation.Keep;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.errorprone.annotations.ForOverride;
-
 import java.util.Set;
 
 /** Parent class for activities sharing the common Helios menu. */

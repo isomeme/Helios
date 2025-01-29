@@ -1,18 +1,15 @@
 package org.onereed.helios;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
-
 import com.google.common.collect.ImmutableSet;
-
+import java.util.Set;
 import org.onereed.helios.databinding.ActivityLiberBinding;
 import org.onereed.helios.sun.SunEvent;
-
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /** Activity for displaying the text of Liber Resh. */
 public class LiberActivity extends AbstractMenuActivity {

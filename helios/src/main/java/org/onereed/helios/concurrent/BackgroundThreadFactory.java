@@ -1,9 +1,7 @@
 package org.onereed.helios.concurrent;
 
 import android.os.Process;
-
 import androidx.annotation.NonNull;
-
 import java.util.Locale;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;

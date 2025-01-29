@@ -1,7 +1,6 @@
 package org.onereed.helios.common;
 
 import android.hardware.GeomagneticField;
-
 import java.time.Instant;
 
 /** Static utility methods for working with angular directions. */
