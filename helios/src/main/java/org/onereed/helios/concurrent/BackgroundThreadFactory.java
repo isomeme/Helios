@@ -30,6 +30,6 @@ class BackgroundThreadFactory implements ThreadFactory {
         };
     String name =
         String.format(Locale.ENGLISH, "%s-%d", nameBase, threadNumberSource.incrementAndGet());
-    return new Thread(null, wrapperRunnable, name);
+    return new Thread(wrapperRunnable, name);
   }
 }
