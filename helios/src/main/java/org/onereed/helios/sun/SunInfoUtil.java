@@ -5,13 +5,13 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Collections.reverseOrder;
 
 import androidx.annotation.NonNull;
+import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Optional;
 import org.onereed.helios.common.DirectionUtil;
-import org.onereed.helios.common.FormattedVerifyException;
 import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.Place;
 import org.onereed.helios.logger.AppLogger;
@@ -93,9 +93,10 @@ class SunInfoUtil {
         .findFirst()
         .orElseThrow(
             () ->
-                new FormattedVerifyException(
-                    "Nothing in precedingEvents=%s works as a preceding event for nextEvent=%s",
-                    precedingEvents, nextEvent));
+                new VerifyException(
+                    String.format(
+                        "Nothing in precedingEvents=%s works as a preceding event for nextEvent=%s",
+                        precedingEvents, nextEvent)));
   }
 
   private static int getClosestEventIndex(
