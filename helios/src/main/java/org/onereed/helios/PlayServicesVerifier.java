@@ -1,4 +1,4 @@
-package org.onereed.helios.common;
+package org.onereed.helios;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.onereed.helios.common.ToastUtil.longToastAndFinish;
@@ -10,13 +10,13 @@ import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import org.onereed.helios.R;
+import org.onereed.helios.common.LogUtil;
 
 /**
  * When activity resumes, checks for Google Play Services availability. If it is not available,
  * tries to get the user to install or upgrade.
  */
-public class PlayServicesVerifier implements DefaultLifecycleObserver {
+class PlayServicesVerifier implements DefaultLifecycleObserver {
 
   private static final String TAG = LogUtil.makeTag(PlayServicesVerifier.class);
 
@@ -25,7 +25,7 @@ public class PlayServicesVerifier implements DefaultLifecycleObserver {
 
   private final Activity activity;
 
-  public PlayServicesVerifier(Activity activity) {
+  PlayServicesVerifier(Activity activity) {
     this.activity = activity;
   }
 

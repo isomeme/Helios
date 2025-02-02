@@ -1,4 +1,4 @@
-package org.onereed.helios.common;
+package org.onereed.helios;
 
 import static org.onereed.helios.common.ToastUtil.longToastAndFinish;
 
@@ -14,13 +14,14 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
-import org.onereed.helios.R;
+import org.onereed.helios.common.LocationUtil;
+import org.onereed.helios.common.LogUtil;
 
 /**
  * When activity resumes, checks that LocationService is on and capable of handling our request for
  * updates. If not, it attempts to assist the user in fixing this problem.
  */
-public class LocationServiceVerifier implements DefaultLifecycleObserver {
+class LocationServiceVerifier implements DefaultLifecycleObserver {
 
   private static final String TAG = LogUtil.makeTag(LocationServiceVerifier.class);
 
@@ -30,7 +31,7 @@ public class LocationServiceVerifier implements DefaultLifecycleObserver {
   private final Activity activity;
   private SettingsClient settingsClient;
 
-  public LocationServiceVerifier(Activity activity) {
+  LocationServiceVerifier(Activity activity) {
     this.activity = activity;
   }
 
@@ -78,7 +79,7 @@ public class LocationServiceVerifier implements DefaultLifecycleObserver {
             });
   }
 
-  public void acceptActivityResult(int requestCode, int resultCode) {
+  void acceptActivityResult(int requestCode, int resultCode) {
     if (requestCode == REQUEST_CHECK_SETTINGS_CODE) {
       if (resultCode == Activity.RESULT_OK) {
         Log.i(TAG, "User enabled LocationServices.");

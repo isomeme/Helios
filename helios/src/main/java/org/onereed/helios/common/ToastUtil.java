@@ -11,7 +11,7 @@ public class ToastUtil {
         () -> Toast.makeText(activity, activity.getString(stringId), Toast.LENGTH_LONG).show());
   }
 
-  static void longToastAndFinish(Activity activity, int stringId) {
+  public static void longToastAndFinish(Activity activity, int stringId) {
     longToast(activity, stringId);
     activity.finish();
   }
