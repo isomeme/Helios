@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context=".CompassActivity">
 
     <androidx.appcompat.widget.Toolbar
@@ -185,7 +186,7 @@
         android:minHeight="48dp"
         android:onClick="onCheckboxClicked"
         android:text="@string/south_at_top"
-        tools:text="South at top"
-        tools:ignore="RelativeOverlap" />
+        tools:ignore="RelativeOverlap"
+        tools:text="South at top" />
 
 </RelativeLayout>

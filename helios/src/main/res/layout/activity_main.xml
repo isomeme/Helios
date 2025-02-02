@@ -6,6 +6,7 @@
     android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:visibility="visible"
     tools:context=".MainActivity">
 
@@ -28,9 +29,9 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/sunEventsRecyclerView"
-            android:contentDescription="@string/content_sun_event_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:contentDescription="@string/content_sun_event_list"
             android:scrollbars="vertical" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
