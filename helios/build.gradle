@@ -4,7 +4,7 @@ apply plugin: 'com.google.gms.google-services'
 android {
     namespace 'org.onereed.helios'
 
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "org.onereed.helios"
@@ -59,7 +59,7 @@ android {
 dependencies {
     // Desugaring
 
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 
     // Library jars
 
@@ -67,7 +67,7 @@ dependencies {
 
     // Firebase
 
-    implementation 'com.google.firebase:firebase-analytics:22.2.0'
+    implementation 'com.google.firebase:firebase-analytics:22.5.0'
     // add SDKs for any other desired Firebase products
     // https://firebase.google.com/docs/android/setup#available-libraries
 
@@ -77,10 +77,10 @@ dependencies {
 
     // Android components
 
-    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-common-java8:2.8.7'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation 'androidx.lifecycle:lifecycle-common-java8:2.9.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
 
@@ -90,7 +90,7 @@ dependencies {
 
     // Guava
 
-    implementation 'com.google.guava:guava:33.4.0-android'
+    implementation 'com.google.guava:guava:33.4.8-android'
 
     // @AutoValue
 
@@ -100,7 +100,7 @@ dependencies {
     // Testing
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.mockito:mockito-core:5.15.2'
+    testImplementation 'org.mockito:mockito-core:5.18.0'
 
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
