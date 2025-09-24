@@ -1,7 +1,6 @@
 package org.onereed.helios;
 
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
@@ -10,16 +9,13 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.common.collect.ImmutableSet;
 import java.time.Instant;
 import java.util.Set;
-import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.databinding.ActivityMainBinding;
 import org.onereed.helios.location.LocationManager;
-import org.onereed.helios.logger.AppLogger;
+import timber.log.Timber;
 
 /** Main activity for Helios. */
 public class MainActivity extends AbstractMenuActivity
     implements SwipeRefreshLayout.OnRefreshListener {
-
-  private static final String TAG = LogUtil.makeTag(MainActivity.class);
 
   private final PlayServicesVerifier playServicesVerifier = new PlayServicesVerifier(this);
   private final LocationServiceVerifier locationServiceVerifier = new LocationServiceVerifier(this);
@@ -32,11 +28,7 @@ public class MainActivity extends AbstractMenuActivity
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    if ((this.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-      AppLogger.useAndroidLogger();
-    }
-
-    AppLogger.debug(TAG, "onCreate");
+    Timber.d("onCreate");
 
     activityMainBinding = ActivityMainBinding.inflate(getLayoutInflater());
     setContentView(activityMainBinding.getRoot());

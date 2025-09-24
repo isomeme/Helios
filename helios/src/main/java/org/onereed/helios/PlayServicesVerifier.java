@@ -4,21 +4,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.onereed.helios.common.ToastUtil.longToastAndFinish;
 
 import android.app.Activity;
-import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import org.onereed.helios.common.LogUtil;
+import timber.log.Timber;
 
 /**
  * When activity resumes, checks for Google Play Services availability. If it is not available,
  * tries to get the user to install or upgrade.
  */
 class PlayServicesVerifier implements DefaultLifecycleObserver {
-
-  private static final String TAG = LogUtil.makeTag(PlayServicesVerifier.class);
 
   /** The specific value doesn't matter; the API just needs some int. */
   private static final int PLAY_SERVICE_RESOLUTION_REQUEST = 1;
@@ -40,13 +37,13 @@ class PlayServicesVerifier implements DefaultLifecycleObserver {
 
     if (code != ConnectionResult.SUCCESS) {
       if (availability.isUserResolvableError(code)) {
-        Log.w(TAG, "Play Services requires user setup, code=" + code);
+        Timber.w("Play Services requires user setup, code=%s", code);
         var errorDialog =
             availability.getErrorDialog(
                 activity, code, PLAY_SERVICE_RESOLUTION_REQUEST, unused -> activity.finish());
         checkNotNull(errorDialog).show();
       } else {
-        Log.e(TAG, "Play Services not available, code=" + code);
+        Timber.e("Play Services not available, code=%s", code);
         longToastAndFinish(activity, R.string.toast_playservices_unrecoverable);
       }
     }

@@ -8,17 +8,14 @@ import androidx.lifecycle.ViewModel;
 import com.google.android.gms.tasks.Task;
 import java.time.Clock;
 import java.time.Instant;
-import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.Place;
-import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunInfo;
 import org.onereed.helios.sun.SunInfoSource;
+import timber.log.Timber;
 
 /** Stores and updates data needed for {@link SunInfo} display. */
 // Must be public to work with the default ViewModel provider factory.
 public class SunInfoViewModel extends ViewModel {
-
-  private static final String TAG = LogUtil.makeTag(SunInfoViewModel.class);
 
   private static final Clock CLOCK = Clock.systemUTC();
 
@@ -46,7 +43,7 @@ public class SunInfoViewModel extends ViewModel {
       var sunInfo = checkNotNull(sunInfoTask.getResult());
       sunInfoMutableLiveData.postValue(sunInfo);
     } else {
-      AppLogger.error(TAG, sunInfoTask.getException(), "Failure obtaining SunInfo.");
+      Timber.e(sunInfoTask.getException(), "Failure obtaining SunInfo.");
     }
   }
 }

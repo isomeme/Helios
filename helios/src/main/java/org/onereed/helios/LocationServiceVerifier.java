@@ -4,7 +4,6 @@ import static org.onereed.helios.common.ToastUtil.longToastAndFinish;
 
 import android.app.Activity;
 import android.content.IntentSender;
-import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
@@ -15,15 +14,13 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
 import org.onereed.helios.common.LocationUtil;
-import org.onereed.helios.common.LogUtil;
+import timber.log.Timber;
 
 /**
  * When activity resumes, checks that LocationService is on and capable of handling our request for
  * updates. If not, it attempts to assist the user in fixing this problem.
  */
 class LocationServiceVerifier implements DefaultLifecycleObserver {
-
-  private static final String TAG = LogUtil.makeTag(LocationServiceVerifier.class);
 
   /** The specific value doesn't matter; the API just needs some int. */
   private static final int REQUEST_CHECK_SETTINGS_CODE = 2;
@@ -64,13 +61,13 @@ class LocationServiceVerifier implements DefaultLifecycleObserver {
                       ResolvableApiException resolvable = (ResolvableApiException) exception;
                       resolvable.startResolutionForResult(activity, REQUEST_CHECK_SETTINGS_CODE);
                     } catch (IntentSender.SendIntentException | ClassCastException e) {
-                      Log.e(TAG, "Unexpected exception", e);
+                      Timber.e(e, "Unexpected exception");
                       longToastAndFinish(
                           activity, R.string.toast_locationservice_not_available);
                     }
                     break;
                   case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                    Log.e(TAG, "Location settings change unavailable.");
+                    Timber.e("Location settings change unavailable.");
                     longToastAndFinish(
                         activity, R.string.toast_locationservice_not_available);
                     break;
@@ -82,9 +79,9 @@ class LocationServiceVerifier implements DefaultLifecycleObserver {
   void acceptActivityResult(int requestCode, int resultCode) {
     if (requestCode == REQUEST_CHECK_SETTINGS_CODE) {
       if (resultCode == Activity.RESULT_OK) {
-        Log.i(TAG, "User enabled LocationServices.");
+        Timber.i("User enabled LocationServices.");
       } else {
-        Log.e(TAG, "resultCode != RESULT_OK : " + resultCode);
+        Timber.e("resultCode != RESULT_OK : %s", resultCode);
         longToastAndFinish(activity, R.string.toast_locationservice_not_available);
       }
     }

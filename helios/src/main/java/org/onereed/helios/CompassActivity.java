@@ -24,17 +24,14 @@ import java.util.HashMap;
 import java.util.Set;
 import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.LayoutParamsUtil;
-import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
 import org.onereed.helios.location.LocationManager;
-import org.onereed.helios.logger.AppLogger;
 import org.onereed.helios.sun.SunEvent;
 import org.onereed.helios.sun.SunInfo;
+import timber.log.Timber;
 
 /** Displays directions to sun events. */
 public class CompassActivity extends AbstractMenuActivity implements SensorEventListener {
-
-  private static final String TAG = LogUtil.makeTag(CompassActivity.class);
 
   /**
    * How long the compass rotation would last, in theory. In practice it will be interrupted by a
@@ -299,7 +296,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
         type -> checkNotNull(sunEventViews.get(type)).setVisibility(View.INVISIBLE));
 
     if (!shownTypes.containsAll(REQUIRED_EVENT_TYPES)) {
-      AppLogger.error(TAG, "Noon or nadir missing; shownEvents=%s", shownEvents);
+      Timber.e("Noon or nadir missing; shownEvents=%s", shownEvents);
       return;
     }
 

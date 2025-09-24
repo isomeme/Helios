@@ -12,15 +12,13 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Optional;
 import org.onereed.helios.common.DirectionUtil;
-import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.Place;
-import org.onereed.helios.logger.AppLogger;
 import org.shredzone.commons.suncalc.SunTimes;
+
+import timber.log.Timber;
 
 /** Implements a static method which produces {@link SunInfo} instances. */
 class SunInfoUtil {
-
-  private static final String TAG = LogUtil.makeTag(SunInfoUtil.class);
 
   /**
    * We use this value combined with {@link #PRECEDING_LIMIT} to include "preceding" events up to
@@ -41,7 +39,7 @@ class SunInfoUtil {
   private static final Duration FUTURE_LIMIT = Duration.ofHours(36L);
 
   static @NonNull SunInfo getSunInfo(@NonNull Place where, @NonNull Instant when) {
-    AppLogger.debug(TAG, "where=%s when=%s", where, when);
+    Timber.d("where=%s when=%s", where, when);
 
     SunTimes.Parameters parameters = where.asTimesParameters();
     SunTimes nextSunTimes = parameters.on(when).limit(FUTURE_LIMIT).execute();

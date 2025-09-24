@@ -22,13 +22,10 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 import org.onereed.helios.R;
 import org.onereed.helios.common.LocationUtil;
-import org.onereed.helios.common.LogUtil;
 import org.onereed.helios.common.Place;
-import org.onereed.helios.logger.AppLogger;
+import timber.log.Timber;
 
 public class LocationManager implements DefaultLifecycleObserver {
-
-  private static final String TAG = LogUtil.makeTag(LocationManager.class);
 
   private static final int REQUEST_PERMISSION_CODE = 1;
   private static final String[] PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION};
@@ -48,7 +45,7 @@ public class LocationManager implements DefaultLifecycleObserver {
 
   @Override
   public void onCreate(@NonNull LifecycleOwner owner) {
-    AppLogger.debug(TAG, "onCreate");
+    Timber.d("onCreate");
 
     fusedLocationClient =
         LocationServices.getFusedLocationProviderClient(activity.getApplicationContext());
@@ -59,7 +56,7 @@ public class LocationManager implements DefaultLifecycleObserver {
 
   @Override
   public void onResume(@NonNull LifecycleOwner owner) {
-    AppLogger.debug(TAG, "onResume");
+    Timber.d("onResume");
 
     if (checkPermission()) {
       fusedLocationClient
@@ -67,33 +64,33 @@ public class LocationManager implements DefaultLifecycleObserver {
               LocationUtil.REPEATED_LOCATION_REQUEST,
               locationUpdateRecipient,
               locationHandlerThread.getLooper())
-          .addOnFailureListener(e -> AppLogger.error(TAG, e, "Location update request failed."));
+          .addOnFailureListener(e -> Timber.e("Location update request failed."));
     }
   }
 
   @Override
   public void onPause(@NonNull LifecycleOwner owner) {
-    AppLogger.debug(TAG, "onPause");
+    Timber.d("onPause");
 
     fusedLocationClient
         .removeLocationUpdates(locationUpdateRecipient)
-        .addOnFailureListener(e -> AppLogger.error(TAG, e, "Failed to remove location update."));
+        .addOnFailureListener(e -> Timber.e("Failed to remove location update."));
   }
 
   @Override
   public void onDestroy(@NonNull LifecycleOwner owner) {
-    AppLogger.debug(TAG, "onDestroy");
+    Timber.d("onDestroy");
     locationHandlerThread.quitSafely();
   }
 
   public void requestLastLocation() {
-    AppLogger.debug(TAG, "requestLastLocation");
+    Timber.d("requestLastLocation");
 
     if (checkPermission()) {
       fusedLocationClient
           .getLastLocation()
           .addOnSuccessListener(this::relayPlace)
-          .addOnFailureListener(e -> AppLogger.error(TAG, e, "getLastLocation failed."));
+          .addOnFailureListener(e -> Timber.e("getLastLocation failed."));
     }
   }
 
@@ -109,7 +106,7 @@ public class LocationManager implements DefaultLifecycleObserver {
     boolean permissionOkay = permissionResult == PackageManager.PERMISSION_GRANTED;
 
     if (!permissionOkay) {
-      AppLogger.debug(TAG, "Requesting location permission.");
+      Timber.d("Requesting location permission.");
       ActivityCompat.requestPermissions(activity, PERMISSIONS, REQUEST_PERMISSION_CODE);
     }
 
@@ -131,9 +128,9 @@ public class LocationManager implements DefaultLifecycleObserver {
 
     // If request is cancelled, the result arrays are empty.
     if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-      AppLogger.debug(TAG, "User granted request for location permission.");
+      Timber.d("User granted request for location permission.");
     } else {
-      AppLogger.warning(TAG, "User refused request for location permission.");
+      Timber.w("User refused request for location permission.");
       longToast(activity, R.string.toast_location_permission_needed);
     }
   }
@@ -149,7 +146,7 @@ public class LocationManager implements DefaultLifecycleObserver {
     if (location != null) {
       placeConsumer.accept(Place.from(location));
     } else {
-      AppLogger.warning(TAG, "Null location received.");
+      Timber.w("Null location received.");
     }
   }
 
@@ -158,7 +155,7 @@ public class LocationManager implements DefaultLifecycleObserver {
     @Override
     public void onLocationAvailability(LocationAvailability locationAvailability) {
       if (!locationAvailability.isLocationAvailable()) {
-        AppLogger.warning(TAG, "Location not available.");
+        Timber.w("Location not available.");
       }
     }
 
