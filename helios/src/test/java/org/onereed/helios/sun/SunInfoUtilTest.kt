@@ -1,6 +1,6 @@
 package org.onereed.helios.sun
 
-import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,7 +31,7 @@ class SunInfoUtilTest {
             SunInfo.builder()
                 .setTimestamp(`when`)
                 .setSunAzimuthInfo(
-                    SunAzimuthInfo.create(289.93357351191065f, true)
+                    SunAzimuthInfo.create(289.93356f, true)
                 )
                 .setMagneticDeclinationDeg(0.0)
                 .setClosestEventIndex(1)
@@ -44,7 +44,7 @@ class SunInfoUtilTest {
                 )
                 .build()
 
-        Assert.assertEquals(expectedSunInfo, sunInfo)
+        assertEquals(expectedSunInfo, sunInfo)
     }
 
     /**
@@ -60,7 +60,7 @@ class SunInfoUtilTest {
             SunInfo.builder()
                 .setTimestamp(`when`)
                 .setSunAzimuthInfo(
-                    SunAzimuthInfo.create(294.5638405069754f, true)
+                    SunAzimuthInfo.create(294.56384f, true)
                 )
                 .setMagneticDeclinationDeg(0.0)
                 .setClosestEventIndex(0)
@@ -73,7 +73,7 @@ class SunInfoUtilTest {
                 )
                 .build()
 
-        Assert.assertEquals(expectedSunInfo, sunInfo)
+        assertEquals(expectedSunInfo, sunInfo)
     }
 
     companion object {
