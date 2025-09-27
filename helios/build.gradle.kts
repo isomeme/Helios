@@ -1,4 +1,4 @@
-import org.gradle.api.JavaVersion.VERSION_11
+import org.gradle.api.JavaVersion
 
 plugins {
     id("com.android.application")
@@ -35,13 +35,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = VERSION_11
-        targetCompatibility = VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
         isCoreLibraryDesugaringEnabled = true
     }
 
     kotlin {
-        jvmToolchain(11)
+        jvmToolchain(17)
     }
 
     buildFeatures {

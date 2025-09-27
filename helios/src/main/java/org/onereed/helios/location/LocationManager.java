@@ -8,15 +8,12 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.HandlerThread;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationAvailability;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationServices;
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -25,12 +22,10 @@ import org.onereed.helios.common.LocationUtil;
 import org.onereed.helios.common.Place;
 import timber.log.Timber;
 
-public class LocationManager implements DefaultLifecycleObserver {
+public class LocationManager implements DefaultLifecycleObserver, LocationListener {
 
   private static final int REQUEST_PERMISSION_CODE = 1;
   private static final String[] PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION};
-
-  private final LocationUpdateRecipient locationUpdateRecipient = new LocationUpdateRecipient();
 
   private final Activity activity;
   private final Consumer<Place> placeConsumer;
@@ -48,7 +43,7 @@ public class LocationManager implements DefaultLifecycleObserver {
     Timber.d("onCreate");
 
     fusedLocationClient =
-        LocationServices.getFusedLocationProviderClient(activity.getApplicationContext());
+        LocationServices.getFusedLocationProviderClient(activity);
 
     locationHandlerThread = new HandlerThread("LocationUpdates");
     locationHandlerThread.start();
@@ -61,9 +56,7 @@ public class LocationManager implements DefaultLifecycleObserver {
     if (checkPermission()) {
       fusedLocationClient
           .requestLocationUpdates(
-              LocationUtil.REPEATED_LOCATION_REQUEST,
-              locationUpdateRecipient,
-              locationHandlerThread.getLooper())
+              LocationUtil.REPEATED_LOCATION_REQUEST, this, locationHandlerThread.getLooper())
           .addOnFailureListener(e -> Timber.e("Location update request failed."));
     }
   }
@@ -73,7 +66,7 @@ public class LocationManager implements DefaultLifecycleObserver {
     Timber.d("onPause");
 
     fusedLocationClient
-        .removeLocationUpdates(locationUpdateRecipient)
+        .removeLocationUpdates(this)
         .addOnFailureListener(e -> Timber.e("Failed to remove location update."));
   }
 
@@ -83,14 +76,19 @@ public class LocationManager implements DefaultLifecycleObserver {
     locationHandlerThread.quitSafely();
   }
 
+  @Override
+  public void onLocationChanged(@NonNull Location location) {
+    placeConsumer.accept(Place.from(location));
+  }
+
   public void requestLastLocation() {
     Timber.d("requestLastLocation");
 
     if (checkPermission()) {
       fusedLocationClient
           .getLastLocation()
-          .addOnSuccessListener(this::relayPlace)
-          .addOnFailureListener(e -> Timber.e("getLastLocation failed."));
+          .addOnSuccessListener(this::onLocationChanged)
+          .addOnFailureListener(e -> Timber.e(e, "getLastLocation failed."));
     }
   }
 
@@ -132,36 +130,6 @@ public class LocationManager implements DefaultLifecycleObserver {
     } else {
       Timber.w("User refused request for location permission.");
       longToast(activity, R.string.toast_location_permission_needed);
-    }
-  }
-
-  /**
-   * Converts a received {@link Location} update into a {@link Place} value and relays it to the
-   * registered consumer.
-   */
-  private void relayPlace(@Nullable Location location) {
-    // Location has never been null in emulator or device tests, but it was null on all automated
-    // Play Store acceptance tests. So we will handle it gracefully.
-
-    if (location != null) {
-      placeConsumer.accept(Place.from(location));
-    } else {
-      Timber.w("Null location received.");
-    }
-  }
-
-  private class LocationUpdateRecipient extends LocationCallback {
-
-    @Override
-    public void onLocationAvailability(LocationAvailability locationAvailability) {
-      if (!locationAvailability.isLocationAvailable()) {
-        Timber.w("Location not available.");
-      }
-    }
-
-    @Override
-    public void onLocationResult(LocationResult locationResult) {
-      relayPlace(locationResult.getLastLocation());
     }
   }
 }
