@@ -78,7 +78,7 @@ public abstract class SunEvent implements Comparable<SunEvent> {
   public abstract float getAzimuthDeg();
 
   /**
-   * The RecyclerView we use to display the list of sun events can do some nice transition
+   * The {@link androidx.recyclerview.widget.RecyclerView} we use to display the list of sun events can do some nice transition
    * animations if it can identify which cards are the same after a data update. This method returns
    * an ID value which is likely to remain stable under expected fluctuations in calculated event
    * times, and very unlikely to collide with the ID of a different event.

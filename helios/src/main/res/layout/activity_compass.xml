@@ -168,7 +168,7 @@
         android:layout_marginBottom="10dp"
         android:checked="false"
         android:minHeight="48dp"
-        android:onClick="onCheckboxClicked"
+        android:onClick="onLockCompassClicked"
         android:text="@string/control_lock_compass"
         tools:text="Lock compass" />
 
@@ -184,7 +184,7 @@
         android:layout_marginBottom="10dp"
         android:checked="false"
         android:minHeight="48dp"
-        android:onClick="onCheckboxClicked"
+        android:onClick="onSouthAtTopClicked"
         android:text="@string/south_at_top"
         tools:ignore="RelativeOverlap"
         tools:text="South at top" />

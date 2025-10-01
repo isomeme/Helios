@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 import org.onereed.helios.R;
 import org.onereed.helios.common.LocationUtil;
-import org.onereed.helios.common.Place;
 import timber.log.Timber;
 
 public class LocationManager implements DefaultLifecycleObserver, LocationListener {
@@ -28,14 +27,14 @@ public class LocationManager implements DefaultLifecycleObserver, LocationListen
   private static final String[] PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION};
 
   private final Activity activity;
-  private final Consumer<Place> placeConsumer;
+  private final Consumer<Location> locationConsumer;
 
   private FusedLocationProviderClient fusedLocationClient;
   private HandlerThread locationHandlerThread;
 
-  public LocationManager(Activity activity, Consumer<Place> placeConsumer) {
+  public LocationManager(Activity activity, Consumer<Location> locationConsumer) {
     this.activity = activity;
-    this.placeConsumer = placeConsumer;
+    this.locationConsumer = locationConsumer;
   }
 
   @Override
@@ -78,18 +77,7 @@ public class LocationManager implements DefaultLifecycleObserver, LocationListen
 
   @Override
   public void onLocationChanged(@NonNull Location location) {
-    placeConsumer.accept(Place.from(location));
-  }
-
-  public void requestLastLocation() {
-    Timber.d("requestLastLocation");
-
-    if (checkPermission()) {
-      fusedLocationClient
-          .getLastLocation()
-          .addOnSuccessListener(this::onLocationChanged)
-          .addOnFailureListener(e -> Timber.e(e, "getLastLocation failed."));
-    }
+    locationConsumer.accept(location);
   }
 
   /**

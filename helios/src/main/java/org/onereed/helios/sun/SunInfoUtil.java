@@ -11,7 +11,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Optional;
-import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.Place;
 import org.shredzone.commons.suncalc.SunTimes;
 
@@ -62,12 +61,10 @@ class SunInfoUtil {
         ImmutableList.<SunEvent>builder().add(mostRecentEvent).addAll(nextEvents).build();
 
     var sunAzimuthInfo = SunAzimuthInfo.from(where, when);
-    double magneticDeclinationDeg = DirectionUtil.getMagneticDeclinationDeg(where, when);
 
     return SunInfo.builder()
         .setTimestamp(when)
         .setSunAzimuthInfo(sunAzimuthInfo)
-        .setMagneticDeclinationDeg(magneticDeclinationDeg)
         .setClosestEventIndex(closestEventIndex)
         .setSunEvents(shownSunEvents)
         .build();

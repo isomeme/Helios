@@ -12,8 +12,6 @@ public abstract class SunInfo {
 
   public abstract SunAzimuthInfo getSunAzimuthInfo();
 
-  public abstract double getMagneticDeclinationDeg();
-
   public abstract int getClosestEventIndex();
 
   public abstract ImmutableList<SunEvent> getSunEvents();
@@ -28,8 +26,6 @@ public abstract class SunInfo {
     public abstract Builder setTimestamp(Instant timestamp);
 
     public abstract Builder setSunAzimuthInfo(SunAzimuthInfo info);
-
-    public abstract Builder setMagneticDeclinationDeg(double magneticDeclinationDeg);
 
     public abstract Builder setClosestEventIndex(int closestEventIndex);
 

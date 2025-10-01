@@ -1,37 +1,43 @@
 package org.onereed.helios;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.Math.toDegrees;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
+import com.google.android.gms.location.DeviceOrientation;
+import com.google.android.gms.location.DeviceOrientationListener;
+import com.google.android.gms.location.DeviceOrientationRequest;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.FusedOrientationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.LayoutParamsUtil;
+import org.onereed.helios.common.LocationUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
-import org.onereed.helios.location.LocationManager;
 import org.onereed.helios.sun.SunEvent;
 import org.onereed.helios.sun.SunInfo;
 import timber.log.Timber;
 
 /** Displays directions to sun events. */
-public class CompassActivity extends AbstractMenuActivity implements SensorEventListener {
+public class CompassActivity extends AbstractMenuActivity implements DeviceOrientationListener {
 
   /**
    * How long the compass rotation would last, in theory. In practice it will be interrupted by a
@@ -44,17 +50,13 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   private static final long INSET_ANIMATION_DURATION_MILLIS = 1000L;
 
   private static final int COMPASS_SIDE_DP = 100;
-
   private static final int COMPASS_RADIUS_DP = 44;
 
   private static final double RADIUS_INSET_SCALE = 0.82;
-
   private static final double RADIUS_SUN_MOVEMENT_SCALE = 0.6;
 
   private static final float OPAQUE_ALPHA = 1.0f;
-
   private static final float INSET_ALPHA = 0.5f;
-
   private static final float ALPHA_RANGE = OPAQUE_ALPHA - INSET_ALPHA;
 
   private static final ImmutableSet<SunEvent.Type> REQUIRED_EVENT_TYPES =
@@ -66,32 +68,38 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   /** Shared preference key for (locked) compass south-at-top status. */
   private static final String PREF_SOUTH_AT_TOP = "southAtTop";
 
+  private static final DeviceOrientationRequest DEVICE_ORIENTATION_REQUEST =
+      new DeviceOrientationRequest.Builder(DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT).build();
+
   private ActivityCompassBinding activityCompassBinding;
-  private SensorManager sensorManager;
-  private Sensor rotationVectorSensor = null;
-  private LocationManager locationManager;
+
+  private FusedLocationProviderClient fusedLocationProviderClient;
+  private FusedOrientationProviderClient fusedOrientationProviderClient;
+  private Executor mainExecutor;
+
+  private SunInfoViewModel sunInfoViewModel;
 
   private ImmutableMap<SunEvent.Type, ImageView> sunEventViews = null;
   private ImmutableList<ImageView> compassRadiusViews = null;
   private NoonNadirWrapper noonWrapper = null;
   private NoonNadirWrapper nadirWrapper = null;
 
-  private double magneticDeclinationDeg = 0.0;
   private float lastRotationDeg = 0.0f;
   private int compassRadiusPx;
   private int radiusPxRange;
 
-  /** Returns true iff noon and nadir are either both in the north or both in the south. */
-  private static boolean noonNadirOverlap(SunEvent noonEvent, SunEvent nadirEvent) {
-    // If we're starting near north (0 az), we'll end up near 90. If we start off near south
-    // (180 az), we'll end up near -90.
-    float noonOffsetDeg = DirectionUtil.zeroCenterDeg(noonEvent.getAzimuthDeg() + 90.0);
-    float nadirOffsetDeg = DirectionUtil.zeroCenterDeg(nadirEvent.getAzimuthDeg() + 90.0);
-    return Math.abs(noonOffsetDeg - nadirOffsetDeg) < 45.0;
+  private enum CompassDisplayState {
+    LOCKED,
+    UNLOCK_PENDING,
+    UNLOCKING,
+    UNLOCKED
   }
+
+  private CompassDisplayState compassDisplayState;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    Timber.d("onCreate");
     super.onCreate(savedInstanceState);
 
     activityCompassBinding = ActivityCompassBinding.inflate(getLayoutInflater());
@@ -99,20 +107,12 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     setSupportActionBar(activityCompassBinding.toolbar);
     checkNotNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-    sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-    rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+    fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+    fusedOrientationProviderClient = LocationServices.getFusedOrientationProviderClient(this);
+    mainExecutor = ContextCompat.getMainExecutor(this);
 
-    if (rotationVectorSensor == null) {
-      activityCompassBinding.lockCompassControl.setChecked(true);
-      activityCompassBinding.lockCompassControl.setEnabled(false);
-    }
-
-    var sunInfoViewModel = new ViewModelProvider(this).get(SunInfoViewModel.class);
-
+    sunInfoViewModel = new ViewModelProvider(this).get(SunInfoViewModel.class);
     sunInfoViewModel.getSunInfoLiveData().observe(this, this::acceptSunInfo);
-
-    locationManager = new LocationManager(this, sunInfoViewModel::acceptPlace);
-    getLifecycle().addObserver(locationManager);
 
     sunEventViews =
         ImmutableMap.of(
@@ -140,29 +140,102 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     return ImmutableSet.of(R.id.action_text);
   }
 
-  @Override
-  public void onRequestPermissionsResult(
-      int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    locationManager.acceptPermissionsResult(requestCode, permissions, grantResults);
-  }
-
+  @SuppressLint("MissingPermission")
   @Override
   protected void onResume() {
+    Timber.d("onResume");
     super.onResume();
+
+    fusedLocationProviderClient
+        .requestLocationUpdates(
+            LocationUtil.REPEATED_LOCATION_REQUEST, mainExecutor, sunInfoViewModel)
+        .addOnSuccessListener(unusedVoid -> Timber.d("Location updates started."))
+        .addOnFailureListener(e -> Timber.e(e, "Location updates start failed."));
 
     activityCompassBinding.compassComposite.post(this::obtainCompassRadius);
 
-    var prefs = getPreferences();
-    boolean isLocked = prefs.getBoolean(PREF_LOCK_COMPASS, false) || rotationVectorSensor == null;
+    var prefs = getPreferences(Context.MODE_PRIVATE);
+    boolean isLocked = prefs.getBoolean(PREF_LOCK_COMPASS, false);
     boolean southAtTop = prefs.getBoolean(PREF_SOUTH_AT_TOP, false);
 
+    compassDisplayState = isLocked ? CompassDisplayState.LOCKED : CompassDisplayState.UNLOCKED;
+
     activityCompassBinding.lockCompassControl.setChecked(isLocked);
+    activityCompassBinding.lockCompassControl.setEnabled(true);
+
     activityCompassBinding.southAtTopControl.setChecked(southAtTop);
     activityCompassBinding.southAtTopControl.setEnabled(isLocked);
 
-    applyCompassLockState();
+    applyCompassControls();
+  }
+
+  @Override
+  protected void onPause() {
+    Timber.d("onPause");
+    super.onPause();
+
+    fusedLocationProviderClient
+        .removeLocationUpdates(sunInfoViewModel)
+        .addOnSuccessListener(unusedVoid -> Timber.d("Location updates stopped."))
+        .addOnFailureListener(e -> Timber.e(e, "Location updates stop failed."));
+
+    fusedOrientationProviderClient.removeOrientationUpdates(this);
+
+    getPreferences(Context.MODE_PRIVATE)
+        .edit()
+        .putBoolean(PREF_LOCK_COMPASS, activityCompassBinding.lockCompassControl.isChecked())
+        .putBoolean(PREF_SOUTH_AT_TOP, activityCompassBinding.southAtTopControl.isChecked())
+        .apply();
+  }
+
+  @Override
+  public void onDestroy() {
+    Timber.d("onDestroy");
+    super.onDestroy();
+
+    // NoonNadirWrapper instances hold references to views, so explicitly free them up for
+    // garbage collection.
+    noonWrapper = null;
+    nadirWrapper = null;
+  }
+
+  @Override
+  public void onDeviceOrientationChanged(@NonNull DeviceOrientation deviceOrientation) {
+    float compassAzimuthDeg = deviceOrientation.getHeadingDegrees();
+
+    switch (compassDisplayState) {
+      case LOCKED -> {}
+      case UNLOCK_PENDING -> {
+        // We use a single orientation update to animate rotating the compass to the reported
+        // heading. We block further orientation updates until the animation is complete.
+
+        compassDisplayState = CompassDisplayState.UNLOCKING;
+
+        rotateCompass(
+            compassAzimuthDeg,
+            new AnimatorListenerAdapter() {
+              @Override
+              public void onAnimationCancel(Animator animation) {
+                compassDisplayState = CompassDisplayState.UNLOCKED;
+              }
+
+              @Override
+              public void onAnimationEnd(Animator animation) {
+                compassDisplayState = CompassDisplayState.UNLOCKED;
+              }
+            });
+      }
+      case UNLOCKING -> {}
+      case UNLOCKED -> rotateCompass(compassAzimuthDeg, /* listener= */ null);
+    }
+  }
+
+  public void onLockCompassClicked(View unused) {
+    applyCompassControls();
+  }
+
+  public void onSouthAtTopClicked(View unused) {
+    rotateCompassToLockedPosition();
   }
 
   private void obtainCompassRadius() {
@@ -183,60 +256,43 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     nadirWrapper.redraw();
   }
 
-  @Override
-  protected void onPause() {
-    super.onPause();
-
-    sensorManager.unregisterListener(this);
-    getPreferences()
-        .edit()
-        .putBoolean(PREF_LOCK_COMPASS, activityCompassBinding.lockCompassControl.isChecked())
-        .putBoolean(PREF_SOUTH_AT_TOP, activityCompassBinding.southAtTopControl.isChecked())
-        .apply();
-  }
-
-  @Override
-  public void onDestroy() {
-    super.onDestroy();
-
-    // NoonNadirWrapper instances hold references to views, so explicitly free them up for
-    // garbage collection.
-    noonWrapper = null;
-    nadirWrapper = null;
-  }
-
-  @Override
-  public void onAccuracyChanged(Sensor sensor, int accuracy) {
-    // Do nothing.
-  }
-
-  @Override
-  public void onSensorChanged(SensorEvent event) {
-    if (event.sensor.getType() != Sensor.TYPE_ROTATION_VECTOR) {
-      return;
+  private void applyCompassControls() {
+    if (activityCompassBinding.lockCompassControl.isChecked()) {
+      compassDisplayState = CompassDisplayState.LOCKED;
+      fusedOrientationProviderClient.removeOrientationUpdates(this);
+      activityCompassBinding.southAtTopControl.setEnabled(true);
+      rotateCompassToLockedPosition();
+    } else {
+      fusedOrientationProviderClient
+          .requestOrientationUpdates(DEVICE_ORIENTATION_REQUEST, mainExecutor, this)
+          .addOnSuccessListener(
+              unusedVoid -> {
+                Timber.i("Request for orientation updates succeeded.");
+                compassDisplayState = CompassDisplayState.UNLOCK_PENDING;
+                activityCompassBinding.southAtTopControl.setEnabled(false);
+              })
+          .addOnFailureListener(
+              e -> {
+                Timber.e(e, "Failed to request orientation updates.");
+                activityCompassBinding.lockCompassControl.setChecked(true);
+                activityCompassBinding.lockCompassControl.setEnabled(false);
+                applyCompassControls();
+              });
     }
+  }
 
-    float[] rotationMatrix = new float[9];
-    float[] orientationAngles = new float[3];
-
-    SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
-    SensorManager.getOrientation(rotationMatrix, orientationAngles);
-
-    double magneticAzimuthDeg = toDegrees(orientationAngles[0]);
-
-    // This is how much the compass face as a whole will rotate, based on the device's orientation
-    // with respect to true north.
-    float compassAzimuthDeg =
-        DirectionUtil.zeroCenterDeg(magneticAzimuthDeg + magneticDeclinationDeg);
-
-    updateCompassState(compassAzimuthDeg);
+  private void rotateCompassToLockedPosition() {
+    rotateCompass(
+        activityCompassBinding.southAtTopControl.isChecked() ? 180.0f : 0.0f, /* listener= */ null);
   }
 
   /**
    * Executes an animated sweep from the old compass rotation to the new one, and updates the old
    * one to the new value to prepare for the next update.
    */
-  private void updateCompassState(float compassAzimuthDeg) {
+  private void rotateCompass(
+      float compassAzimuthDeg, @Nullable Animator.AnimatorListener listener) {
+
     float desiredRotationDeg = -compassAzimuthDeg;
     float deltaDeg = desiredRotationDeg - lastRotationDeg;
 
@@ -257,6 +313,11 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
                 lastRotationDeg,
                 adjustedDesiredRotationDeg)
             .setDuration(ROTATION_ANIMATION_DURATION_MILLIS);
+
+    if (listener != null) {
+      compassAnimator.addListener(listener);
+    }
+
     compassAnimator.setAutoCancel(true);
     compassAnimator.start();
 
@@ -264,7 +325,6 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
   }
 
   private void acceptSunInfo(SunInfo sunInfo) {
-    magneticDeclinationDeg = sunInfo.getMagneticDeclinationDeg();
     var sunAzimuthInfo = sunInfo.getSunAzimuthInfo();
     float sunAzimuthDeg = sunAzimuthInfo.getAzimuthDeg();
 
@@ -316,29 +376,13 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
     nadirWrapper.selectInset(isNadirInset);
   }
 
-  public void onCheckboxClicked(View view) {
-    // This call handles both checkboxes.
-    applyCompassLockState();
-  }
-
-  private void applyCompassLockState() {
-    if (activityCompassBinding.lockCompassControl.isChecked()) {
-      activityCompassBinding.southAtTopControl.setEnabled(true);
-      sensorManager.unregisterListener(this);
-      updateCompassState(activityCompassBinding.southAtTopControl.isChecked() ? 180.0f : 0.0f);
-    } else {
-      activityCompassBinding.southAtTopControl.setEnabled(false);
-      sensorManager.registerListener(
-          this,
-          rotationVectorSensor,
-          SensorManager.SENSOR_DELAY_NORMAL,
-          SensorManager.SENSOR_DELAY_UI);
-    }
-  }
-
-  /** Obtains user preferences using the same path as the deprecated older way of doing this. */
-  private SharedPreferences getPreferences() {
-    return getSharedPreferences(getPackageName() + "_preferences", Context.MODE_PRIVATE);
+  /** Returns true iff noon and nadir are either both in the north or both in the south. */
+  private static boolean noonNadirOverlap(SunEvent noonEvent, SunEvent nadirEvent) {
+    // If we're starting near north (0 az), we'll end up near 90. If we start off near south
+    // (180 az), we'll end up near -90.
+    float noonOffsetDeg = DirectionUtil.zeroCenterDeg(noonEvent.getAzimuthDeg() + 90.0);
+    float nadirOffsetDeg = DirectionUtil.zeroCenterDeg(nadirEvent.getAzimuthDeg() + 90.0);
+    return Math.abs(noonOffsetDeg - nadirOffsetDeg) < 45.0;
   }
 
   /**
@@ -383,10 +427,7 @@ public class CompassActivity extends AbstractMenuActivity implements SensorEvent
       LayoutParamsUtil.changeConstraintLayoutCircleRadius(view, radiusPx);
     }
 
-    /**
-     * Called from {@link CompassActivity#obtainCompassRadius()} to redraw this event at the
-     * appropriate radius and alpha for its saved state.
-     */
+    /** Redraws this event at the appropriate radius and alpha for its saved state. */
     private void redraw() {
       setInsetPct(insetPct);
     }
