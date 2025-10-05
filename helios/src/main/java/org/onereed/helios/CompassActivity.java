@@ -3,9 +3,9 @@ package org.onereed.helios;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
@@ -13,12 +13,10 @@ import android.widget.ImageView;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.Observer;
 import com.google.android.gms.location.DeviceOrientation;
 import com.google.android.gms.location.DeviceOrientationListener;
 import com.google.android.gms.location.DeviceOrientationRequest;
-import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.FusedOrientationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.common.collect.ImmutableList;
@@ -27,17 +25,16 @@ import com.google.common.collect.ImmutableSet;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.LayoutParamsUtil;
-import org.onereed.helios.common.LocationUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
 import org.onereed.helios.sun.SunEvent;
 import org.onereed.helios.sun.SunInfo;
 import timber.log.Timber;
 
 /** Displays directions to sun events. */
-public class CompassActivity extends AbstractMenuActivity implements DeviceOrientationListener {
+public class CompassActivity extends BaseSunInfoActivity
+    implements DeviceOrientationListener, Observer<SunInfo> {
 
   /**
    * How long the compass rotation would last, in theory. In practice it will be interrupted by a
@@ -73,11 +70,7 @@ public class CompassActivity extends AbstractMenuActivity implements DeviceOrien
 
   private ActivityCompassBinding activityCompassBinding;
 
-  private FusedLocationProviderClient fusedLocationProviderClient;
   private FusedOrientationProviderClient fusedOrientationProviderClient;
-  private Executor mainExecutor;
-
-  private SunInfoViewModel sunInfoViewModel;
 
   private ImmutableMap<SunEvent.Type, ImageView> sunEventViews = null;
   private ImmutableList<ImageView> compassRadiusViews = null;
@@ -107,12 +100,7 @@ public class CompassActivity extends AbstractMenuActivity implements DeviceOrien
     setSupportActionBar(activityCompassBinding.toolbar);
     checkNotNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-    fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-    fusedOrientationProviderClient = LocationServices.getFusedOrientationProviderClient(this);
-    mainExecutor = ContextCompat.getMainExecutor(this);
-
-    sunInfoViewModel = new ViewModelProvider(this).get(SunInfoViewModel.class);
-    sunInfoViewModel.getSunInfoLiveData().observe(this, this::acceptSunInfo);
+    sunInfoViewModel.getSunInfoLiveData().observe(/* owner= */ this, /* observer= */ this);
 
     sunEventViews =
         ImmutableMap.of(
@@ -133,6 +121,8 @@ public class CompassActivity extends AbstractMenuActivity implements DeviceOrien
 
     noonWrapper = new NoonNadirWrapper(activityCompassBinding.noon);
     nadirWrapper = new NoonNadirWrapper(activityCompassBinding.nadir);
+
+    fusedOrientationProviderClient = LocationServices.getFusedOrientationProviderClient(this);
   }
 
   @Override
@@ -140,17 +130,10 @@ public class CompassActivity extends AbstractMenuActivity implements DeviceOrien
     return ImmutableSet.of(R.id.action_text);
   }
 
-  @SuppressLint("MissingPermission")
   @Override
   protected void onResume() {
     Timber.d("onResume");
     super.onResume();
-
-    fusedLocationProviderClient
-        .requestLocationUpdates(
-            LocationUtil.REPEATED_LOCATION_REQUEST, mainExecutor, sunInfoViewModel)
-        .addOnSuccessListener(unusedVoid -> Timber.d("Location updates started."))
-        .addOnFailureListener(e -> Timber.e(e, "Location updates start failed."));
 
     activityCompassBinding.compassComposite.post(this::obtainCompassRadius);
 
@@ -174,11 +157,6 @@ public class CompassActivity extends AbstractMenuActivity implements DeviceOrien
     Timber.d("onPause");
     super.onPause();
 
-    fusedLocationProviderClient
-        .removeLocationUpdates(sunInfoViewModel)
-        .addOnSuccessListener(unusedVoid -> Timber.d("Location updates stopped."))
-        .addOnFailureListener(e -> Timber.e(e, "Location updates stop failed."));
-
     fusedOrientationProviderClient.removeOrientationUpdates(this);
 
     getPreferences(Context.MODE_PRIVATE)
@@ -200,11 +178,64 @@ public class CompassActivity extends AbstractMenuActivity implements DeviceOrien
   }
 
   @Override
+  public void onChanged(@NonNull SunInfo sunInfo) {
+    var sunAzimuthInfo = sunInfo.getSunAzimuthInfo();
+    float sunAzimuthDeg = sunAzimuthInfo.getAzimuthDeg();
+
+    LayoutParamsUtil.changeConstraintLayoutCircleAngle(activityCompassBinding.sun, sunAzimuthDeg);
+    LayoutParamsUtil.changeConstraintLayoutCircleAngle(
+        activityCompassBinding.sunMovement, sunAzimuthDeg);
+
+    float sunMovementRotation =
+        sunAzimuthInfo.isClockwise() ? sunAzimuthDeg : sunAzimuthDeg + 180.0f;
+    activityCompassBinding.sunMovement.setRotation(sunMovementRotation);
+
+    var shownEvents = new HashMap<SunEvent.Type, SunEvent>();
+
+    for (SunEvent sunEvent : sunInfo.getSunEvents()) {
+      SunEvent.Type type = sunEvent.getType();
+
+      if (!shownEvents.containsKey(type)) {
+        shownEvents.put(type, sunEvent);
+        var view = checkNotNull(sunEventViews.get(type));
+        LayoutParamsUtil.changeConstraintLayoutCircleAngle(view, sunEvent.getAzimuthDeg());
+        view.setVisibility(View.VISIBLE);
+      }
+    }
+
+    var shownTypes = EnumSet.copyOf(shownEvents.keySet());
+    var missingTypes = EnumSet.complementOf(shownTypes);
+
+    missingTypes.forEach(
+        type -> checkNotNull(sunEventViews.get(type)).setVisibility(View.INVISIBLE));
+
+    if (!shownTypes.containsAll(REQUIRED_EVENT_TYPES)) {
+      Timber.e("Noon or nadir missing; shownEvents=%s", shownEvents);
+      return;
+    }
+
+    // In the tropics, noon and nadir can be at the same azimuth, so inset and dim the icon for
+    // the one that comes later. We also explicitly reset the non-offset event(s) to correct
+    // previous later-event status.
+
+    var noonEvent = checkNotNull(shownEvents.get(SunEvent.Type.NOON));
+    var nadirEvent = checkNotNull(shownEvents.get(SunEvent.Type.NADIR));
+
+    boolean isOverlap = noonNadirOverlap(noonEvent, nadirEvent);
+    boolean isNoonEarlier = noonEvent.compareTo(nadirEvent) < 1;
+    boolean isNoonInset = isOverlap && !isNoonEarlier;
+    boolean isNadirInset = isOverlap && isNoonEarlier;
+
+    noonWrapper.selectInset(isNoonInset);
+    nadirWrapper.selectInset(isNadirInset);
+  }
+
+  @Override
   public void onDeviceOrientationChanged(@NonNull DeviceOrientation deviceOrientation) {
     float compassAzimuthDeg = deviceOrientation.getHeadingDegrees();
 
     switch (compassDisplayState) {
-      case LOCKED -> {}
+      case LOCKED, UNLOCKING -> {}
       case UNLOCK_PENDING -> {
         // We use a single orientation update to animate rotating the compass to the reported
         // heading. We block further orientation updates until the animation is complete.
@@ -215,25 +246,26 @@ public class CompassActivity extends AbstractMenuActivity implements DeviceOrien
             compassAzimuthDeg,
             new AnimatorListenerAdapter() {
               @Override
-              public void onAnimationCancel(Animator animation) {
+              public void onAnimationCancel(Animator unused) {
                 compassDisplayState = CompassDisplayState.UNLOCKED;
               }
 
               @Override
-              public void onAnimationEnd(Animator animation) {
+              public void onAnimationEnd(Animator unused) {
                 compassDisplayState = CompassDisplayState.UNLOCKED;
               }
             });
       }
-      case UNLOCKING -> {}
       case UNLOCKED -> rotateCompass(compassAzimuthDeg, /* listener= */ null);
     }
   }
 
+  @Keep
   public void onLockCompassClicked(View unused) {
     applyCompassControls();
   }
 
+  @Keep
   public void onSouthAtTopClicked(View unused) {
     rotateCompassToLockedPosition();
   }
@@ -291,7 +323,7 @@ public class CompassActivity extends AbstractMenuActivity implements DeviceOrien
    * one to the new value to prepare for the next update.
    */
   private void rotateCompass(
-      float compassAzimuthDeg, @Nullable Animator.AnimatorListener listener) {
+      float compassAzimuthDeg, @Nullable AnimatorListener listener) {
 
     float desiredRotationDeg = -compassAzimuthDeg;
     float deltaDeg = desiredRotationDeg - lastRotationDeg;
@@ -322,58 +354,6 @@ public class CompassActivity extends AbstractMenuActivity implements DeviceOrien
     compassAnimator.start();
 
     lastRotationDeg = desiredRotationDeg;
-  }
-
-  private void acceptSunInfo(SunInfo sunInfo) {
-    var sunAzimuthInfo = sunInfo.getSunAzimuthInfo();
-    float sunAzimuthDeg = sunAzimuthInfo.getAzimuthDeg();
-
-    LayoutParamsUtil.changeConstraintLayoutCircleAngle(activityCompassBinding.sun, sunAzimuthDeg);
-    LayoutParamsUtil.changeConstraintLayoutCircleAngle(
-        activityCompassBinding.sunMovement, sunAzimuthDeg);
-
-    float sunMovementRotation =
-        sunAzimuthInfo.isClockwise() ? sunAzimuthDeg : sunAzimuthDeg + 180.0f;
-    activityCompassBinding.sunMovement.setRotation(sunMovementRotation);
-
-    var shownEvents = new HashMap<SunEvent.Type, SunEvent>();
-
-    for (SunEvent sunEvent : sunInfo.getSunEvents()) {
-      SunEvent.Type type = sunEvent.getType();
-
-      if (!shownEvents.containsKey(type)) {
-        shownEvents.put(type, sunEvent);
-        var view = checkNotNull(sunEventViews.get(type));
-        LayoutParamsUtil.changeConstraintLayoutCircleAngle(view, sunEvent.getAzimuthDeg());
-        view.setVisibility(View.VISIBLE);
-      }
-    }
-
-    var shownTypes = EnumSet.copyOf(shownEvents.keySet());
-    var missingTypes = EnumSet.complementOf(shownTypes);
-
-    missingTypes.forEach(
-        type -> checkNotNull(sunEventViews.get(type)).setVisibility(View.INVISIBLE));
-
-    if (!shownTypes.containsAll(REQUIRED_EVENT_TYPES)) {
-      Timber.e("Noon or nadir missing; shownEvents=%s", shownEvents);
-      return;
-    }
-
-    // In the tropics, noon and nadir can be at the same azimuth, so inset and dim the icon for
-    // the one that comes later. We also explicitly reset the non-offset event(s) to correct
-    // previous later-event status.
-
-    var noonEvent = checkNotNull(shownEvents.get(SunEvent.Type.NOON));
-    var nadirEvent = checkNotNull(shownEvents.get(SunEvent.Type.NADIR));
-
-    boolean isOverlap = noonNadirOverlap(noonEvent, nadirEvent);
-    boolean isNoonEarlier = noonEvent.compareTo(nadirEvent) < 1;
-    boolean isNoonInset = isOverlap && !isNoonEarlier;
-    boolean isNadirInset = isOverlap && isNoonEarlier;
-
-    noonWrapper.selectInset(isNoonInset);
-    nadirWrapper.selectInset(isNadirInset);
   }
 
   /** Returns true iff noon and nadir are either both in the north or both in the south. */

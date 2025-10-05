@@ -12,7 +12,7 @@ import org.onereed.helios.databinding.ActivityLiberBinding;
 import org.onereed.helios.sun.SunEvent;
 
 /** Activity for displaying the text of Liber Resh. */
-public class LiberActivity extends AbstractMenuActivity {
+public class LiberActivity extends BaseActivity {
 
   private ActivityLiberBinding activityLiberBinding;
 

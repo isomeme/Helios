@@ -12,8 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.errorprone.annotations.ForOverride;
 import java.util.Set;
 
-/** Parent class for activities sharing the common Helios menu. */
-abstract class AbstractMenuActivity extends AppCompatActivity {
+/** Parent class for Helios activities. */
+abstract class BaseActivity extends AppCompatActivity {
 
   private static final String HELP_PAGE = "https://www.one-reed.org/helios";
   private static final Intent HELP_INTENT = new Intent(Intent.ACTION_VIEW, Uri.parse(HELP_PAGE));
@@ -28,6 +28,13 @@ abstract class AbstractMenuActivity extends AppCompatActivity {
 
     return super.onCreateOptionsMenu(menu);
   }
+
+  /**
+   * Subclass implementations of this method are called to determine what options menu items should
+   * be visible. The 'Help' menu item is always visible, so it need not be included in this set.
+   */
+  @ForOverride
+  protected abstract Set<Integer> getOptionsMenuItems();
 
   @Keep // Called via onClick
   public final void openHelp(MenuItem unused) {
@@ -47,11 +54,4 @@ abstract class AbstractMenuActivity extends AppCompatActivity {
   public final void openLiber(MenuItem unused) {
     startActivity(new Intent(this, LiberActivity.class));
   }
-
-  /**
-   * Subclass implementations of this method are called to determine what options menu items should
-   * be visible. The 'Help' menu item is always visible, so it need not be included in this set.
-   */
-  @ForOverride
-  protected abstract Set<Integer> getOptionsMenuItems();
 }

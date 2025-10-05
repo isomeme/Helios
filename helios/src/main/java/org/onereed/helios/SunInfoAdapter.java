@@ -10,12 +10,14 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 import org.onereed.helios.common.TypedArrayAccessor;
 import org.onereed.helios.sun.SunEvent;
 import org.onereed.helios.sun.SunInfo;
 
-class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventViewHolder> {
+class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventViewHolder>
+    implements Observer<SunInfo> {
 
   private static final int DATE_FORMAT_FLAGS =
       DateUtils.FORMAT_SHOW_DATE
@@ -37,7 +39,8 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventViewHol
   }
 
   @SuppressLint("NotifyDataSetChanged")
-  void acceptSunInfo(SunInfo newSunInfo) {
+  @Override
+  public void onChanged(SunInfo newSunInfo) {
     sunInfo = newSunInfo;
     notifyDataSetChanged();
   }

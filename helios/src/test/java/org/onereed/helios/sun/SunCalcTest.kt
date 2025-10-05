@@ -14,11 +14,11 @@ class SunCalcTest {
         val where = doubleArrayOf(34.0, -118.5)
         val `when` = Instant.parse("2020-06-16T04:11:00Z")
         val sunTimes = SunTimes.compute().at(where).on(`when`).execute()
-        val noon = sunTimes.getNoon()
+        val noon = sunTimes.noon
         assertNotNull(noon)
 
         val sunPosition = SunPosition.compute().at(where).on(noon).execute()
-        val noonAzimuth = sunPosition.getAzimuth()
+        val noonAzimuth = sunPosition.azimuth
 
         assertEquals(180.0, noonAzimuth, 0.25) // noonAzimuth = 180.00725554668216
     }

@@ -93,6 +93,11 @@ dependencies {
 
     implementation("com.jakewharton.timber:timber:5.0.1")
 
+    // Permissions management
+
+    implementation("io.github.ParkSangGwon:tedpermission-normal:3.4.2")
+    implementation("com.guolindev.permissionx:permissionx:1.8.1")
+
     // Testing
 
     testImplementation("junit:junit:4.13.2")
