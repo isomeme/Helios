@@ -77,7 +77,6 @@ dependencies {
     implementation("androidx.core:core-ktx:1.17.0")
     implementation("androidx.lifecycle:lifecycle-common-java8:2.9.4")
     implementation("androidx.recyclerview:recyclerview:1.4.0")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     // SunCalc
 
@@ -92,11 +91,6 @@ dependencies {
     // Logging
 
     implementation("com.jakewharton.timber:timber:5.0.1")
-
-    // Permissions management
-
-    implementation("io.github.ParkSangGwon:tedpermission-normal:3.4.2")
-    implementation("com.guolindev.permissionx:permissionx:1.8.1")
 
     // Testing
 
