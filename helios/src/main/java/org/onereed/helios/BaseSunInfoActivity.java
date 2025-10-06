@@ -11,19 +11,35 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
+
+import org.onereed.helios.sun.SunInfo;
+
+import java.time.Duration;
 import java.util.concurrent.Executor;
-import org.onereed.helios.common.LocationUtil;
 import timber.log.Timber;
 
 abstract class BaseSunInfoActivity extends BaseActivity {
 
-  protected SunInfoViewModel sunInfoViewModel;
-  protected Executor mainExecutor;
+  private static final Duration UPDATE_INTERVAL = Duration.ofSeconds(30L);
+  private static final Duration MIN_UPDATE_INTERVAL = Duration.ofSeconds(15L);
+
+  private static final LocationRequest REPEATED_LOCATION_REQUEST =
+          new LocationRequest.Builder(
+                  Priority.PRIORITY_BALANCED_POWER_ACCURACY, UPDATE_INTERVAL.toMillis())
+                  .setMinUpdateIntervalMillis(MIN_UPDATE_INTERVAL.toMillis())
+                  .build();
+
+  private SunInfoViewModel sunInfoViewModel;
 
   private FusedLocationProviderClient fusedLocationProviderClient;
+  private Executor mainExecutor;
+
   private ActivityResultLauncher<String> requestPermissionLauncher;
 
   private Intent settingsIntent;
@@ -34,9 +50,10 @@ abstract class BaseSunInfoActivity extends BaseActivity {
     super.onCreate(savedInstanceState);
 
     sunInfoViewModel = new ViewModelProvider(this).get(SunInfoViewModel.class);
-    mainExecutor = ContextCompat.getMainExecutor(this);
 
     fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+    mainExecutor = ContextCompat.getMainExecutor(this);
+
     requestPermissionLauncher =
         registerForActivityResult(new RequestPermission(), this::acceptLocationPermissionResult);
 
@@ -68,7 +85,7 @@ abstract class BaseSunInfoActivity extends BaseActivity {
 
       fusedLocationProviderClient
           .requestLocationUpdates(
-              LocationUtil.REPEATED_LOCATION_REQUEST, mainExecutor, sunInfoViewModel)
+              REPEATED_LOCATION_REQUEST, mainExecutor, sunInfoViewModel)
           .addOnSuccessListener(unusedVoid -> Timber.d("Location updates started."))
           .addOnFailureListener(e -> Timber.e(e, "Location updates start failed."));
 
@@ -87,6 +104,10 @@ abstract class BaseSunInfoActivity extends BaseActivity {
         .removeLocationUpdates(sunInfoViewModel)
         .addOnSuccessListener(unusedVoid -> Timber.d("Location updates stopped."))
         .addOnFailureListener(e -> Timber.e(e, "Location updates stop failed."));
+  }
+
+  protected void observeSunInfo(Observer<SunInfo> sunInfoObserver) {
+    sunInfoViewModel.getSunInfoLiveData().observe(this, sunInfoObserver);
   }
 
   private void acceptLocationPermissionResult(boolean isGranted) {

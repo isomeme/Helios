@@ -1,12 +1,12 @@
 package org.onereed.helios;
 
-import static org.onereed.helios.common.ToastUtil.longToast;
-
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
 import androidx.annotation.Keep;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.errorprone.annotations.ForOverride;
@@ -20,9 +20,9 @@ abstract class BaseActivity extends AppCompatActivity {
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.options_menu, menu);
+    getMenuInflater().inflate(R.menu.actions_menu, menu);
 
-    getOptionsMenuItems().stream()
+    getActionsMenuItems().stream()
         .map(menu::findItem)
         .forEach(menuItem -> menuItem.setVisible(true));
 
@@ -30,18 +30,21 @@ abstract class BaseActivity extends AppCompatActivity {
   }
 
   /**
-   * Subclass implementations of this method are called to determine what options menu items should
-   * be visible. The 'Help' menu item is always visible, so it need not be included in this set.
+   * Subclass implementations of this method are called to determine what actions should be visible
+   * in the top bar (or its spillover menu). The 'Help' action is always visible, so it need not be
+   * included in this set.
    */
   @ForOverride
-  protected abstract Set<Integer> getOptionsMenuItems();
+  protected abstract Set<Integer> getActionsMenuItems();
 
   @Keep // Called via onClick
   public final void openHelp(MenuItem unused) {
     try {
       startActivity(HELP_INTENT);
     } catch (ActivityNotFoundException e) {
-      longToast(this, R.string.toast_no_browser);
+      runOnUiThread(
+          () ->
+              Toast.makeText(this, getString(R.string.toast_no_browser), Toast.LENGTH_LONG).show());
     }
   }
 

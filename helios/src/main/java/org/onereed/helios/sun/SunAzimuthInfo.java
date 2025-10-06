@@ -23,7 +23,7 @@ public abstract class SunAzimuthInfo {
     double azimuthNow = parameters.on(when).execute().getAzimuth();
     Instant when1 = when.plus(DELTA_TIME);
     double azimuthSoon = parameters.on(when1).execute().getAzimuth();
-    double deltaAzimuth = DirectionUtil.zeroCenterDeg(azimuthSoon - azimuthNow);
+    float deltaAzimuth = DirectionUtil.zeroCenterDeg(azimuthSoon - azimuthNow);
 
     return create((float) azimuthNow, /* clockwise= */ deltaAzimuth >= 0.0);
   }

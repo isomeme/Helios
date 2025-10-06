@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimaryDark">#3700B3</color>
     <color name="bg_rise">#827717</color>
     <color name="bg_noon">#6C1111</color>
     <color name="bg_set">#0D47A1</color>
     <color name="bg_nadir">#1B5E20</color>
+
     <color name="fg_rise">#CDA320</color>
     <color name="fg_noon">#D84744</color>
     <color name="fg_set">#29B6F6</color>
     <color name="fg_nadir">#66BB6A</color>
+
     <color name="sun_yellow">#FFFF00</color>
     <color name="compass_dial">#787878</color>
+
     <color name="helios_logo_bg">#82C9DC</color>
+    <color name="toolbar_bg">#3700B3</color>
 </resources>

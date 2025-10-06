@@ -15,20 +15,20 @@ public class MainActivity extends BaseSunInfoActivity {
     Timber.d("onCreate");
     super.onCreate(savedInstanceState);
 
-    ActivityMainBinding activityMainBinding = ActivityMainBinding.inflate(getLayoutInflater());
-    setContentView(activityMainBinding.getRoot());
-    setSupportActionBar(activityMainBinding.toolbar);
+    ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+    setContentView(binding.getRoot());
+    setSupportActionBar(binding.toolbar);
 
     SunInfoAdapter sunInfoAdapter = new SunInfoAdapter();
 
-    activityMainBinding.sunEventsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-    activityMainBinding.sunEventsRecyclerView.setAdapter(sunInfoAdapter);
+    binding.sunEventsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+    binding.sunEventsRecyclerView.setAdapter(sunInfoAdapter);
 
-    sunInfoViewModel.getSunInfoLiveData().observe(this, sunInfoAdapter);
+    observeSunInfo(sunInfoAdapter);
   }
 
   @Override
-  protected Set<Integer> getOptionsMenuItems() {
-    return ImmutableSet.of(R.id.action_text, R.id.action_direction);
+  protected Set<Integer> getActionsMenuItems() {
+    return ImmutableSet.of(R.id.action_text, R.id.action_compass);
   }
 }

@@ -3,26 +3,27 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_direction"
-        android:icon="@drawable/ic_navigation_black_24dp"
-        android:iconTint="@android:color/primary_text_dark_nodisable"
+        android:id="@+id/action_compass"
+        android:icon="@drawable/navigation_24dp_e3e3e3_fill0_wght400_grad0_opsz24"
         android:onClick="openCompass"
-        android:title="@string/control_directions"
+        android:title="@string/action_compass"
         android:visible="false"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_text"
+        android:icon="@drawable/article_24dp_e3e3e3_fill0_wght400_grad0_opsz24"
         android:onClick="openLiber"
         android:title="@string/action_text"
         android:visible="false"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_help"
+        android:icon="@drawable/help_24dp_e3e3e3_fill0_wght400_grad0_opsz24"
         android:onClick="openHelp"
-        android:title="@string/control_help"
+        android:title="@string/action_help"
         android:visible="true"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 
 </menu>

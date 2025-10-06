@@ -11,7 +11,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimaryDark"
+        android:background="@color/toolbar_bg"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
         app:maxButtonHeight="56dp" />
@@ -20,13 +20,12 @@
         android:id="@+id/compass_composite"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/lock_compass_control"
+        android:layout_above="@id/lock_compass"
         android:layout_below="@id/toolbar"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="false">
 
         <ImageView
-            android:id="@+id/view_line"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentTop="false"
@@ -157,7 +156,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <CheckBox
-        android:id="@+id/lock_compass_control"
+        android:id="@+id/lock_compass"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -173,7 +172,7 @@
         tools:text="Lock compass" />
 
     <CheckBox
-        android:id="@+id/south_at_top_control"
+        android:id="@+id/south_at_top"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
@@ -185,7 +184,7 @@
         android:checked="false"
         android:minHeight="48dp"
         android:onClick="onSouthAtTopClicked"
-        android:text="@string/south_at_top"
+        android:text="@string/control_south_at_top"
         tools:ignore="RelativeOverlap"
         tools:text="South at top" />
 

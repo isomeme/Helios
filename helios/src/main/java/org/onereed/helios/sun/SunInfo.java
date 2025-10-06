@@ -31,8 +31,6 @@ public abstract class SunInfo {
 
     public abstract Builder setSunEvents(ImmutableList<SunEvent> sunEvents);
 
-    public abstract Builder setSunEvents(SunEvent... sunEvents);
-
     public abstract SunInfo build();
   }
 }

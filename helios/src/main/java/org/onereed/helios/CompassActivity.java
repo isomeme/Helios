@@ -13,6 +13,8 @@ import android.widget.ImageView;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import com.google.android.gms.location.DeviceOrientation;
 import com.google.android.gms.location.DeviceOrientationListener;
@@ -25,6 +27,8 @@ import com.google.common.collect.ImmutableSet;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.Executor;
+
 import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.LayoutParamsUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
@@ -68,9 +72,10 @@ public class CompassActivity extends BaseSunInfoActivity
   private static final DeviceOrientationRequest DEVICE_ORIENTATION_REQUEST =
       new DeviceOrientationRequest.Builder(DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT).build();
 
-  private ActivityCompassBinding activityCompassBinding;
+  private ActivityCompassBinding binding;
 
   private FusedOrientationProviderClient fusedOrientationProviderClient;
+  private Executor mainExecutor;
 
   private ImmutableMap<SunEvent.Type, ImageView> sunEventViews = null;
   private ImmutableList<ImageView> compassRadiusViews = null;
@@ -95,38 +100,40 @@ public class CompassActivity extends BaseSunInfoActivity
     Timber.d("onCreate");
     super.onCreate(savedInstanceState);
 
-    activityCompassBinding = ActivityCompassBinding.inflate(getLayoutInflater());
-    setContentView(activityCompassBinding.getRoot());
-    setSupportActionBar(activityCompassBinding.toolbar);
-    checkNotNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-
-    sunInfoViewModel.getSunInfoLiveData().observe(/* owner= */ this, /* observer= */ this);
+    binding = ActivityCompassBinding.inflate(getLayoutInflater());
+    setContentView(binding.getRoot());
+    setSupportActionBar(binding.toolbar);
+    ActionBar actionBar = checkNotNull(getSupportActionBar());
+    actionBar.setDisplayHomeAsUpEnabled(true);
 
     sunEventViews =
         ImmutableMap.of(
             SunEvent.Type.RISE,
-            activityCompassBinding.rise,
+            binding.rise,
             SunEvent.Type.NOON,
-            activityCompassBinding.noon,
+            binding.noon,
             SunEvent.Type.SET,
-            activityCompassBinding.set,
+            binding.set,
             SunEvent.Type.NADIR,
-            activityCompassBinding.nadir);
+            binding.nadir);
 
     // Note that noon and nadir can be inset, and sunMovement is at a fraction of the compass
     // radius, so they're handled differently.
     compassRadiusViews =
         ImmutableList.of(
-            activityCompassBinding.sun, activityCompassBinding.rise, activityCompassBinding.set);
+            binding.sun, binding.rise, binding.set);
 
-    noonWrapper = new NoonNadirWrapper(activityCompassBinding.noon);
-    nadirWrapper = new NoonNadirWrapper(activityCompassBinding.nadir);
+    noonWrapper = new NoonNadirWrapper(binding.noon);
+    nadirWrapper = new NoonNadirWrapper(binding.nadir);
 
     fusedOrientationProviderClient = LocationServices.getFusedOrientationProviderClient(this);
+    mainExecutor = ContextCompat.getMainExecutor(this);
+
+    observeSunInfo(this);
   }
 
   @Override
-  protected Set<Integer> getOptionsMenuItems() {
+  protected Set<Integer> getActionsMenuItems() {
     return ImmutableSet.of(R.id.action_text);
   }
 
@@ -135,7 +142,7 @@ public class CompassActivity extends BaseSunInfoActivity
     Timber.d("onResume");
     super.onResume();
 
-    activityCompassBinding.compassComposite.post(this::obtainCompassRadius);
+    binding.compassComposite.post(this::obtainCompassRadius);
 
     var prefs = getPreferences(Context.MODE_PRIVATE);
     boolean isLocked = prefs.getBoolean(PREF_LOCK_COMPASS, false);
@@ -143,11 +150,11 @@ public class CompassActivity extends BaseSunInfoActivity
 
     compassDisplayState = isLocked ? CompassDisplayState.LOCKED : CompassDisplayState.UNLOCKED;
 
-    activityCompassBinding.lockCompassControl.setChecked(isLocked);
-    activityCompassBinding.lockCompassControl.setEnabled(true);
+    binding.lockCompass.setChecked(isLocked);
+    binding.lockCompass.setEnabled(true);
 
-    activityCompassBinding.southAtTopControl.setChecked(southAtTop);
-    activityCompassBinding.southAtTopControl.setEnabled(isLocked);
+    binding.southAtTop.setChecked(southAtTop);
+    binding.southAtTop.setEnabled(isLocked);
 
     applyCompassControls();
   }
@@ -161,8 +168,8 @@ public class CompassActivity extends BaseSunInfoActivity
 
     getPreferences(Context.MODE_PRIVATE)
         .edit()
-        .putBoolean(PREF_LOCK_COMPASS, activityCompassBinding.lockCompassControl.isChecked())
-        .putBoolean(PREF_SOUTH_AT_TOP, activityCompassBinding.southAtTopControl.isChecked())
+        .putBoolean(PREF_LOCK_COMPASS, binding.lockCompass.isChecked())
+        .putBoolean(PREF_SOUTH_AT_TOP, binding.southAtTop.isChecked())
         .apply();
   }
 
@@ -182,13 +189,13 @@ public class CompassActivity extends BaseSunInfoActivity
     var sunAzimuthInfo = sunInfo.getSunAzimuthInfo();
     float sunAzimuthDeg = sunAzimuthInfo.getAzimuthDeg();
 
-    LayoutParamsUtil.changeConstraintLayoutCircleAngle(activityCompassBinding.sun, sunAzimuthDeg);
+    LayoutParamsUtil.changeConstraintLayoutCircleAngle(binding.sun, sunAzimuthDeg);
     LayoutParamsUtil.changeConstraintLayoutCircleAngle(
-        activityCompassBinding.sunMovement, sunAzimuthDeg);
+        binding.sunMovement, sunAzimuthDeg);
 
     float sunMovementRotation =
         sunAzimuthInfo.isClockwise() ? sunAzimuthDeg : sunAzimuthDeg + 180.0f;
-    activityCompassBinding.sunMovement.setRotation(sunMovementRotation);
+    binding.sunMovement.setRotation(sunMovementRotation);
 
     var shownEvents = new HashMap<SunEvent.Type, SunEvent>();
 
@@ -271,7 +278,7 @@ public class CompassActivity extends BaseSunInfoActivity
   }
 
   private void obtainCompassRadius() {
-    int widthPx = activityCompassBinding.compassFace.getWidth();
+    int widthPx = binding.compassFace.getWidth();
     double pxPerDp = (double) widthPx / COMPASS_SIDE_DP;
     compassRadiusPx = (int) (pxPerDp * COMPASS_RADIUS_DP);
     int insetRadiusPx = (int) (compassRadiusPx * RADIUS_INSET_SCALE);
@@ -282,17 +289,17 @@ public class CompassActivity extends BaseSunInfoActivity
 
     int sunMovementRadiusPx = (int) (compassRadiusPx * RADIUS_SUN_MOVEMENT_SCALE);
     LayoutParamsUtil.changeConstraintLayoutCircleRadius(
-        activityCompassBinding.sunMovement, sunMovementRadiusPx);
+        binding.sunMovement, sunMovementRadiusPx);
 
     noonWrapper.redraw();
     nadirWrapper.redraw();
   }
 
   private void applyCompassControls() {
-    if (activityCompassBinding.lockCompassControl.isChecked()) {
+    if (binding.lockCompass.isChecked()) {
       compassDisplayState = CompassDisplayState.LOCKED;
       fusedOrientationProviderClient.removeOrientationUpdates(this);
-      activityCompassBinding.southAtTopControl.setEnabled(true);
+      binding.southAtTop.setEnabled(true);
       rotateCompassToLockedPosition();
     } else {
       fusedOrientationProviderClient
@@ -301,13 +308,13 @@ public class CompassActivity extends BaseSunInfoActivity
               unusedVoid -> {
                 Timber.i("Request for orientation updates succeeded.");
                 compassDisplayState = CompassDisplayState.UNLOCK_PENDING;
-                activityCompassBinding.southAtTopControl.setEnabled(false);
+                binding.southAtTop.setEnabled(false);
               })
           .addOnFailureListener(
               e -> {
                 Timber.e(e, "Failed to request orientation updates.");
-                activityCompassBinding.lockCompassControl.setChecked(true);
-                activityCompassBinding.lockCompassControl.setEnabled(false);
+                binding.lockCompass.setChecked(true);
+                binding.lockCompass.setEnabled(false);
                 applyCompassControls();
               });
     }
@@ -315,7 +322,7 @@ public class CompassActivity extends BaseSunInfoActivity
 
   private void rotateCompassToLockedPosition() {
     rotateCompass(
-        activityCompassBinding.southAtTopControl.isChecked() ? 180.0f : 0.0f, /* listener= */ null);
+        binding.southAtTop.isChecked() ? 180.0f : 0.0f, /* listener= */ null);
   }
 
   /**
@@ -340,7 +347,7 @@ public class CompassActivity extends BaseSunInfoActivity
 
     var compassAnimator =
         ObjectAnimator.ofFloat(
-                activityCompassBinding.compassRotating,
+                binding.compassRotating,
                 "rotation",
                 lastRotationDeg,
                 adjustedDesiredRotationDeg)

@@ -1,19 +1,16 @@
 <resources>
     <string name="app_name">Helios</string>
 
-    <string name="toast_playservices_unrecoverable">Helios requires Google Play Services.</string>
-    <string name="toast_location_permission_needed">Helios needs permission to access your device\'s location.</string>
-    <string name="toast_locationservice_not_available">Helios requires location services to be enabled.</string>
-    <string name="toast_no_browser">No web browser available.</string>
-
-    <string name="button_text_select">Select</string>
-
-    <string name="control_directions">Directions</string>
-    <string name="control_lock_compass">Lock compass</string>
-    <string name="control_help">Help</string>
+    <string name="action_compass">Compass</string>
+    <string name="action_help">Help</string>
     <string name="action_text">Text</string>
 
-    <string name="dialog_select_text">Select text</string>
+    <string name="control_lock_compass">Lock compass</string>
+    <string name="control_south_at_top">South at top</string>
+
+    <string name="button_select_text">Select</string>
+
+    <string name="dialog_title_select_text">Select text</string>
 
     <string name="content_compass_display">Compass display</string>
     <string name="content_sunrise_position">Sunrise position</string>
@@ -24,5 +21,6 @@
     <string name="content_sun_position">Sun position</string>
     <string name="content_sun_event_list">List of sun events</string>
     <string name="content_sun_movement_direction">Sun movement direction</string>
-    <string name="south_at_top">South at top</string>
+
+    <string name="toast_no_browser">No web browser available.</string>
 </resources>
