@@ -12,10 +12,12 @@ android {
 
     defaultConfig {
         applicationId = "org.onereed.helios"
-        minSdk = 26
-        targetSdk = 35
         versionCode = 19
         versionName = "2.3.2"
+
+        minSdk = 26
+        targetSdk = 35
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -59,6 +61,7 @@ dependencies {
     // Helios
 
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    implementation("androidx.webkit:webkit:1.14.0")
 
     // Language
 

@@ -1,15 +1,16 @@
 package org.onereed.helios;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-
-import androidx.appcompat.app.ActionBar;
-
+import androidx.webkit.WebViewAssetLoader;
+import androidx.webkit.WebViewClientCompat;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import org.onereed.helios.databinding.ActivityLiberBinding;
@@ -28,9 +29,8 @@ public class LiberActivity extends BaseActivity implements AdapterView.OnItemSel
     binding = ActivityLiberBinding.inflate(getLayoutInflater());
     setContentView(binding.getRoot());
     setSupportActionBar(binding.toolbar);
-    ActionBar actionBar = checkNotNull(getSupportActionBar());
-    actionBar.setDisplayHomeAsUpEnabled(true);
 
+    binding.invocation.setWebViewClient(new LocalContentWebViewClient());
     binding.invocation.setBackgroundColor(Color.TRANSPARENT);
 
     int typeOrdinal =
@@ -56,6 +56,7 @@ public class LiberActivity extends BaseActivity implements AdapterView.OnItemSel
   @Override
   public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
     Timber.d("onItemSelected: position=%d", position);
+    view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
     displayInvocation(position);
   }
 
@@ -67,7 +68,26 @@ public class LiberActivity extends BaseActivity implements AdapterView.OnItemSel
   private void displayInvocation(int sunEventTypeOrdinal) {
     SunEvent.Type type = SunEvent.Type.values()[sunEventTypeOrdinal];
     String invocationHtml =
-        String.format("file:///android_asset/invocation_%s.html", type.toString().toLowerCase());
+        String.format(
+            "https://appassets.androidplatform.net/assets/invocation_%s.html",
+            type.toString().toLowerCase());
+
     binding.invocation.loadUrl(invocationHtml);
+  }
+
+  private class LocalContentWebViewClient extends WebViewClientCompat {
+
+    private final WebViewAssetLoader assetLoader =
+        new WebViewAssetLoader.Builder()
+            .addPathHandler(
+                "/assets/", new WebViewAssetLoader.AssetsPathHandler(LiberActivity.this))
+            .addPathHandler(
+                "/res/", new WebViewAssetLoader.ResourcesPathHandler(LiberActivity.this))
+            .build();
+
+    @Override
+    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+      return assetLoader.shouldInterceptRequest(request.getUrl());
+    }
   }
 }

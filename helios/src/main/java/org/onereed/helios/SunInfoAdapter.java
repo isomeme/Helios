@@ -7,7 +7,9 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.text.format.DateUtils;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -33,7 +35,9 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventViewHol
     setHasStableIds(true);
   }
 
-  private static void sendToLiberActivity(Context context, int typeOrdinal) {
+  private static void sendToLiberActivity(View view, int typeOrdinal) {
+    view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+    Context context = view.getContext();
     var intent = new Intent(context, LiberActivity.class);
     intent.putExtra(IntentExtraTags.SUN_EVENT_TYPE, typeOrdinal);
     context.startActivity(intent);
@@ -83,8 +87,7 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventViewHol
     sunEventViewHolder.eventTimeView.setText(timeText);
     sunEventViewHolder.eventTimeView.setTypeface(/* tf= */ null, timeStyle);
 
-    sunEventViewHolder.cardView.setOnClickListener(
-        view -> sendToLiberActivity(view.getContext(), typeOrdinal));
+    sunEventViewHolder.cardView.setOnClickListener(view -> sendToLiberActivity(view, typeOrdinal));
   }
 
   @Override

@@ -8,12 +8,12 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.os.Bundle;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.ImageView;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import com.google.android.gms.location.DeviceOrientation;
@@ -28,7 +28,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.Executor;
-
 import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.LayoutParamsUtil;
 import org.onereed.helios.databinding.ActivityCompassBinding;
@@ -103,8 +102,6 @@ public class CompassActivity extends BaseSunInfoActivity
     binding = ActivityCompassBinding.inflate(getLayoutInflater());
     setContentView(binding.getRoot());
     setSupportActionBar(binding.toolbar);
-    ActionBar actionBar = checkNotNull(getSupportActionBar());
-    actionBar.setDisplayHomeAsUpEnabled(true);
 
     sunEventViews =
         ImmutableMap.of(
@@ -119,9 +116,7 @@ public class CompassActivity extends BaseSunInfoActivity
 
     // Note that noon and nadir can be inset, and sunMovement is at a fraction of the compass
     // radius, so they're handled differently.
-    compassRadiusViews =
-        ImmutableList.of(
-            binding.sun, binding.rise, binding.set);
+    compassRadiusViews = ImmutableList.of(binding.sun, binding.rise, binding.set);
 
     noonWrapper = new NoonNadirWrapper(binding.noon);
     nadirWrapper = new NoonNadirWrapper(binding.nadir);
@@ -190,8 +185,7 @@ public class CompassActivity extends BaseSunInfoActivity
     float sunAzimuthDeg = sunAzimuthInfo.getAzimuthDeg();
 
     LayoutParamsUtil.changeConstraintLayoutCircleAngle(binding.sun, sunAzimuthDeg);
-    LayoutParamsUtil.changeConstraintLayoutCircleAngle(
-        binding.sunMovement, sunAzimuthDeg);
+    LayoutParamsUtil.changeConstraintLayoutCircleAngle(binding.sunMovement, sunAzimuthDeg);
 
     float sunMovementRotation =
         sunAzimuthInfo.isClockwise() ? sunAzimuthDeg : sunAzimuthDeg + 180.0f;
@@ -268,12 +262,14 @@ public class CompassActivity extends BaseSunInfoActivity
   }
 
   @Keep
-  public void onLockCompassClicked(View unused) {
+  public void onLockCompassClicked(View view) {
+    view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
     applyCompassControls();
   }
 
   @Keep
-  public void onSouthAtTopClicked(View unused) {
+  public void onSouthAtTopClicked(View view) {
+    view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
     rotateCompassToLockedPosition();
   }
 
@@ -288,8 +284,7 @@ public class CompassActivity extends BaseSunInfoActivity
         view -> LayoutParamsUtil.changeConstraintLayoutCircleRadius(view, compassRadiusPx));
 
     int sunMovementRadiusPx = (int) (compassRadiusPx * RADIUS_SUN_MOVEMENT_SCALE);
-    LayoutParamsUtil.changeConstraintLayoutCircleRadius(
-        binding.sunMovement, sunMovementRadiusPx);
+    LayoutParamsUtil.changeConstraintLayoutCircleRadius(binding.sunMovement, sunMovementRadiusPx);
 
     noonWrapper.redraw();
     nadirWrapper.redraw();
@@ -321,16 +316,14 @@ public class CompassActivity extends BaseSunInfoActivity
   }
 
   private void rotateCompassToLockedPosition() {
-    rotateCompass(
-        binding.southAtTop.isChecked() ? 180.0f : 0.0f, /* listener= */ null);
+    rotateCompass(binding.southAtTop.isChecked() ? 180.0f : 0.0f, /* listener= */ null);
   }
 
   /**
    * Executes an animated sweep from the old compass rotation to the new one, and updates the old
    * one to the new value to prepare for the next update.
    */
-  private void rotateCompass(
-      float compassAzimuthDeg, @Nullable AnimatorListener listener) {
+  private void rotateCompass(float compassAzimuthDeg, @Nullable AnimatorListener listener) {
 
     float desiredRotationDeg = -compassAzimuthDeg;
     float deltaDeg = desiredRotationDeg - lastRotationDeg;
@@ -347,10 +340,7 @@ public class CompassActivity extends BaseSunInfoActivity
 
     var compassAnimator =
         ObjectAnimator.ofFloat(
-                binding.compassRotating,
-                "rotation",
-                lastRotationDeg,
-                adjustedDesiredRotationDeg)
+                binding.compassRotating, "rotation", lastRotationDeg, adjustedDesiredRotationDeg)
             .setDuration(ROTATION_ANIMATION_DURATION_MILLIS);
 
     if (listener != null) {

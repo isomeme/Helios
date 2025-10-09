@@ -11,6 +11,7 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.tasks.Task;
 import java.time.Instant;
 import org.onereed.helios.common.Place;
+import org.onereed.helios.common.Sounds;
 import org.onereed.helios.sun.SunInfo;
 import org.onereed.helios.sun.SunInfoSource;
 import timber.log.Timber;
@@ -33,6 +34,7 @@ public class SunInfoViewModel extends ViewModel implements LocationListener {
 
   private void publishSunInfo(Task<SunInfo> sunInfoTask) {
     if (sunInfoTask.isSuccessful()) {
+      Sounds.beep();
       var sunInfo = checkNotNull(sunInfoTask.getResult());
       sunInfoMutableLiveData.postValue(sunInfo);
     } else {

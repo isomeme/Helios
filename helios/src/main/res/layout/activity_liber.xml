@@ -31,6 +31,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="false"
         android:layout_marginTop="10dp"
+        android:background="@android:color/transparent"
         tools:text="Invocation">
 
     </WebView>
