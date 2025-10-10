@@ -23,17 +23,32 @@
         android:layout_below="@id/toolbar"
         android:layout_marginTop="10dp" />
 
-    <WebView
-        android:id="@+id/invocation"
+    <ScrollView
+        android:id="@+id/scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_below="@id/sun_event_selector"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="false"
-        android:layout_marginTop="10dp"
-        android:background="@android:color/transparent"
-        tools:text="Invocation">
+        android:layout_marginTop="10dp">
 
-    </WebView>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
+            <WebView
+                android:id="@+id/invocation_display"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                tools:text="Invocation" />
+
+            <TextView
+                android:id="@+id/adoration_display"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                tools:text="Adoration" />
+        </LinearLayout>
+    </ScrollView>
 </RelativeLayout>

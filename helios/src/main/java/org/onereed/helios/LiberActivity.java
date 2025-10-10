@@ -1,5 +1,8 @@
 package org.onereed.helios;
 
+
+import static org.onereed.helios.common.AssetUtil.readAssetText;
+
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.HapticFeedbackConstants;
@@ -12,6 +15,7 @@ import android.widget.ArrayAdapter;
 import androidx.webkit.WebViewAssetLoader;
 import androidx.webkit.WebViewClientCompat;
 import com.google.common.collect.ImmutableSet;
+import io.noties.markwon.Markwon;
 import java.util.Set;
 import org.onereed.helios.databinding.ActivityLiberBinding;
 import org.onereed.helios.sun.SunEvent;
@@ -22,20 +26,23 @@ public class LiberActivity extends BaseActivity implements AdapterView.OnItemSel
 
   private ActivityLiberBinding binding;
 
+  private Markwon markwon;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    Timber.d("onCreate");
     super.onCreate(savedInstanceState);
 
     binding = ActivityLiberBinding.inflate(getLayoutInflater());
     setContentView(binding.getRoot());
     setSupportActionBar(binding.toolbar);
 
-    binding.invocation.setWebViewClient(new LocalContentWebViewClient());
-    binding.invocation.setBackgroundColor(Color.TRANSPARENT);
+    binding.invocationDisplay.setWebViewClient(new LocalContentWebViewClient());
+    binding.invocationDisplay.setBackgroundColor(Color.TRANSPARENT);
 
-    int typeOrdinal =
-        getIntent().getIntExtra(IntentExtraTags.SUN_EVENT_TYPE, SunEvent.Type.RISE.ordinal());
-    displayInvocation(typeOrdinal);
+    String adorationText = readAssetText(this, "adoration.md");
+    markwon = Markwon.create(this);
+    markwon.setMarkdown(binding.adorationDisplay, adorationText);
 
     ArrayAdapter<CharSequence> adapter =
         ArrayAdapter.createFromResource(
@@ -43,9 +50,12 @@ public class LiberActivity extends BaseActivity implements AdapterView.OnItemSel
 
     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
+    int typeOrdinal =
+        getIntent().getIntExtra(IntentExtraTags.SUN_EVENT_TYPE, SunEvent.Type.RISE.ordinal());
+
     binding.sunEventSelector.setAdapter(adapter);
-    binding.sunEventSelector.setSelection(typeOrdinal);
     binding.sunEventSelector.setOnItemSelectedListener(this);
+    binding.sunEventSelector.setSelection(typeOrdinal);
   }
 
   @Override
@@ -67,12 +77,14 @@ public class LiberActivity extends BaseActivity implements AdapterView.OnItemSel
 
   private void displayInvocation(int sunEventTypeOrdinal) {
     SunEvent.Type type = SunEvent.Type.values()[sunEventTypeOrdinal];
-    String invocationHtml =
+    String invocationUrl =
         String.format(
             "https://appassets.androidplatform.net/assets/invocation_%s.html",
             type.toString().toLowerCase());
 
-    binding.invocation.loadUrl(invocationHtml);
+    binding.invocationDisplay.loadUrl(invocationUrl);
+
+    binding.scrollView.fullScroll(View.FOCUS_UP);
   }
 
   private class LocalContentWebViewClient extends WebViewClientCompat {

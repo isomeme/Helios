@@ -91,6 +91,10 @@ dependencies {
     implementation("com.google.auto.value:auto-value-annotations:1.11.0")
     annotationProcessor("com.google.auto.value:auto-value:1.11.0")
 
+    // Markdown support
+
+    implementation("io.noties.markwon:core:4.6.2")
+
     // Logging
 
     implementation("com.jakewharton.timber:timber:5.0.1")
