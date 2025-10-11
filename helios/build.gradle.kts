@@ -61,11 +61,10 @@ dependencies {
     // Helios
 
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    implementation("androidx.webkit:webkit:1.14.0")
 
     // Language
 
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs_nio:2.1.5")
 
     // Services
 
@@ -80,6 +79,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.17.0")
     implementation("androidx.lifecycle:lifecycle-common-java8:2.9.4")
     implementation("androidx.recyclerview:recyclerview:1.4.0")
+    implementation("androidx.webkit:webkit:1.14.0")
 
     // SunCalc
 
@@ -94,6 +94,7 @@ dependencies {
     // Markdown support
 
     implementation("io.noties.markwon:core:4.6.2")
+    implementation("io.noties.markwon:html:4.6.2")
 
     // Logging
 

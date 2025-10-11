@@ -23,7 +23,7 @@ public final class Sounds {
   }
 
   public static void play(int toneType) {
-    if (BuildConfig.DEBUG) {
+    if (BuildConfig.DEBUG && VOLUME > 0) {
       TONE_GENERATOR.startTone(toneType);
     }
   }

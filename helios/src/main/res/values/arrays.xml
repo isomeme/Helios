@@ -22,4 +22,11 @@
         <item>Midnight</item>
     </string-array>
 
+    <string-array name="invocation_asset_names">
+        <item>invocation_sunrise.md</item>
+        <item>invocation_noon.md</item>
+        <item>invocation_sunset.md</item>
+        <item>invocation_midnight.md</item>
+    </string-array>
+
 </resources>

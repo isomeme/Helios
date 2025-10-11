@@ -1,21 +1,16 @@
 package org.onereed.helios;
 
-
 import static org.onereed.helios.common.AssetUtil.readAssetText;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
-import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import androidx.webkit.WebViewAssetLoader;
-import androidx.webkit.WebViewClientCompat;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.noties.markwon.Markwon;
+import io.noties.markwon.html.HtmlPlugin;
 import java.util.Set;
 import org.onereed.helios.databinding.ActivityLiberBinding;
 import org.onereed.helios.sun.SunEvent;
@@ -28,6 +23,8 @@ public class LiberActivity extends BaseActivity implements AdapterView.OnItemSel
 
   private Markwon markwon;
 
+  private ImmutableList<String> invocationAssetNames;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     Timber.d("onCreate");
@@ -37,11 +34,9 @@ public class LiberActivity extends BaseActivity implements AdapterView.OnItemSel
     setContentView(binding.getRoot());
     setSupportActionBar(binding.toolbar);
 
-    binding.invocationDisplay.setWebViewClient(new LocalContentWebViewClient());
-    binding.invocationDisplay.setBackgroundColor(Color.TRANSPARENT);
+    markwon = Markwon.builder(this).usePlugin(HtmlPlugin.create()).build();
 
     String adorationText = readAssetText(this, "adoration.md");
-    markwon = Markwon.create(this);
     markwon.setMarkdown(binding.adorationDisplay, adorationText);
 
     ArrayAdapter<CharSequence> adapter =
@@ -56,6 +51,9 @@ public class LiberActivity extends BaseActivity implements AdapterView.OnItemSel
     binding.sunEventSelector.setAdapter(adapter);
     binding.sunEventSelector.setOnItemSelectedListener(this);
     binding.sunEventSelector.setSelection(typeOrdinal);
+
+    invocationAssetNames =
+        ImmutableList.copyOf(getResources().getStringArray(R.array.invocation_asset_names));
   }
 
   @Override
@@ -76,30 +74,9 @@ public class LiberActivity extends BaseActivity implements AdapterView.OnItemSel
   }
 
   private void displayInvocation(int sunEventTypeOrdinal) {
-    SunEvent.Type type = SunEvent.Type.values()[sunEventTypeOrdinal];
-    String invocationUrl =
-        String.format(
-            "https://appassets.androidplatform.net/assets/invocation_%s.html",
-            type.toString().toLowerCase());
-
-    binding.invocationDisplay.loadUrl(invocationUrl);
+    String invocationText = readAssetText(this, invocationAssetNames.get(sunEventTypeOrdinal));
+    markwon.setMarkdown(binding.invocationDisplay, invocationText);
 
     binding.scrollView.fullScroll(View.FOCUS_UP);
-  }
-
-  private class LocalContentWebViewClient extends WebViewClientCompat {
-
-    private final WebViewAssetLoader assetLoader =
-        new WebViewAssetLoader.Builder()
-            .addPathHandler(
-                "/assets/", new WebViewAssetLoader.AssetsPathHandler(LiberActivity.this))
-            .addPathHandler(
-                "/res/", new WebViewAssetLoader.ResourcesPathHandler(LiberActivity.this))
-            .build();
-
-    @Override
-    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-      return assetLoader.shouldInterceptRequest(request.getUrl());
-    }
   }
 }
