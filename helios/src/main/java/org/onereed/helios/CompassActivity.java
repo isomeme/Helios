@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.concurrent.Executor;
 import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.LayoutParamsUtil;
@@ -128,8 +127,8 @@ public class CompassActivity extends BaseSunInfoActivity
   }
 
   @Override
-  protected Set<Integer> getActionsMenuItems() {
-    return ImmutableSet.of(R.id.action_text);
+  protected int myActionsMenuId() {
+    return R.id.action_compass;
   }
 
   @Override

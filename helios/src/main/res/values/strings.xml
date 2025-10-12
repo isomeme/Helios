@@ -20,4 +20,5 @@
     <string name="content_sun_movement_direction">Sun movement direction</string>
 
     <string name="toast_no_browser">No web browser available.</string>
+    <string name="sun_event_icon_description">The sun event icon</string>
 </resources>

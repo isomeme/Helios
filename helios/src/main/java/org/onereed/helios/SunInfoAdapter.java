@@ -1,11 +1,14 @@
 package org.onereed.helios;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
+import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
@@ -29,18 +32,12 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventViewHol
           | DateUtils.FORMAT_SHOW_TIME
           | DateUtils.FORMAT_ABBREV_ALL;
 
+  private final Activity activity;
   private SunInfo sunInfo = null;
 
-  SunInfoAdapter() {
+  SunInfoAdapter(Activity activity) {
+    this.activity = activity;
     setHasStableIds(true);
-  }
-
-  private static void sendToLiberActivity(View view, int typeOrdinal) {
-    view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
-    Context context = view.getContext();
-    var intent = new Intent(context, LiberActivity.class);
-    intent.putExtra(IntentExtraTags.SUN_EVENT_TYPE, typeOrdinal);
-    context.startActivity(intent);
   }
 
   @SuppressLint("NotifyDataSetChanged")
@@ -97,6 +94,14 @@ class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventViewHol
 
   private SunEvent getSunEvent(int position) {
     return sunInfo.getSunEvents().get(position);
+  }
+
+  private void sendToLiberActivity(View view, int typeOrdinal) {
+    view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+    var intent = new Intent(activity, LiberActivity.class);
+    intent.putExtra(IntentExtraTags.SUN_EVENT_TYPE, typeOrdinal);
+    Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(activity).toBundle();
+    activity.startActivity(intent, bundle);
   }
 
   static class SunEventViewHolder extends RecyclerView.ViewHolder {

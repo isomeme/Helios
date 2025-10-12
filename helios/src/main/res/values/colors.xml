@@ -10,9 +10,12 @@
     <color name="fg_set">#29B6F6</color>
     <color name="fg_nadir">#66BB6A</color>
 
+    <color name="activities_menu_icon_default">#CCCCCC</color>
+    <color name="activities_menu_icon_current">#FFFF88</color>
+
     <color name="sun_yellow">#FFFF00</color>
     <color name="compass_dial">#787878</color>
 
     <color name="helios_logo_bg">#82C9DC</color>
-    <color name="toolbar_bg">#3700B3</color>
+    <color name="toolbar_bg">#3F51B5</color>
 </resources>

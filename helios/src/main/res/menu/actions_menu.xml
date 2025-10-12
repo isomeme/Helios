@@ -6,18 +6,21 @@
     <item
         android:id="@+id/action_schedule"
         android:icon="@drawable/schedule_24dp_e3e3e3_fill0_wght400_grad0_opsz24"
+        android:iconTint="@color/actions_menu_color_selector"
         android:title="@string/action_schedule"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/action_text"
         android:icon="@drawable/article_24dp_e3e3e3_fill0_wght400_grad0_opsz24"
+        android:iconTint="@color/actions_menu_color_selector"
         android:title="@string/action_text"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/action_compass"
         android:icon="@drawable/navigation_24dp_e3e3e3_fill0_wght400_grad0_opsz24"
+        android:iconTint="@color/actions_menu_color_selector"
         android:title="@string/action_compass"
         app:showAsAction="always"
         tools:ignore="AlwaysShowAction" />
@@ -25,6 +28,7 @@
     <item
         android:id="@+id/action_help"
         android:icon="@drawable/help_24dp_e3e3e3_fill0_wght400_grad0_opsz24"
+        android:iconTint="@color/actions_menu_color_selector"
         android:title="@string/action_help"
         app:showAsAction="ifRoom" />
 

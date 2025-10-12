@@ -2,8 +2,6 @@ package org.onereed.helios;
 
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import com.google.common.collect.ImmutableSet;
-import java.util.Set;
 import org.onereed.helios.databinding.ActivityMainBinding;
 import timber.log.Timber;
 
@@ -19,7 +17,7 @@ public class MainActivity extends BaseSunInfoActivity {
     setContentView(binding.getRoot());
     setSupportActionBar(binding.toolbar);
 
-    SunInfoAdapter sunInfoAdapter = new SunInfoAdapter();
+    SunInfoAdapter sunInfoAdapter = new SunInfoAdapter(this);
 
     binding.sunEventsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     binding.sunEventsRecyclerView.setAdapter(sunInfoAdapter);
@@ -28,7 +26,7 @@ public class MainActivity extends BaseSunInfoActivity {
   }
 
   @Override
-  protected Set<Integer> getActionsMenuItems() {
-    return ImmutableSet.of(R.id.action_text, R.id.action_compass);
+  protected int myActionsMenuId() {
+    return R.id.action_schedule;
   }
 }

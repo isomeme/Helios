@@ -8,12 +8,19 @@
         <item>@color/bg_nadir</item>
     </integer-array>
 
-    <integer-array name="sun_event_icons">
+    <integer-array name="sun_event_fg_colors">
+        <item>@color/fg_rise</item>
+        <item>@color/fg_noon</item>
+        <item>@color/fg_set</item>
+        <item>@color/fg_nadir</item>
+    </integer-array>
+
+    <array name="sun_event_icons">
         <item>@drawable/ic_rise_36dp</item>
         <item>@drawable/ic_noon_36dp</item>
         <item>@drawable/ic_set_36dp</item>
         <item>@drawable/ic_nadir_36dp</item>
-    </integer-array>
+    </array>
 
     <string-array name="sun_event_names">
         <item>Sunrise</item>
@@ -22,11 +29,39 @@
         <item>Midnight</item>
     </string-array>
 
-    <string-array name="invocation_asset_names">
-        <item>invocation_sunrise.md</item>
-        <item>invocation_noon.md</item>
-        <item>invocation_sunset.md</item>
-        <item>invocation_midnight.md</item>
+    <string-array name="invocation_gods">
+        <item>Ra</item>
+        <item>Ahathoor</item>
+        <item>Tum</item>
+        <item>Kephra</item>
+    </string-array>
+
+    <string-array name="invocation_gerunds">
+        <item>rising</item>
+        <item>triumphing</item>
+        <item>setting</item>
+        <item>hiding</item>
+    </string-array>
+
+    <string-array name="invocation_nouns">
+        <item>strength</item>
+        <item>beauty</item>
+        <item>joy</item>
+        <item>silence</item>
+    </string-array>
+
+    <string-array name="invocation_events">
+        <item>Uprising</item>
+        <item>Mid-course</item>
+        <item>Down-going</item>
+        <item>Midnight Hour</item>
+    </string-array>
+
+    <string-array name="invocation_abodes">
+        <item>Night</item>
+        <item>Morning</item>
+        <item>Day</item>
+        <item>Evening</item>
     </string-array>
 
 </resources>
