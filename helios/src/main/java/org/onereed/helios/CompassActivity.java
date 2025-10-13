@@ -136,21 +136,12 @@ public class CompassActivity extends BaseSunInfoActivity
     Timber.d("onResume");
     super.onResume();
 
-    binding.compassComposite.post(this::obtainCompassRadius);
-
-    var prefs = getPreferences(Context.MODE_PRIVATE);
-    boolean isLocked = prefs.getBoolean(PREF_LOCK_COMPASS, false);
-    boolean southAtTop = prefs.getBoolean(PREF_SOUTH_AT_TOP, false);
-
-    compassDisplayState = isLocked ? CompassDisplayState.LOCKED : CompassDisplayState.UNLOCKED;
-
-    binding.lockCompass.setChecked(isLocked);
-    binding.lockCompass.setEnabled(true);
-
-    binding.southAtTop.setChecked(southAtTop);
-    binding.southAtTop.setEnabled(isLocked);
-
+    applyPreferences();
     applyCompassControls();
+
+    // Delay compass radius calculations until layout is complete.
+
+    binding.compassComposite.post(this::applyCompassRadius);
   }
 
   @Override
@@ -165,17 +156,6 @@ public class CompassActivity extends BaseSunInfoActivity
         .putBoolean(PREF_LOCK_COMPASS, binding.lockCompass.isChecked())
         .putBoolean(PREF_SOUTH_AT_TOP, binding.southAtTop.isChecked())
         .apply();
-  }
-
-  @Override
-  public void onDestroy() {
-    Timber.d("onDestroy");
-    super.onDestroy();
-
-    // NoonNadirWrapper instances hold references to views, so explicitly free them up for
-    // garbage collection.
-    noonWrapper = null;
-    nadirWrapper = null;
   }
 
   @Override
@@ -272,8 +252,10 @@ public class CompassActivity extends BaseSunInfoActivity
     rotateCompassToLockedPosition();
   }
 
-  private void obtainCompassRadius() {
+  private void applyCompassRadius() {
     int widthPx = binding.compassFace.getWidth();
+    Timber.d("widthPx=%d", widthPx);
+
     double pxPerDp = (double) widthPx / COMPASS_SIDE_DP;
     compassRadiusPx = (int) (pxPerDp * COMPASS_RADIUS_DP);
     int insetRadiusPx = (int) (compassRadiusPx * RADIUS_INSET_SCALE);
@@ -287,6 +269,20 @@ public class CompassActivity extends BaseSunInfoActivity
 
     noonWrapper.redraw();
     nadirWrapper.redraw();
+  }
+
+  private void applyPreferences() {
+    var prefs = getPreferences(Context.MODE_PRIVATE);
+    boolean isLocked = prefs.getBoolean(PREF_LOCK_COMPASS, false);
+    boolean southAtTop = prefs.getBoolean(PREF_SOUTH_AT_TOP, false);
+
+    compassDisplayState = isLocked ? CompassDisplayState.LOCKED : CompassDisplayState.UNLOCKED;
+
+    binding.lockCompass.setChecked(isLocked);
+    binding.lockCompass.setEnabled(true);
+
+    binding.southAtTop.setChecked(southAtTop);
+    binding.southAtTop.setEnabled(isLocked);
   }
 
   private void applyCompassControls() {
