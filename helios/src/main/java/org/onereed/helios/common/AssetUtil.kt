@@ -1,22 +1,22 @@
-package org.onereed.helios.common;
+package org.onereed.helios.common
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import android.annotation.SuppressLint
+import android.content.Context
+import java.io.IOException
+import java.io.UncheckedIOException
+import java.nio.charset.StandardCharsets
 
-import android.content.Context;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
+object AssetUtil {
 
-public final class AssetUtil {
-
-  public static String readAssetText(Context context, String assetName) {
-    try (InputStream inputStream = context.getAssets().open(assetName)) {
-      //noinspection NewApi - Handled by desugaring
-      return new String(inputStream.readAllBytes(), UTF_8);
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
+    @SuppressLint("NewApi") // Desugared nio readAllBytes()
+    @JvmStatic
+    fun readAssetText(context: Context, assetName: String): String {
+        try {
+            context.assets.open(assetName).use { inputStream ->
+                return String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
+            }
+        } catch (e: IOException) {
+            throw UncheckedIOException(e)
+        }
     }
-  }
-
-  private AssetUtil() {}
 }

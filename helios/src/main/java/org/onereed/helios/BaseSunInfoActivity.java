@@ -24,7 +24,7 @@ import java.time.Duration;
 import java.util.concurrent.Executor;
 import timber.log.Timber;
 
-abstract class BaseSunInfoActivity extends BaseActivity {
+public abstract class BaseSunInfoActivity extends BaseActivity {
 
   private static final Duration UPDATE_INTERVAL = Duration.ofSeconds(30L);
   private static final Duration MIN_UPDATE_INTERVAL = Duration.ofSeconds(15L);

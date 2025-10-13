@@ -19,7 +19,7 @@ import androidx.core.content.ContextCompat;
 import com.google.errorprone.annotations.ForOverride;
 
 /** Parent class for Helios activities. */
-abstract class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity {
 
   private static final String HELP_PAGE = "https://www.one-reed.org/helios";
   private static final Intent HELP_INTENT = new Intent(Intent.ACTION_VIEW, Uri.parse(HELP_PAGE));
@@ -87,7 +87,7 @@ abstract class BaseActivity extends AppCompatActivity {
     }
   }
 
-  protected void go(Intent intent) {
+  private void go(Intent intent) {
     Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle();
     startActivity(intent, bundle);
   }
