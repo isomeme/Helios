@@ -26,7 +26,7 @@ public class LiberActivity extends BaseActivity implements AdapterView.OnItemSel
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    Timber.d("onCreate");
+    Timber.d("onCreate start");
     super.onCreate(savedInstanceState);
 
     binding = ActivityLiberBinding.inflate(getLayoutInflater());
@@ -44,13 +44,20 @@ public class LiberActivity extends BaseActivity implements AdapterView.OnItemSel
             this, R.array.sun_event_names, android.R.layout.simple_spinner_item);
 
     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    binding.sunEventSelector.setAdapter(adapter);
 
     int typeOrdinal =
         getIntent().getIntExtra(IntentExtraTags.SUN_EVENT_TYPE, SunEvent.Type.RISE.ordinal());
 
-    binding.sunEventSelector.setAdapter(adapter);
+    // The animate=false argument tells the item selected listener not to run based on this
+    // initial selection. This avoids a double haptic click, one from the activity transition and
+    // one from onItemSelected. Instead, we call displayInvocation directly for the initial load.
+
+    binding.sunEventSelector.setSelection(typeOrdinal, /* animate= */ false);
     binding.sunEventSelector.setOnItemSelectedListener(this);
-    binding.sunEventSelector.setSelection(typeOrdinal);
+    displayInvocation(typeOrdinal);
+
+    Timber.d("onCreate end");
   }
 
   @Override
@@ -71,6 +78,7 @@ public class LiberActivity extends BaseActivity implements AdapterView.OnItemSel
   }
 
   private void displayInvocation(int ix) {
+    Timber.d("displayInvocation: ix=%d", ix);
     Resources res = getResources();
 
     try (TypedArray icons = res.obtainTypedArray(R.array.sun_event_icons)) {

@@ -30,10 +30,10 @@ abstract class BaseSunInfoActivity extends BaseActivity {
   private static final Duration MIN_UPDATE_INTERVAL = Duration.ofSeconds(15L);
 
   private static final LocationRequest REPEATED_LOCATION_REQUEST =
-          new LocationRequest.Builder(
-                  Priority.PRIORITY_BALANCED_POWER_ACCURACY, UPDATE_INTERVAL.toMillis())
-                  .setMinUpdateIntervalMillis(MIN_UPDATE_INTERVAL.toMillis())
-                  .build();
+      new LocationRequest.Builder(
+              Priority.PRIORITY_BALANCED_POWER_ACCURACY, UPDATE_INTERVAL.toMillis())
+          .setMinUpdateIntervalMillis(MIN_UPDATE_INTERVAL.toMillis())
+          .build();
 
   private SunInfoViewModel sunInfoViewModel;
 
@@ -41,8 +41,6 @@ abstract class BaseSunInfoActivity extends BaseActivity {
   private Executor mainExecutor;
 
   private ActivityResultLauncher<String> requestPermissionLauncher;
-
-  private Intent settingsIntent;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -56,10 +54,6 @@ abstract class BaseSunInfoActivity extends BaseActivity {
 
     requestPermissionLauncher =
         registerForActivityResult(new RequestPermission(), this::acceptLocationPermissionResult);
-
-    settingsIntent =
-        new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            .setData(Uri.fromParts("package", getPackageName(), /* fragment= */ null));
   }
 
   @Override
@@ -84,8 +78,7 @@ abstract class BaseSunInfoActivity extends BaseActivity {
       Timber.d("About to request location updates.");
 
       fusedLocationProviderClient
-          .requestLocationUpdates(
-              REPEATED_LOCATION_REQUEST, mainExecutor, sunInfoViewModel)
+          .requestLocationUpdates(REPEATED_LOCATION_REQUEST, mainExecutor, sunInfoViewModel)
           .addOnSuccessListener(unusedVoid -> Timber.d("Location updates started."))
           .addOnFailureListener(e -> Timber.e(e, "Location updates start failed."));
 
@@ -119,24 +112,30 @@ abstract class BaseSunInfoActivity extends BaseActivity {
 
     if (shouldShowRequestPermissionRationale(ACCESS_FINE_LOCATION)) {
       new AlertDialog.Builder(this)
-          .setMessage("Pretty please??")
-          .setPositiveButton("Continue", (dialog, which) -> requestLocationPermission())
-          .setNegativeButton("Exit", (dialog, which) -> finish())
+          .setMessage(R.string.location_permission_rationale)
+          .setPositiveButton(
+              R.string.button_continue, (dialog, which) -> requestLocationPermission())
+          .setNegativeButton(R.string.button_exit, (dialog, which) -> finish())
           .setCancelable(false)
           .create()
           .show();
 
       Timber.d("Launched rationale dialog.");
     } else {
+      Intent settingsIntent =
+          new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+              .setData(Uri.fromParts("package", getPackageName(), /* fragment= */ null));
+
       new AlertDialog.Builder(this)
-          .setMessage("You need to fix this in settings.")
-          .setPositiveButton("Settings", (dialog, which) -> startActivity(settingsIntent))
-          .setNegativeButton("Exit", (dialog, which) -> finish())
+          .setMessage(R.string.location_permission_use_settings)
+          .setPositiveButton(
+              R.string.button_settings, (dialog, which) -> startActivity(settingsIntent))
+          .setNegativeButton(R.string.button_exit, (dialog, which) -> finish())
           .setCancelable(false)
           .create()
           .show();
 
-      Timber.d("Launched go-to-settings dialog.");
+      Timber.d("Launched use-settings dialog.");
     }
   }
 

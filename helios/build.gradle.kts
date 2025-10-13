@@ -1,5 +1,3 @@
-import org.gradle.api.JavaVersion
-
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
@@ -58,10 +56,6 @@ android {
 
 dependencies {
 
-    // Helios
-
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-
     // Language
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs_nio:2.1.5")
@@ -77,8 +71,8 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation("androidx.core:core-ktx:1.17.0")
-    implementation("androidx.lifecycle:lifecycle-common-java8:2.9.4")
     implementation("androidx.recyclerview:recyclerview:1.4.0")
+    implementation("com.google.android.material:material:1.13.0")
 
     // SunCalc
 
@@ -104,8 +98,4 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.20.0")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
-}
-
-tasks.withType<JavaCompile> {
-    options.compilerArgs.addAll(listOf("-Xlint:unchecked", "-Xlint:deprecation"))
 }
