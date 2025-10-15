@@ -14,7 +14,7 @@ public abstract class SunAzimuthInfo {
 
   private static final Duration DELTA_TIME = Duration.ofMinutes(1L);
 
-  public abstract float getAzimuthDeg();
+  public abstract double getAzimuthDeg();
 
   public abstract boolean isClockwise();
 
@@ -23,13 +23,13 @@ public abstract class SunAzimuthInfo {
     double azimuthNow = parameters.on(when).execute().getAzimuth();
     Instant when1 = when.plus(DELTA_TIME);
     double azimuthSoon = parameters.on(when1).execute().getAzimuth();
-    float deltaAzimuth = DirectionUtil.zeroCenterDeg(azimuthSoon - azimuthNow);
+    double deltaAzimuth = DirectionUtil.arc(azimuthNow, azimuthSoon);
 
     return create((float) azimuthNow, /* clockwise= */ deltaAzimuth >= 0.0);
   }
 
   @VisibleForTesting
-  static SunAzimuthInfo create(float azimuthDeg, boolean isClockwise) {
+  static SunAzimuthInfo create(double azimuthDeg, boolean isClockwise) {
     return new AutoValue_SunAzimuthInfo(azimuthDeg, isClockwise);
   }
 }

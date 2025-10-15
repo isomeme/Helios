@@ -1,0 +1,16 @@
+<resources>
+    <style name="Theme.Helios" parent="@style/Theme.AppCompat.NoActionBar">
+
+        <item name="android:windowActivityTransitions">true</item>
+
+        <item name="android:colorPrimary">@color/toolbar_bg</item>
+
+    </style>
+
+    <style name="MyActionBar"
+        parent="@style/Widget.AppCompat.ActionBar.Solid">
+
+        <item name="background">@color/toolbar_bg</item>
+    </style>
+
+</resources>

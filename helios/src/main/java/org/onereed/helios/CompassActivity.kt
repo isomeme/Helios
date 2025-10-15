@@ -26,7 +26,7 @@ import org.onereed.helios.sun.SunInfo
 import timber.log.Timber
 import java.util.EnumSet
 import java.util.concurrent.Executor
-import kotlin.math.abs
+import kotlin.math.absoluteValue
 
 /** Displays directions to sun events.  */
 class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener,
@@ -125,7 +125,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener,
 
         val sunMovementRotation =
             if (sunAzimuthInfo.isClockwise) sunAzimuthDeg else sunAzimuthDeg + 180.0f
-        binding.sunMovement.rotation = sunMovementRotation
+        binding.sunMovement.rotation = sunMovementRotation.toFloat()
 
         val shownEvents = HashMap<SunEvent.Type, SunEvent>()
 
@@ -263,7 +263,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener,
             Timber.d("Request for orientation updates succeeded.")
             compassDisplayState = CompassDisplayState.UNLOCK_PENDING
             binding.southAtTop.isEnabled = false
-        }.addOnFailureListener { e: Exception ->
+        }.addOnFailureListener { e ->
             Timber.e(e, "Failed to request orientation updates.")
             binding.lockCompass.isChecked = true
             binding.lockCompass.isEnabled = false
@@ -290,13 +290,13 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener,
         val deltaDeg = desiredRotationDeg - lastRotationDeg
 
         // When animating from -179 to +179, we don't want to go the long way around the circle.
-        var adjustedDesiredRotationDeg = desiredRotationDeg
 
-        if (deltaDeg > 180.0f) {
-            adjustedDesiredRotationDeg -= 360.0f
-        } else if (deltaDeg < -180.0f) {
-            adjustedDesiredRotationDeg += 360.0f
-        }
+        val adjustedDesiredRotationDeg =
+            when {
+                deltaDeg < -180.0f -> desiredRotationDeg + 360.0f
+                deltaDeg > 180.0f -> desiredRotationDeg - 360.0f
+                else -> desiredRotationDeg;
+            }
 
         val compassAnimator = ObjectAnimator.ofFloat(
             binding.compassRotating, "rotation", lastRotationDeg, adjustedDesiredRotationDeg
@@ -380,11 +380,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener,
 
         /** Returns true iff noon and nadir are either both in the north or both in the south.  */
         private fun noonNadirOverlap(noonEvent: SunEvent, nadirEvent: SunEvent): Boolean {
-            // If we're starting near north (0 az), we'll end up near 90. If we start off near south
-            // (180 az), we'll end up near -90.
-            val noonOffsetDeg = DirectionUtil.zeroCenterDeg(noonEvent.getAzimuthDeg() + 90.0)
-            val nadirOffsetDeg = DirectionUtil.zeroCenterDeg(nadirEvent.getAzimuthDeg() + 90.0)
-            return abs(noonOffsetDeg - nadirOffsetDeg) < 45.0
+            return DirectionUtil.arc(noonEvent.azimuthDeg, nadirEvent.azimuthDeg).absoluteValue < 90.0
         }
     }
 }

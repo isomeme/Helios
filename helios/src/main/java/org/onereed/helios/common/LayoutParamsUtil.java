@@ -13,8 +13,8 @@ public class LayoutParamsUtil {
   }
 
   /** Sets the angle of a view that is using circle-constrained layout. */
-  public static void changeConstraintLayoutCircleAngle(View view, float angle) {
-    changeConstraintLayoutParams(view, layoutParams -> layoutParams.circleAngle = angle);
+  public static void changeConstraintLayoutCircleAngle(View view, double angle) {
+    changeConstraintLayoutParams(view, layoutParams -> layoutParams.circleAngle = (float) angle);
   }
 
   /**

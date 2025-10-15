@@ -1,6 +1,0 @@
-<resources>
-    <style name="Theme.Helios" parent="@style/Theme.AppCompat.NoActionBar">
-        <!-- enable window content transitions -->
-        <item name="android:windowActivityTransitions">true</item>
-    </style>
-</resources>

@@ -75,7 +75,7 @@ public abstract class SunEvent implements Comparable<SunEvent> {
   public abstract Instant getTime();
 
   /** Sun azimuth degrees, clockwise from north, [0..360). */
-  public abstract float getAzimuthDeg();
+  public abstract double getAzimuthDeg();
 
   /**
    * The {@link androidx.recyclerview.widget.RecyclerView} we use to display the list of sun events can do some nice transition

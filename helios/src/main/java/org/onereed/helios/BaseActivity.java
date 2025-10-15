@@ -5,7 +5,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import android.app.ActivityOptions;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import com.google.errorprone.annotations.ForOverride;
 
 /** Parent class for Helios activities. */
@@ -35,16 +33,7 @@ public abstract class BaseActivity extends AppCompatActivity {
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.actions_menu, menu);
-
-    ColorStateList colors =
-        ContextCompat.getColorStateList(this, R.color.actions_menu_color_selector);
-
-    for (int i = 0; i < menu.size(); i++) {
-      menu.getItem(i).setIconTintList(colors);
-    }
-
     checkNotNull(menu.findItem(myActionsMenuId())).setEnabled(false);
-
     return super.onCreateOptionsMenu(menu);
   }
 
