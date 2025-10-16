@@ -8,6 +8,7 @@ import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Function;
+import org.onereed.helios.common.DirectionUtil;
 import org.onereed.helios.common.Place;
 import org.shredzone.commons.suncalc.SunTimes;
 
@@ -49,7 +50,7 @@ public abstract class SunEvent implements Comparable<SunEvent> {
      * summer and winter.
      */
     Optional<SunEvent> createSunEvent(@NonNull SunTimes sunTimes, @NonNull Place where) {
-        return Optional.ofNullable(timeExtractor.apply(sunTimes))
+      return Optional.ofNullable(timeExtractor.apply(sunTimes))
           .map(ZonedDateTime::toInstant)
           .map(
               when ->
@@ -88,5 +89,9 @@ public abstract class SunEvent implements Comparable<SunEvent> {
   @Override
   public int compareTo(@NonNull SunEvent o) {
     return COMPARATOR.compare(this, o);
+  }
+
+  public boolean isNear(SunEvent other) {
+    return Math.abs(DirectionUtil.arc(getAzimuthDeg(), other.getAzimuthDeg())) < 20.0;
   }
 }

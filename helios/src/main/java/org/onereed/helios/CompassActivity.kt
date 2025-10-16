@@ -26,11 +26,9 @@ import org.onereed.helios.sun.SunInfo
 import timber.log.Timber
 import java.util.EnumSet
 import java.util.concurrent.Executor
-import kotlin.math.absoluteValue
 
 /** Displays directions to sun events.  */
-class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener,
-    Observer<SunInfo?> {
+class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observer<SunInfo?> {
 
     private lateinit var binding: ActivityCompassBinding
 
@@ -48,7 +46,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener,
 
     private lateinit var compassDisplayState: CompassDisplayState
 
-    private var lastRotationDeg = 0.0f
+    private var lastRotationDeg = 0.0
     private var compassRadiusPx = 0
     private var radiusPxRange = 0
 
@@ -159,7 +157,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener,
             return
         }
 
-        val isOverlap = noonNadirOverlap(noonEvent, nadirEvent)
+        val isOverlap = noonEvent.isNear(nadirEvent)
         val isNoonEarlier = noonEvent.compareTo(nadirEvent) < 1
         val isNoonInset = isOverlap && !isNoonEarlier
         val isNadirInset = isOverlap && isNoonEarlier
@@ -169,7 +167,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener,
     }
 
     override fun onDeviceOrientationChanged(deviceOrientation: DeviceOrientation) {
-        val compassAzimuthDeg = deviceOrientation.headingDegrees
+        val compassAzimuthDeg = deviceOrientation.headingDegrees.toDouble()
 
         when (compassDisplayState) {
             CompassDisplayState.LOCKED, CompassDisplayState.UNLOCKING -> {}
@@ -278,28 +276,24 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener,
     }
 
     private fun rotateCompassToLockedPosition() {
-        rotateCompass(if (binding.southAtTop.isChecked) 180.0f else 0.0f,  /* listener= */ null)
+        rotateCompass(if (binding.southAtTop.isChecked) 180.0 else 0.0,  /* listener= */ null)
     }
 
     /**
      * Executes an animated sweep from the old compass rotation to the new one, and updates the old
      * one to the new value to prepare for the next update.
      */
-    private fun rotateCompass(compassAzimuthDeg: Float, listener: Animator.AnimatorListener?) {
-        val desiredRotationDeg = -compassAzimuthDeg
-        val deltaDeg = desiredRotationDeg - lastRotationDeg
-
+    private fun rotateCompass(compassAzimuthDeg: Double, listener: Animator.AnimatorListener?) {
         // When animating from -179 to +179, we don't want to go the long way around the circle.
 
-        val adjustedDesiredRotationDeg =
-            when {
-                deltaDeg < -180.0f -> desiredRotationDeg + 360.0f
-                deltaDeg > 180.0f -> desiredRotationDeg - 360.0f
-                else -> desiredRotationDeg;
-            }
+        val deltaDeg = DirectionUtil.arc(lastRotationDeg, -compassAzimuthDeg)
+        val desiredRotationDeg = lastRotationDeg + deltaDeg
 
         val compassAnimator = ObjectAnimator.ofFloat(
-            binding.compassRotating, "rotation", lastRotationDeg, adjustedDesiredRotationDeg
+            binding.compassRotating,
+            "rotation",
+            lastRotationDeg.toFloat(),
+            desiredRotationDeg.toFloat()
         ).setDuration(ROTATION_ANIMATION_DURATION_MILLIS)
 
         if (listener != null) {
@@ -339,7 +333,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener,
 
         fun redraw() {
             val insetFraction = insetPct / 100.0f
-            val alpha: Float = OPAQUE_ALPHA - insetFraction * ALPHA_RANGE
+            val alpha = OPAQUE_ALPHA - insetFraction * ALPHA_RANGE
             val radiusPx = (compassRadiusPx - insetFraction * radiusPxRange).toInt()
 
             view.setAlpha(alpha)
@@ -377,10 +371,5 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener,
 
         private val DEVICE_ORIENTATION_REQUEST =
             DeviceOrientationRequest.Builder(DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT).build()
-
-        /** Returns true iff noon and nadir are either both in the north or both in the south.  */
-        private fun noonNadirOverlap(noonEvent: SunEvent, nadirEvent: SunEvent): Boolean {
-            return DirectionUtil.arc(noonEvent.azimuthDeg, nadirEvent.azimuthDeg).absoluteValue < 90.0
-        }
     }
 }
