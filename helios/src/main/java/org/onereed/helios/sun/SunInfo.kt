@@ -1,36 +1,10 @@
-package org.onereed.helios.sun;
+package org.onereed.helios.sun
 
-import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableList;
-import java.time.Instant;
+import java.time.Instant
 
-/** Information about the most recent sun event, and upcoming ones. */
-@AutoValue
-public abstract class SunInfo {
-
-  public abstract Instant getTimestamp();
-
-  public abstract SunAzimuthInfo getSunAzimuthInfo();
-
-  public abstract int getClosestEventIndex();
-
-  public abstract ImmutableList<SunEvent> getSunEvents();
-
-  public static Builder builder() {
-    return new AutoValue_SunInfo.Builder();
-  }
-
-  /** Builder for {@link SunInfo} */
-  @AutoValue.Builder
-  public abstract static class Builder {
-    public abstract Builder setTimestamp(Instant timestamp);
-
-    public abstract Builder setSunAzimuthInfo(SunAzimuthInfo info);
-
-    public abstract Builder setClosestEventIndex(int closestEventIndex);
-
-    public abstract Builder setSunEvents(ImmutableList<SunEvent> sunEvents);
-
-    public abstract SunInfo build();
-  }
-}
+data class SunInfo(
+    val instant: Instant,
+    val sunAzimuthInfo: SunAzimuthInfo,
+    val closestEventIndex: Int,
+    val sunEvents: List<SunEvent>
+)

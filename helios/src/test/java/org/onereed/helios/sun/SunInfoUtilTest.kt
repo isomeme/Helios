@@ -25,20 +25,21 @@ class SunInfoUtilTest {
      */
     @Test
     fun testEventOverlap() {
-        val `when` = Instant.parse("2020-05-09T02:30:15Z")
-        val sunInfo = SunInfoUtil.getSunInfo(PLACE, `when`)
+        val instant = Instant.parse("2020-05-09T02:30:15Z")
+        val sunInfo = SunInfoUtil.getSunInfo(PLACE, instant)
 
-        val expectedSunInfo = SunInfo.builder().setTimestamp(`when`).setSunAzimuthInfo(
-                SunAzimuthInfo.create(289.9335632324219, true)
-            ).setClosestEventIndex(1).setSunEvents(
-                ImmutableList.of(
-                    event("2020-05-08T19:50:33Z", SunEvent.Type.NOON, 180.0486297607422),
-                    event("2020-05-09T02:43:51Z", SunEvent.Type.SET, 291.8290562827426),
-                    event("2020-05-09T07:50:18Z", SunEvent.Type.NADIR, 359.9482197950236),
-                    event("2020-05-09T12:56:55Z", SunEvent.Type.RISE, 68.05589238252242),
-                    event("2020-05-09T19:50:31Z", SunEvent.Type.NOON, 180.05583201838022)
-                )
-            ).build()
+        val expectedSunInfo = SunInfo(
+            instant,
+            SunAzimuthInfo.create(289.9335632324219, true),
+            1,
+            ImmutableList.of(
+                event("2020-05-08T19:50:33Z", SunEvent.Type.NOON, 180.0486292899211),
+                event("2020-05-09T02:43:51Z", SunEvent.Type.SET, 291.8290562827426),
+                event("2020-05-09T07:50:18Z", SunEvent.Type.NADIR, 359.9482197950236),
+                event("2020-05-09T12:56:55Z", SunEvent.Type.RISE, 68.05589238252242),
+                event("2020-05-09T19:50:31Z", SunEvent.Type.NOON, 180.05583201838022)
+            )
+        )
 
         assertEquals(expectedSunInfo, sunInfo)
     }
@@ -49,20 +50,20 @@ class SunInfoUtilTest {
      */
     @Test
     fun testEventGap() {
-        val `when` = Instant.parse("2020-05-18T02:50:50Z")
-        val sunInfo = SunInfoUtil.getSunInfo(PLACE, `when`)
+        val instant = Instant.parse("2020-05-18T02:50:50Z")
+        val sunInfo = SunInfoUtil.getSunInfo(PLACE, instant)
 
-        val expectedSunInfo = SunInfo.builder().setTimestamp(`when`).setSunAzimuthInfo(
-                SunAzimuthInfo.create(294.5638427734375, true)
-            ).setClosestEventIndex(0).setSunEvents(
-                ImmutableList.of(
-                    event("2020-05-18T02:50:35Z", SunEvent.Type.SET, 294.52853932175793),
-                    event("2020-05-18T07:50:21Z", SunEvent.Type.NADIR, 359.9604617342177),
-                    event("2020-05-18T12:50:06Z", SunEvent.Type.RISE, 65.35870558986005),
-                    event("2020-05-18T19:50:33Z", SunEvent.Type.NOON, 180.03983395176928),
-                    event("2020-05-19T02:51:19Z", SunEvent.Type.SET, 294.79749942898354)
-                )
-            ).build()
+        val expectedSunInfo = SunInfo(
+            instant, SunAzimuthInfo.create(294.5638427734375, true),
+            0,
+            ImmutableList.of(
+                event("2020-05-18T02:50:35Z", SunEvent.Type.SET, 294.52853932175793),
+                event("2020-05-18T07:50:21Z", SunEvent.Type.NADIR, 359.9604617342177),
+                event("2020-05-18T12:50:06Z", SunEvent.Type.RISE, 65.35870558986005),
+                event("2020-05-18T19:50:33Z", SunEvent.Type.NOON, 180.03983395176928),
+                event("2020-05-19T02:51:19Z", SunEvent.Type.SET, 294.79749942898354)
+            )
+        )
 
         assertEquals(expectedSunInfo, sunInfo)
     }
@@ -71,9 +72,9 @@ class SunInfoUtilTest {
         // Coords for Santa Monica CA USA
         private val PLACE: Place = Place.of(34.0, -118.5, 0.0)
 
-        private fun event(whenText: String?, type: SunEvent.Type?, azimuth: Double): SunEvent {
-            val `when` = Instant.parse(whenText)
-            return SunEvent.create(type, `when`, azimuth)
+        private fun event(whenText: String, type: SunEvent.Type, azimuth: Double): SunEvent {
+            val instant = Instant.parse(whenText)
+            return SunEvent(type, instant, azimuth)
         }
     }
 }

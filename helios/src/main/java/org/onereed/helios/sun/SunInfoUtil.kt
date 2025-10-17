@@ -1,108 +1,71 @@
-package org.onereed.helios.sun;
+package org.onereed.helios.sun
 
-import static com.google.common.base.Verify.verify;
-import static com.google.common.collect.ImmutableList.toImmutableList;
-import static java.util.Collections.reverseOrder;
+import org.onereed.helios.common.Place
+import org.shredzone.commons.suncalc.SunTimes
+import timber.log.Timber
+import java.time.Duration
+import java.time.Instant
 
-import androidx.annotation.NonNull;
-import com.google.common.base.VerifyException;
-import com.google.common.collect.ImmutableList;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.Optional;
-import org.onereed.helios.common.Place;
-import org.shredzone.commons.suncalc.SunTimes;
+/** Implements a static method which produces [SunInfo] instances.  */
+internal object SunInfoUtil {
 
-import timber.log.Timber;
+    /**
+     * We use this value combined with [.PRECEDING_LIMIT] to include "preceding" events up to
+     * and beyond the next upcoming event, to avoid edge cases where an event happening near the time
+     * we're checking falls out of both the preceding and upcoming events lists. We then remove
+     * duplicates in the preceding events.
+     */
+    private val PRECEDING_OFFSET = Duration.ofHours(13L)
 
-/** Implements a static method which produces {@link SunInfo} instances. */
-class SunInfoUtil {
+    /** See [.PRECEDING_OFFSET].  */
+    private val PRECEDING_LIMIT = Duration.ofHours(14L)
 
-  /**
-   * We use this value combined with {@link #PRECEDING_LIMIT} to include "preceding" events up to
-   * and beyond the next upcoming event, to avoid edge cases where an event happening near the time
-   * we're checking falls out of both the preceding and upcoming events lists. We then remove
-   * duplicates in the preceding events.
-   */
-  private static final Duration PRECEDING_OFFSET = Duration.ofHours(13L);
+    /**
+     * We want to display e.g. a sunset that happens 24 hrs 1 minute from now. But we don't want to
+     * confuse the display by showing a sunset that won't happen for a long time (e.g. in arctic
+     * summer). We limit the search for future events to this long from now.
+     */
+    private val FUTURE_LIMIT = Duration.ofHours(36L)
 
-  /** See {@link #PRECEDING_OFFSET}. */
-  private static final Duration PRECEDING_LIMIT = Duration.ofHours(14L);
+    @JvmStatic
+    fun getSunInfo(place: Place, instant: Instant): SunInfo {
+        Timber.d("place=%s instant=%s", place, instant)
 
-  /**
-   * We want to display e.g. a sunset that happens 24 hrs 1 minute from now. But we don't want to
-   * confuse the display by showing a sunset that won't happen for a long time (e.g. in arctic
-   * summer). We limit the search for future events to this long from now.
-   */
-  private static final Duration FUTURE_LIMIT = Duration.ofHours(36L);
+        val parameters = place.asTimesParameters()
+        val nextSunTimes = parameters.on(instant).limit(FUTURE_LIMIT).execute()
+        val nextEvents = toSunEvents(nextSunTimes, place)
+        val nextEvent = nextEvents.first()
 
-  static @NonNull SunInfo getSunInfo(@NonNull Place where, @NonNull Instant when) {
-    Timber.d("where=%s when=%s", where, when);
+        val precedingTime = nextEvent.time.minus(PRECEDING_OFFSET)
+        val precedingSunTimes = parameters.on(precedingTime).limit(PRECEDING_LIMIT).execute()
+        val precedingEvents = toSunEvents(precedingSunTimes, place)
+        val mostRecentEvent = getMostRecentEvent(precedingEvents, nextEvent)
 
-    SunTimes.Parameters parameters = where.asTimesParameters();
-    SunTimes nextSunTimes = parameters.on(when).limit(FUTURE_LIMIT).execute();
-    var nextEvents = toSunEvents(nextSunTimes, where);
+        val sunAzimuthInfo = SunAzimuthInfo.from(place, instant)
+        val closestEventIndex = getClosestEventIndex(instant, mostRecentEvent, nextEvent)
+        val shownSunEvents = listOf(mostRecentEvent).plus(nextEvents)
 
-    verify(!nextEvents.isEmpty(), "nextEvents empty for nextSunTimes=%s", nextSunTimes);
+        return SunInfo(instant, sunAzimuthInfo, closestEventIndex, shownSunEvents)
+    }
 
-    SunEvent nextEvent = nextEvents.get(0);
-    Instant precedingTime = nextEvent.getTime().minus(PRECEDING_OFFSET);
-    SunTimes precedingSunTimes = parameters.on(precedingTime).limit(PRECEDING_LIMIT).execute();
-    var precedingEvents = toSunEvents(precedingSunTimes, where);
+    private fun toSunEvents(sunTimes: SunTimes, place: Place): List<SunEvent> {
+        return SunEvent.Type.entries.mapNotNull { it.createSunEvent(sunTimes, place) }.sorted()
+    }
 
-    verify(
-        !precedingEvents.isEmpty(), "precedingEvents empty for precedingSunTimes=%s", nextSunTimes);
+    private fun getMostRecentEvent(
+        precedingEvents: List<SunEvent>, nextEvent: SunEvent
+    ): SunEvent {
+        return precedingEvents.filter { it.type != nextEvent.type }
+            .last { it.time.isBefore(nextEvent.time) }
+    }
 
-    var mostRecentEvent = getMostRecentEvent(precedingEvents, nextEvent);
-    int closestEventIndex = getClosestEventIndex(when, mostRecentEvent, nextEvent);
-
-    var shownSunEvents =
-        ImmutableList.<SunEvent>builder().add(mostRecentEvent).addAll(nextEvents).build();
-
-    var sunAzimuthInfo = SunAzimuthInfo.from(where, when);
-
-    return SunInfo.builder()
-        .setTimestamp(when)
-        .setSunAzimuthInfo(sunAzimuthInfo)
-        .setClosestEventIndex(closestEventIndex)
-        .setSunEvents(shownSunEvents)
-        .build();
-  }
-
-  private static ImmutableList<SunEvent> toSunEvents(SunTimes sunTimes, Place where) {
-    return Arrays.stream(SunEvent.Type.values())
-        .map(type -> type.createSunEvent(sunTimes, where))
-        .flatMap(Optional::stream)
-        .sorted()
-        .collect(toImmutableList());
-  }
-
-  private static SunEvent getMostRecentEvent(
-      ImmutableList<SunEvent> precedingEvents, SunEvent nextEvent) {
-
-    return precedingEvents.stream()
-        .sorted(reverseOrder())
-        .filter(event -> !event.getType().equals(nextEvent.getType()))
-        .filter(event -> event.getTime().isBefore(nextEvent.getTime()))
-        .findFirst()
-        .orElseThrow(
-            () ->
-                new VerifyException(
-                    String.format(
-                        "Nothing in precedingEvents=%s works as a preceding event for nextEvent=%s",
-                        precedingEvents, nextEvent)));
-  }
-
-  private static int getClosestEventIndex(
-      Instant when, SunEvent mostRecentEvent, SunEvent nextEvent) {
-
-    Instant beforeTime = mostRecentEvent.getTime();
-    Instant afterTime = nextEvent.getTime();
-    Duration between = Duration.between(beforeTime, afterTime);
-    Instant halfway = beforeTime.plus(between.dividedBy(2L));
-    return when.isBefore(halfway) ? 0 : 1;
-  }
-
-  private SunInfoUtil() {}
+    private fun getClosestEventIndex(
+        instant: Instant, mostRecentEvent: SunEvent, nextEvent: SunEvent
+    ): Int {
+        val beforeTime = mostRecentEvent.time
+        val afterTime = nextEvent.time
+        val between = Duration.between(beforeTime, afterTime)
+        val halfway = beforeTime.plus(between.dividedBy(2L))
+        return if (instant.isBefore(halfway)) 0 else 1
+    }
 }

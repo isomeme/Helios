@@ -127,13 +127,13 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
 
         val shownEvents = HashMap<SunEvent.Type, SunEvent>()
 
-        for (sunEvent in value.getSunEvents()) {
+        value.sunEvents.forEach { sunEvent ->
             val type = sunEvent.type
 
             if (!shownEvents.containsKey(type)) {
                 shownEvents.put(type, sunEvent)
                 val view = sunEventViews.get(type)!!
-                LayoutParamsUtil.changeConstraintLayoutCircleAngle(view, sunEvent.getAzimuthDeg())
+                LayoutParamsUtil.changeConstraintLayoutCircleAngle(view, sunEvent.azimuthDeg)
                 view.setVisibility(View.VISIBLE)
             }
         }
