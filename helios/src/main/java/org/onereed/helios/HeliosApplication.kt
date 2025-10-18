@@ -5,6 +5,7 @@ import timber.log.Timber
 import timber.log.Timber.DebugTree
 
 class HeliosApplication : Application() {
+
     override fun onCreate() {
         super.onCreate()
 

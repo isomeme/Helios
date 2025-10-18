@@ -11,10 +11,7 @@ import kotlin.math.abs
 
 /** Represents one sun event -- rise, noon, set, or nadir.  */
 data class SunEvent(
-    val type: Type,
-    val time: Instant,
-    val azimuthDeg: Double,
-    val weakId: Long = createWeakId(type, time)
+    val type: Type, val time: Instant, val azimuthDeg: Double
 ) : Comparable<SunEvent> {
 
     enum class Type(private val timeExtractor: Function<SunTimes, ZonedDateTime?>) {
@@ -30,8 +27,15 @@ data class SunEvent(
         }
     }
 
-    override fun compareTo(other: SunEvent) =
-        compareValuesBy(this, other, { it.time }, { it.type })
+    val weakId: Long
+        get() {
+            val timeBucket = time.epochSecond / EVENT_TIME_BUCKET_SIZE_SEC
+            val ordinalOffset = TYPE_ORDINAL_SCALE * type.ordinal
+            return timeBucket + ordinalOffset
+        }
+
+
+    override fun compareTo(other: SunEvent) = compareValuesBy(this, other, { it.time }, { it.type })
 
     fun isNear(other: SunEvent): Boolean {
         return abs(arc(this.azimuthDeg, other.azimuthDeg)) < 20.0
@@ -40,26 +44,16 @@ data class SunEvent(
     companion object {
 
         /**
-         * Epoch seconds divided by this value yields a time bucket within which two events with different
-         * times and the same [Type] might actually be the same event.
+         * Epoch seconds divided by this value yields a time bucket within which two events with
+         * different times and the same [Type] might actually be the same event.
          */
         private val EVENT_TIME_BUCKET_SIZE_SEC = Duration.ofHours(4L).seconds
 
         /**
          * The ordinal of the this event's [Type] is multiplied by this value before being added to
-         * the time bucket to yield a weak event ID. This must be >> than the largest expected time bucket
-         * value.
+         * the time bucket to yield a weak event ID. This value must be >> than the largest expected
+         * time bucket value.
          */
-        private const val TYPE_ORDINAL_SCALE = 10000000L
-
-        /**
-         * The weak ID of a [SunEvent] is used in the UI to determine when the identity of the
-         * displayed events has changed.
-         */
-        private fun createWeakId(type: Type, instant: Instant): Long {
-            val timeBucket = instant.epochSecond / EVENT_TIME_BUCKET_SIZE_SEC
-            val ordinalOffset = TYPE_ORDINAL_SCALE * type.ordinal
-            return timeBucket + ordinalOffset
-        }
+        private const val TYPE_ORDINAL_SCALE = 10_000_000L
     }
 }

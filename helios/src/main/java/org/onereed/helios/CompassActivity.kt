@@ -8,6 +8,7 @@ import android.view.HapticFeedbackConstants
 import android.view.View
 import android.widget.ImageView
 import androidx.annotation.Keep
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.lifecycle.Observer
@@ -16,10 +17,8 @@ import com.google.android.gms.location.DeviceOrientationListener
 import com.google.android.gms.location.DeviceOrientationRequest
 import com.google.android.gms.location.FusedOrientationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
-import org.onereed.helios.common.DirectionUtil
-import org.onereed.helios.common.LayoutParamsUtil
+import org.onereed.helios.common.DirectionUtil.arc
 import org.onereed.helios.databinding.ActivityCompassBinding
 import org.onereed.helios.sun.SunEvent
 import org.onereed.helios.sun.SunInfo
@@ -36,7 +35,8 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
     private lateinit var mainExecutor: Executor
 
     private lateinit var sunEventViews: ImmutableMap<SunEvent.Type, ImageView>
-    private lateinit var compassRadiusViews: ImmutableList<ImageView>
+    private lateinit var compassRadiusViews: List<ImageView>
+
     private lateinit var noonWrapper: NoonNadirWrapper
     private lateinit var nadirWrapper: NoonNadirWrapper
 
@@ -71,7 +71,8 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
 
         // Note that noon and nadir can be inset, and sunMovement is at a fraction of the compass
         // radius, so they're handled differently.
-        compassRadiusViews = ImmutableList.of(binding.sun, binding.rise, binding.set)
+
+        compassRadiusViews = listOf(binding.sun, binding.rise, binding.set)
 
         noonWrapper = NoonNadirWrapper(binding.noon)
         nadirWrapper = NoonNadirWrapper(binding.nadir)
@@ -118,14 +119,14 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
         val sunAzimuthInfo = value.sunAzimuthInfo
         val sunAzimuthDeg = sunAzimuthInfo.azimuthDeg
 
-        LayoutParamsUtil.changeConstraintLayoutCircleAngle(binding.sun, sunAzimuthDeg)
-        LayoutParamsUtil.changeConstraintLayoutCircleAngle(binding.sunMovement, sunAzimuthDeg)
+        updateCircleAngle(binding.sun, sunAzimuthDeg)
+        updateCircleAngle(binding.sunMovement, sunAzimuthDeg)
 
         val sunMovementRotation =
             if (sunAzimuthInfo.isClockwise) sunAzimuthDeg else sunAzimuthDeg + 180.0f
         binding.sunMovement.rotation = sunMovementRotation.toFloat()
 
-        val shownEvents = HashMap<SunEvent.Type, SunEvent>()
+        val shownEvents = mutableMapOf<SunEvent.Type, SunEvent>()
 
         value.sunEvents.forEach { sunEvent ->
             val type = sunEvent.type
@@ -133,7 +134,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
             if (!shownEvents.containsKey(type)) {
                 shownEvents.put(type, sunEvent)
                 val view = sunEventViews.get(type)!!
-                LayoutParamsUtil.changeConstraintLayoutCircleAngle(view, sunEvent.azimuthDeg)
+                updateCircleAngle(view, sunEvent.azimuthDeg)
                 view.setVisibility(View.VISIBLE)
             }
         }
@@ -149,8 +150,8 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
         // the one that comes later. We also explicitly reset the non-offset event(s) to correct
         // previous later-event status.
 
-        val noonEvent = shownEvents.get(SunEvent.Type.NOON)
-        val nadirEvent = shownEvents.get(SunEvent.Type.NADIR)
+        val noonEvent = shownEvents[SunEvent.Type.NOON]
+        val nadirEvent = shownEvents[SunEvent.Type.NADIR]
 
         if (noonEvent == null || nadirEvent == null) {
             Timber.e("Noon or nadir missing; shownEvents=%s", shownEvents)
@@ -190,7 +191,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
                     })
             }
 
-            CompassDisplayState.UNLOCKED -> rotateCompass(compassAzimuthDeg,  /* listener= */ null)
+            CompassDisplayState.UNLOCKED -> rotateCompass(compassAzimuthDeg, listener = null)
         }
     }
 
@@ -241,14 +242,10 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
         val insetRadiusPx = (compassRadiusPx * RADIUS_INSET_SCALE).toInt()
         radiusPxRange = compassRadiusPx - insetRadiusPx
 
-        compassRadiusViews.forEach { view ->
-            LayoutParamsUtil.changeConstraintLayoutCircleRadius(view, compassRadiusPx)
-        }
+        compassRadiusViews.forEach { updateCircleRadius(it, compassRadiusPx) }
 
         val sunMovementRadiusPx = (compassRadiusPx * RADIUS_SUN_MOVEMENT_SCALE).toInt()
-        LayoutParamsUtil.changeConstraintLayoutCircleRadius(
-            binding.sunMovement, sunMovementRadiusPx
-        )
+        updateCircleRadius(binding.sunMovement, sunMovementRadiusPx)
 
         noonWrapper.redraw()
         nadirWrapper.redraw()
@@ -271,12 +268,12 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
 
     private fun ignoreOrientation() {
         fusedOrientationProviderClient.removeOrientationUpdates(this)
-            .addOnSuccessListener { _ -> Timber.d("Orientation updates removed.") }
-            .addOnFailureListener { e -> Timber.e(e, "Failed to remove orientation updates.") }
+            .addOnSuccessListener { Timber.d("Orientation updates removed.") }
+            .addOnFailureListener { Timber.e(it, "Failed to remove orientation updates.") }
     }
 
     private fun rotateCompassToLockedPosition() {
-        rotateCompass(if (binding.southAtTop.isChecked) 180.0 else 0.0,  /* listener= */ null)
+        rotateCompass(if (binding.southAtTop.isChecked) 180.0 else 0.0, listener = null)
     }
 
     /**
@@ -286,7 +283,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
     private fun rotateCompass(compassAzimuthDeg: Double, listener: Animator.AnimatorListener?) {
         // When animating from -179 to +179, we don't want to go the long way around the circle.
 
-        val deltaDeg = DirectionUtil.arc(lastRotationDeg, -compassAzimuthDeg)
+        val deltaDeg = arc(lastRotationDeg, -compassAzimuthDeg)
         val desiredRotationDeg = lastRotationDeg + deltaDeg
 
         val compassAnimator = ObjectAnimator.ofFloat(
@@ -337,7 +334,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
             val radiusPx = (compassRadiusPx - insetFraction * radiusPxRange).toInt()
 
             view.setAlpha(alpha)
-            LayoutParamsUtil.changeConstraintLayoutCircleRadius(view, radiusPx)
+            updateCircleRadius(view, radiusPx)
         }
     }
 
@@ -371,5 +368,19 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
 
         private val DEVICE_ORIENTATION_REQUEST =
             DeviceOrientationRequest.Builder(DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT).build()
+
+        /** Sets the radius of a view that is using circle-constrained layout.  */
+        fun updateCircleRadius(view: View, radius: Int) {
+            val layoutParams = view.layoutParams as ConstraintLayout.LayoutParams
+            layoutParams.circleRadius = radius
+            view.layoutParams = layoutParams
+        }
+
+        /** Sets the angle of a view that is using circle-constrained layout.  */
+        fun updateCircleAngle(view: View, angle: Double) {
+            val layoutParams = view.layoutParams as ConstraintLayout.LayoutParams
+            layoutParams.circleAngle = angle.toFloat()
+            view.layoutParams = layoutParams
+        }
     }
 }

@@ -1,6 +1,5 @@
 package org.onereed.helios.sun
 
-import com.google.common.collect.ImmutableList
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -14,6 +13,7 @@ import java.time.Instant
 /** Tests for [SunInfoUtil].  */
 @RunWith(StrictStubs::class)
 class SunInfoUtilTest {
+
     @Before
     fun setup() {
         Timber.plant(DebugTree())
@@ -29,10 +29,7 @@ class SunInfoUtilTest {
         val sunInfo = SunInfoUtil.getSunInfo(PLACE, instant)
 
         val expectedSunInfo = SunInfo(
-            instant,
-            SunAzimuthInfo.create(289.9335632324219, true),
-            1,
-            ImmutableList.of(
+            instant, SunAzimuthInfo(289.93357351191065, true), closestEventIndex = 1, listOf(
                 event("2020-05-08T19:50:33Z", SunEvent.Type.NOON, 180.0486292899211),
                 event("2020-05-09T02:43:51Z", SunEvent.Type.SET, 291.8290562827426),
                 event("2020-05-09T07:50:18Z", SunEvent.Type.NADIR, 359.9482197950236),
@@ -54,9 +51,7 @@ class SunInfoUtilTest {
         val sunInfo = SunInfoUtil.getSunInfo(PLACE, instant)
 
         val expectedSunInfo = SunInfo(
-            instant, SunAzimuthInfo.create(294.5638427734375, true),
-            0,
-            ImmutableList.of(
+            instant, SunAzimuthInfo(294.5638405069754, true), closestEventIndex = 0, listOf(
                 event("2020-05-18T02:50:35Z", SunEvent.Type.SET, 294.52853932175793),
                 event("2020-05-18T07:50:21Z", SunEvent.Type.NADIR, 359.9604617342177),
                 event("2020-05-18T12:50:06Z", SunEvent.Type.RISE, 65.35870558986005),
@@ -69,8 +64,9 @@ class SunInfoUtilTest {
     }
 
     companion object {
-        // Coords for Santa Monica CA USA
-        private val PLACE: Place = Place.of(34.0, -118.5, 0.0)
+
+        /** Santa Monica CA USA */
+        private val PLACE = Place(34.0, -118.5, 0.0)
 
         private fun event(whenText: String, type: SunEvent.Type, azimuth: Double): SunEvent {
             val instant = Instant.parse(whenText)

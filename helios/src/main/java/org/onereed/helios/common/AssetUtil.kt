@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import java.io.IOException
 import java.io.UncheckedIOException
-import java.nio.charset.StandardCharsets
+import java.nio.charset.StandardCharsets.UTF_8
 
 object AssetUtil {
 
@@ -12,9 +12,7 @@ object AssetUtil {
     @JvmStatic
     fun readAssetText(context: Context, assetName: String): String {
         try {
-            context.assets.open(assetName).use { inputStream ->
-                return String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
-            }
+            return context.assets.open(assetName).use { String(it.readAllBytes(), UTF_8) }
         } catch (e: IOException) {
             throw UncheckedIOException(e)
         }

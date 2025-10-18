@@ -1,35 +1,25 @@
-package org.onereed.helios.sun;
+package org.onereed.helios.sun
 
-import androidx.annotation.VisibleForTesting;
-import com.google.auto.value.AutoValue;
-import java.time.Duration;
-import java.time.Instant;
-import org.onereed.helios.common.DirectionUtil;
-import org.onereed.helios.common.Place;
-import org.shredzone.commons.suncalc.SunPosition;
+import org.onereed.helios.common.DirectionUtil.arc
+import org.onereed.helios.common.Place
+import java.time.Duration
+import java.time.Instant
 
-/** Sun azimuth and azimuth direction (clockwise or counterclockwise). */
-@AutoValue
-public abstract class SunAzimuthInfo {
+/** Sun azimuth and azimuth movement direction (clockwise or counterclockwise). */
+data class SunAzimuthInfo(val azimuthDeg: Double, val isClockwise: Boolean) {
 
-  private static final Duration DELTA_TIME = Duration.ofMinutes(1L);
+    companion object {
 
-  public abstract double getAzimuthDeg();
+        private val DELTA_TIME: Duration = Duration.ofMinutes(1L)
 
-  public abstract boolean isClockwise();
+        fun from(place: Place, instant: Instant): SunAzimuthInfo {
+            val parameters = place.asPositionParameters()
+            val azimuthNow = parameters.on(instant).execute().azimuth
+            val soon = instant.plus(DELTA_TIME)
+            val azimuthSoon = parameters.on(soon).execute().azimuth
+            val deltaAzimuth = arc(azimuthNow, azimuthSoon)
 
-  static SunAzimuthInfo from(Place where, Instant when) {
-    SunPosition.Parameters parameters = where.asPositionParameters();
-    double azimuthNow = parameters.on(when).execute().getAzimuth();
-    Instant when1 = when.plus(DELTA_TIME);
-    double azimuthSoon = parameters.on(when1).execute().getAzimuth();
-    double deltaAzimuth = DirectionUtil.arc(azimuthNow, azimuthSoon);
-
-    return create((float) azimuthNow, /* clockwise= */ deltaAzimuth >= 0.0);
-  }
-
-  @VisibleForTesting
-  static SunAzimuthInfo create(double azimuthDeg, boolean isClockwise) {
-    return new AutoValue_SunAzimuthInfo(azimuthDeg, isClockwise);
-  }
+            return SunAzimuthInfo(azimuthNow,  deltaAzimuth >= 0.0)
+        }
+    }
 }

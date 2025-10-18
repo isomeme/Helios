@@ -1,35 +1,19 @@
-package org.onereed.helios.common;
+package org.onereed.helios.common
 
-import android.location.Location;
-import com.google.auto.value.AutoValue;
-import org.shredzone.commons.suncalc.SunPosition;
-import org.shredzone.commons.suncalc.SunTimes;
+import android.location.Location
+import org.shredzone.commons.suncalc.SunPosition
+import org.shredzone.commons.suncalc.SunTimes
 
-/** Represents a latitude-longitude-altitude location. */
-@AutoValue
-public abstract class Place {
+/** Represents a latitude-longitude-altitude location.  */
+data class Place(val latDeg: Double, val lonDeg: Double, val altitudeMeters: Double) {
 
-  public abstract double getLatDeg();
+    constructor(location: Location) : this(location.latitude, location.longitude, location.altitude)
 
-  public abstract double getLonDeg();
+    fun asPositionParameters(): SunPosition.Parameters {
+        return SunPosition.compute().at(latDeg, lonDeg).elevation(altitudeMeters)
+    }
 
-  public abstract double getAltitudeMeters();
-
-  public SunPosition.Parameters asPositionParameters() {
-    return SunPosition.compute().at(getLatDeg(), getLonDeg()).elevation(getAltitudeMeters());
-  }
-
-  public SunTimes.Parameters asTimesParameters() {
-    return SunTimes.compute().at(getLatDeg(), getLonDeg()).elevation(getAltitudeMeters());
-  }
-
-  public static Place from(Location location) {
-    return new AutoValue_Place(
-        location.getLatitude(), location.getLongitude(), location.getAltitude());
-  }
-
-  /** Intended for testing. */
-  public static Place of(double latDeg, double lonDeg, double altitudeMeters) {
-    return new AutoValue_Place(latDeg, lonDeg, altitudeMeters);
-  }
+    fun asTimesParameters(): SunTimes.Parameters {
+        return SunTimes.compute().at(latDeg, lonDeg).elevation(altitudeMeters)
+    }
 }
