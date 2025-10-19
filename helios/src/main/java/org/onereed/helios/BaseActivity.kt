@@ -14,94 +14,93 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import com.google.errorprone.annotations.ForOverride
 
-/** Parent class for Helios activities.  */
+/** Parent class for Helios activities. */
 abstract class BaseActivity : AppCompatActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
 
-        window.apply {
-            enterTransition = Fade()
-            exitTransition = Fade()
-        }
+    window.apply {
+      enterTransition = Fade()
+      exitTransition = Fade()
+    }
+  }
+
+  override fun onCreateOptionsMenu(menu: Menu): Boolean {
+    menuInflater.inflate(R.menu.actions_menu, menu)
+
+    menu.findItem(myActionsMenuId())?.isEnabled = false
+
+    return super.onCreateOptionsMenu(menu)
+  }
+
+  /**
+   * Subclass implementations of this method provide their actions menu ID so we can disable that
+   * control in the nav bar.
+   */
+  @ForOverride protected abstract fun myActionsMenuId(): Int
+
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    hapticClick()
+
+    when (item.itemId) {
+      R.id.action_schedule -> {
+        go(Intent(this, MainActivity::class.java))
+      }
+
+      R.id.action_text -> {
+        go(Intent(this, LiberActivity::class.java))
+      }
+
+      R.id.action_compass -> {
+        go(Intent(this, CompassActivity::class.java))
+      }
+
+      R.id.action_help -> {
+        openHelp()
+      }
+
+      else -> {
+        return super.onOptionsItemSelected(item)
+      }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.actions_menu, menu)
+    return true
+  }
 
-        menu.findItem(myActionsMenuId())?.isEnabled = false
-
-        return super.onCreateOptionsMenu(menu)
+  private fun openHelp() {
+    try {
+      go(HELP_INTENT)
+    } catch (_: ActivityNotFoundException) {
+      hapticReject()
+      runOnUiThread {
+        Toast.makeText(this, getString(R.string.toast_no_browser), Toast.LENGTH_LONG).show()
+      }
     }
+  }
 
-    /**
-     * Subclass implementations of this method provide their actions menu ID so we can disable that
-     * control in the nav bar.
-     */
-    @ForOverride
-    protected abstract fun myActionsMenuId(): Int
+  protected fun go(intent: Intent?) {
+    val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+    startActivity(intent, bundle)
+  }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        hapticClick()
+  private fun hapticClick() {
+    hapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+  }
 
-        val id = item.itemId
-
-        when (id) {
-            R.id.action_schedule -> {
-                go(Intent(this, MainActivity::class.java))
-            }
-            R.id.action_text -> {
-                go(Intent(this, LiberActivity::class.java))
-            }
-            R.id.action_compass -> {
-                go(Intent(this, CompassActivity::class.java))
-            }
-            R.id.action_help -> {
-                openHelp()
-            }
-            else -> {
-                return super.onOptionsItemSelected(item)
-            }
-        }
-
-        return true
+  private fun hapticReject() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      hapticFeedback(HapticFeedbackConstants.REJECT)
     }
+  }
 
-    private fun openHelp() {
-        try {
-            go(HELP_INTENT)
-        } catch (_: ActivityNotFoundException) {
-            hapticReject()
-            runOnUiThread {
-                Toast.makeText(
-                    this, getString(R.string.toast_no_browser), Toast.LENGTH_LONG
-                ).show()
-            }
-        }
-    }
+  private fun hapticFeedback(feedbackConstant: Int) {
+    window.decorView.performHapticFeedback(feedbackConstant)
+  }
 
-    protected fun go(intent: Intent?) {
-        val bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
-        startActivity(intent, bundle)
-    }
+  companion object {
 
-    private fun hapticClick() {
-        hapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-    }
-
-    private fun hapticReject() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            hapticFeedback(HapticFeedbackConstants.REJECT)
-        }
-    }
-
-    private fun hapticFeedback(feedbackConstant: Int) {
-        window.decorView.performHapticFeedback(feedbackConstant)
-    }
-
-    companion object {
-
-        private val HELP_PAGE = "https://www.one-reed.org/helios".toUri()
-        private val HELP_INTENT = Intent(Intent.ACTION_VIEW, HELP_PAGE)
-    }
+    private val HELP_PAGE = "https://www.one-reed.org/helios".toUri()
+    private val HELP_INTENT = Intent(Intent.ACTION_VIEW, HELP_PAGE)
+  }
 }

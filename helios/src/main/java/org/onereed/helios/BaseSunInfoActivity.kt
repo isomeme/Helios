@@ -23,115 +23,124 @@ import java.util.concurrent.Executor
 
 abstract class BaseSunInfoActivity : BaseActivity() {
 
-    private lateinit var sunInfoViewModel: SunInfoViewModel
+  private lateinit var sunInfoViewModel: SunInfoViewModel
 
-    private lateinit var locationProvider: FusedLocationProviderClient
-    private lateinit var mainExecutor: Executor
+  private lateinit var locationProvider: FusedLocationProviderClient
+  private lateinit var mainExecutor: Executor
 
-    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+  private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        Timber.d("onCreate")
-        super.onCreate(savedInstanceState)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    Timber.d("onCreate")
+    super.onCreate(savedInstanceState)
 
-        sunInfoViewModel = ViewModelProvider(this)[SunInfoViewModel::class.java]
+    sunInfoViewModel = ViewModelProvider(this)[SunInfoViewModel::class.java]
 
-        locationProvider = LocationServices.getFusedLocationProviderClient(this)
-        mainExecutor = ContextCompat.getMainExecutor(this)
+    locationProvider = LocationServices.getFusedLocationProviderClient(this)
+    mainExecutor = ContextCompat.getMainExecutor(this)
 
-        requestPermissionLauncher = registerForActivityResult(RequestPermission()) { isGranted ->
-            acceptLocationPermissionResult(isGranted)
+    requestPermissionLauncher =
+      registerForActivityResult(RequestPermission()) { isGranted ->
+        acceptLocationPermissionResult(isGranted)
+      }
+  }
+
+  override fun onStart() {
+    Timber.d("onStart")
+    super.onStart()
+
+    if (checkLocationPermission()) {
+      Timber.d("Location permission already granted")
+    } else {
+      Timber.d("Requesting location permission")
+      requestLocationPermission()
+    }
+  }
+
+  override fun onResume() {
+    Timber.d("onResume")
+    super.onResume()
+
+    if (checkLocationPermission()) {
+      Timber.d("About to request location updates.")
+
+      locationProvider
+        .requestLocationUpdates(LOCATION_REQUEST, mainExecutor, sunInfoViewModel)
+        .addOnSuccessListener { Timber.d("Location updates started.") }
+        .addOnFailureListener { e -> Timber.e(e, "Location updates start failed.") }
+
+      // TODO: Add failure indicator to UI.
+    } else {
+      Timber.d("Not requesting location updates; permission not granted yet.")
+    }
+  }
+
+  override fun onPause() {
+    Timber.d("onPause")
+    super.onPause()
+
+    locationProvider
+      .removeLocationUpdates(sunInfoViewModel)
+      .addOnSuccessListener { Timber.d("Location updates stopped.") }
+      .addOnFailureListener { e -> Timber.e(e, "Location updates stop failed.") }
+  }
+
+  protected fun observeSunInfo(sunInfoObserver: Observer<SunInfo>) {
+    sunInfoViewModel.sunInfoLiveData.observe(this, sunInfoObserver)
+  }
+
+  private fun acceptLocationPermissionResult(isGranted: Boolean) {
+    Timber.d("acceptLocationPermissionResult: isGranted=$isGranted")
+
+    if (isGranted) {
+      return
+    }
+
+    if (shouldShowRequestPermissionRationale(ACCESS_FINE_LOCATION)) {
+      AlertDialog.Builder(this)
+        .setMessage(R.string.location_permission_rationale)
+        .setPositiveButton(R.string.button_continue) { dialog, which ->
+          requestLocationPermission()
         }
+        .setNegativeButton(R.string.button_exit) { dialog, which -> finish() }
+        .setCancelable(false)
+        .create()
+        .show()
+
+      Timber.d("Launched rationale dialog.")
+    } else {
+      val settingsIntent =
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+          .setData(Uri.fromParts("package", packageName, /* fragment= */ null))
+
+      AlertDialog.Builder(this)
+        .setMessage(R.string.location_permission_use_settings)
+        .setPositiveButton(R.string.button_settings) { dialog, which -> go(settingsIntent) }
+        .setNegativeButton(R.string.button_exit) { dialog, which -> finish() }
+        .setCancelable(false)
+        .create()
+        .show()
+
+      Timber.d("Launched use-settings dialog.")
     }
+  }
 
-    override fun onStart() {
-        Timber.d("onStart")
-        super.onStart()
+  protected fun checkLocationPermission(): Boolean {
+    return checkSelfPermission(ACCESS_FINE_LOCATION) == PERMISSION_GRANTED
+  }
 
-        if (checkLocationPermission()) {
-            Timber.d("Location permission already granted")
-        } else {
-            Timber.d("Requesting location permission")
-            requestLocationPermission()
-        }
-    }
+  private fun requestLocationPermission() {
+    requestPermissionLauncher.launch(ACCESS_FINE_LOCATION)
+  }
 
-    override fun onResume() {
-        Timber.d("onResume")
-        super.onResume()
+  companion object {
 
-        if (checkLocationPermission()) {
-            Timber.d("About to request location updates.")
+    private val UPDATE_INTERVAL = Duration.ofSeconds(30L).toMillis()
+    private val MIN_UPDATE_INTERVAL = Duration.ofSeconds(15L).toMillis()
 
-            locationProvider.requestLocationUpdates(
-                LOCATION_REQUEST, mainExecutor, sunInfoViewModel
-            ).addOnSuccessListener { Timber.d("Location updates started.") }
-                .addOnFailureListener { e ->
-                    Timber.e(e, "Location updates start failed.")
-                }
-
-            // TODO: Add failure indicator to UI.
-        } else {
-            Timber.d("Not requesting location updates; permission not granted yet.")
-        }
-    }
-
-    override fun onPause() {
-        Timber.d("onPause")
-        super.onPause()
-
-        locationProvider.removeLocationUpdates(sunInfoViewModel)
-            .addOnSuccessListener { Timber.d("Location updates stopped.") }
-            .addOnFailureListener { e -> Timber.e(e, "Location updates stop failed.") }
-    }
-
-    protected fun observeSunInfo(sunInfoObserver: Observer<SunInfo>) {
-        sunInfoViewModel.sunInfoLiveData.observe(this, sunInfoObserver)
-    }
-
-    private fun acceptLocationPermissionResult(isGranted: Boolean) {
-        Timber.d("acceptLocationPermissionResult: isGranted=$isGranted")
-
-        if (isGranted) {
-            return
-        }
-
-        if (shouldShowRequestPermissionRationale(ACCESS_FINE_LOCATION)) {
-            AlertDialog.Builder(this).setMessage(R.string.location_permission_rationale)
-                .setPositiveButton(R.string.button_continue) { dialog, which -> requestLocationPermission() }
-                .setNegativeButton(R.string.button_exit) { dialog, which -> finish() }
-                .setCancelable(false).create().show()
-
-            Timber.d("Launched rationale dialog.")
-        } else {
-            val settingsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).setData(
-                Uri.fromParts("package", packageName, /* fragment= */ null)
-            )
-
-            AlertDialog.Builder(this).setMessage(R.string.location_permission_use_settings)
-                .setPositiveButton(R.string.button_settings) { dialog, which -> go(settingsIntent) }
-                .setNegativeButton(R.string.button_exit) { dialog, which -> finish() }
-                .setCancelable(false).create().show()
-
-            Timber.d("Launched use-settings dialog.")
-        }
-    }
-
-    protected fun checkLocationPermission(): Boolean {
-        return checkSelfPermission(ACCESS_FINE_LOCATION) == PERMISSION_GRANTED
-    }
-
-    private fun requestLocationPermission() {
-        requestPermissionLauncher.launch(ACCESS_FINE_LOCATION)
-    }
-
-    companion object {
-
-        private val UPDATE_INTERVAL = Duration.ofSeconds(30L).toMillis()
-        private val MIN_UPDATE_INTERVAL = Duration.ofSeconds(15L).toMillis()
-
-        private val LOCATION_REQUEST =
-            LocationRequest.Builder(PRIORITY_BALANCED_POWER_ACCURACY, UPDATE_INTERVAL)
-                .setMinUpdateIntervalMillis(MIN_UPDATE_INTERVAL).build()
-    }
+    private val LOCATION_REQUEST =
+      LocationRequest.Builder(PRIORITY_BALANCED_POWER_ACCURACY, UPDATE_INTERVAL)
+        .setMinUpdateIntervalMillis(MIN_UPDATE_INTERVAL)
+        .build()
+  }
 }

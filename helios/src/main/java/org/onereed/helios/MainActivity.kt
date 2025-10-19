@@ -5,28 +5,28 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import org.onereed.helios.databinding.ActivityMainBinding
 import timber.log.Timber
 
-/** Main activity for Helios.  */
+/** Main activity for Helios. */
 class MainActivity : BaseSunInfoActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        Timber.d("onCreate")
-        super.onCreate(savedInstanceState)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    Timber.d("onCreate")
+    super.onCreate(savedInstanceState)
 
-        val binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
+    val binding = ActivityMainBinding.inflate(layoutInflater)
+    setContentView(binding.root)
+    setSupportActionBar(binding.toolbar)
 
-        val sunInfoAdapter = SunInfoAdapter(this)
+    val sunInfoAdapter = SunInfoAdapter(this)
 
-        binding.sunEventsRecyclerView.apply {
-            layoutManager = LinearLayoutManager(this@MainActivity)
-            adapter = sunInfoAdapter
-        }
-
-        observeSunInfo(sunInfoAdapter)
+    binding.sunEventsRecyclerView.apply {
+      layoutManager = LinearLayoutManager(this@MainActivity)
+      adapter = sunInfoAdapter
     }
 
-    override fun myActionsMenuId(): Int {
-        return R.id.action_schedule
-    }
+    observeSunInfo(sunInfoAdapter)
+  }
+
+  override fun myActionsMenuId(): Int {
+    return R.id.action_schedule
+  }
 }

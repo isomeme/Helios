@@ -6,11 +6,11 @@ import timber.log.Timber.DebugTree
 
 class HeliosApplication : Application() {
 
-    override fun onCreate() {
-        super.onCreate()
+  override fun onCreate() {
+    super.onCreate()
 
-        if (BuildConfig.DEBUG) {
-            Timber.plant(DebugTree())
-        }
+    if (BuildConfig.DEBUG) {
+      Timber.plant(DebugTree())
     }
+  }
 }

@@ -15,21 +15,21 @@ import java.time.Instant
 /** Stores and updates data needed for [SunInfo] display. */
 class SunInfoViewModel : ViewModel(), LocationListener {
 
-    private val sunInfoMutableLiveData = MutableLiveData<SunInfo>()
+  private val sunInfoMutableLiveData = MutableLiveData<SunInfo>()
 
-    val sunInfoLiveData: LiveData<SunInfo>
-        get() = sunInfoMutableLiveData
+  val sunInfoLiveData: LiveData<SunInfo>
+    get() = sunInfoMutableLiveData
 
-    override fun onLocationChanged(location: Location) {
-        val place = Place(location)
-        SunInfoSource.request(place, Instant.now()).addOnCompleteListener { publishSunInfo(it) }
+  override fun onLocationChanged(location: Location) {
+    val place = Place(location)
+    SunInfoSource.request(place, Instant.now()).addOnCompleteListener { publishSunInfo(it) }
+  }
+
+  private fun publishSunInfo(sunInfoTask: Task<SunInfo>) {
+    if (sunInfoTask.isSuccessful) {
+      sunInfoMutableLiveData.postValue(sunInfoTask.result)
+    } else {
+      Timber.e(sunInfoTask.exception, "Failure obtaining SunInfo.")
     }
-
-    private fun publishSunInfo(sunInfoTask: Task<SunInfo>) {
-        if (sunInfoTask.isSuccessful) {
-            sunInfoMutableLiveData.postValue(sunInfoTask.result)
-        } else {
-            Timber.e(sunInfoTask.exception, "Failure obtaining SunInfo.")
-        }
-    }
+  }
 }
