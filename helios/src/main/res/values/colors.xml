@@ -17,5 +17,6 @@
     <color name="compass_dial">#787878</color>
 
     <color name="helios_logo_bg">#82C9DC</color>
-    <color name="toolbar_bg">#3F51B5</color>
+    <color name="toolbar_bg">#1A237E</color>
+    <color name="screen_bg">#181828</color>
 </resources>

@@ -1,32 +1,32 @@
-package org.onereed.helios;
+package org.onereed.helios
 
-import android.os.Bundle;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import org.onereed.helios.databinding.ActivityMainBinding;
-import timber.log.Timber;
+import android.os.Bundle
+import androidx.recyclerview.widget.LinearLayoutManager
+import org.onereed.helios.databinding.ActivityMainBinding
+import timber.log.Timber
 
-/** Main activity for Helios. */
-public class MainActivity extends BaseSunInfoActivity {
+/** Main activity for Helios.  */
+class MainActivity : BaseSunInfoActivity() {
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    Timber.d("onCreate");
-    super.onCreate(savedInstanceState);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        Timber.d("onCreate")
+        super.onCreate(savedInstanceState)
 
-    ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
-    setContentView(binding.getRoot());
-    setSupportActionBar(binding.toolbar);
+        val binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
 
-    SunInfoAdapter sunInfoAdapter = new SunInfoAdapter(this);
+        val sunInfoAdapter = SunInfoAdapter(this)
 
-    binding.sunEventsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-    binding.sunEventsRecyclerView.setAdapter(sunInfoAdapter);
+        binding.sunEventsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = sunInfoAdapter
+        }
 
-    observeSunInfo(sunInfoAdapter);
-  }
+        observeSunInfo(sunInfoAdapter)
+    }
 
-  @Override
-  protected int myActionsMenuId() {
-    return R.id.action_schedule;
-  }
+    override fun myActionsMenuId(): Int {
+        return R.id.action_schedule
+    }
 }

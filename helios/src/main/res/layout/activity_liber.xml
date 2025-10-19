@@ -11,8 +11,8 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/toolbar_bg"
         android:minHeight="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
         android:theme="?attr/actionBarTheme"
         app:maxButtonHeight="56dp" />
 
@@ -23,7 +23,10 @@
         android:minWidth="48dp"
         android:minHeight="48dp"
         android:layout_below="@id/toolbar"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="15dp"
+        android:spinnerMode="dropdown"
+        />
 
     <ScrollView
         android:id="@+id/scroll_view"

@@ -27,11 +27,11 @@ import java.util.EnumSet
 import java.util.concurrent.Executor
 
 /** Displays directions to sun events.  */
-class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observer<SunInfo?> {
+class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observer<SunInfo> {
 
     private lateinit var binding: ActivityCompassBinding
 
-    private lateinit var fusedOrientationProviderClient: FusedOrientationProviderClient
+    private lateinit var orientationProvider: FusedOrientationProviderClient
     private lateinit var mainExecutor: Executor
 
     private lateinit var sunEventViews: ImmutableMap<SunEvent.Type, ImageView>
@@ -77,7 +77,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
         noonWrapper = NoonNadirWrapper(binding.noon)
         nadirWrapper = NoonNadirWrapper(binding.nadir)
 
-        fusedOrientationProviderClient = LocationServices.getFusedOrientationProviderClient(this)
+        orientationProvider = LocationServices.getFusedOrientationProviderClient(this)
         mainExecutor = ContextCompat.getMainExecutor(this)
 
         observeSunInfo(this)
@@ -110,12 +110,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
         }
     }
 
-    override fun onChanged(value: SunInfo?) {
-        if (value == null) {
-            Timber.e("SunInfo is null")
-            return
-        }
-
+    override fun onChanged(value: SunInfo) {
         val sunAzimuthInfo = value.sunAzimuthInfo
         val sunAzimuthDeg = sunAzimuthInfo.azimuthDeg
 
@@ -252,7 +247,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
     }
 
     private fun trackOrientation() {
-        fusedOrientationProviderClient.requestOrientationUpdates(
+        orientationProvider.requestOrientationUpdates(
             DEVICE_ORIENTATION_REQUEST, mainExecutor, this
         ).addOnSuccessListener { _ ->
             Timber.d("Request for orientation updates succeeded.")
@@ -267,7 +262,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
     }
 
     private fun ignoreOrientation() {
-        fusedOrientationProviderClient.removeOrientationUpdates(this)
+        orientationProvider.removeOrientationUpdates(this)
             .addOnSuccessListener { Timber.d("Orientation updates removed.") }
             .addOnFailureListener { Timber.e(it, "Failed to remove orientation updates.") }
     }

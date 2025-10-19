@@ -1,117 +1,102 @@
-package org.onereed.helios;
+package org.onereed.helios
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.ActivityOptions;
-import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.graphics.Typeface;
-import android.os.Bundle;
-import android.text.format.DateUtils;
-import android.view.HapticFeedbackConstants;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
-import androidx.lifecycle.Observer;
-import androidx.recyclerview.widget.RecyclerView;
-import org.onereed.helios.sun.SunEvent;
-import org.onereed.helios.sun.SunInfo;
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.ActivityOptions
+import android.content.Intent
+import android.graphics.Typeface
+import android.text.format.DateUtils.FORMAT_ABBREV_ALL
+import android.text.format.DateUtils.FORMAT_NUMERIC_DATE
+import android.text.format.DateUtils.FORMAT_SHOW_DATE
+import android.text.format.DateUtils.FORMAT_SHOW_TIME
+import android.text.format.DateUtils.FORMAT_SHOW_WEEKDAY
+import android.text.format.DateUtils.formatDateTime
+import android.view.HapticFeedbackConstants
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.cardview.widget.CardView
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.RecyclerView
+import org.onereed.helios.SunInfoAdapter.SunEventViewHolder
+import org.onereed.helios.sun.SunInfo
 
-class SunInfoAdapter extends RecyclerView.Adapter<SunInfoAdapter.SunEventViewHolder>
-    implements Observer<SunInfo> {
+internal class SunInfoAdapter(private val activity: Activity) :
+    RecyclerView.Adapter<SunEventViewHolder>(), Observer<SunInfo> {
 
-  private static final int DATE_FORMAT_FLAGS =
-      DateUtils.FORMAT_SHOW_DATE
-          | DateUtils.FORMAT_NUMERIC_DATE
-          | DateUtils.FORMAT_SHOW_WEEKDAY
-          | DateUtils.FORMAT_SHOW_TIME
-          | DateUtils.FORMAT_ABBREV_ALL;
+    private var sunInfo: SunInfo? = null
 
-  private final Activity activity;
-  private SunInfo sunInfo = null;
-
-  SunInfoAdapter(Activity activity) {
-    this.activity = activity;
-    setHasStableIds(true);
-  }
-
-  @SuppressLint("NotifyDataSetChanged")
-  @Override
-  public void onChanged(SunInfo newSunInfo) {
-    sunInfo = newSunInfo;
-    notifyDataSetChanged();
-  }
-
-  @Override
-  public long getItemId(int position) {
-    return getSunEvent(position).getWeakId();
-  }
-
-  @NonNull
-  @Override
-  public SunEventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-    CardView cardView =
-        (CardView) layoutInflater.inflate(R.layout.sun_event, parent, /* attachToRoot= */ false);
-    return new SunEventViewHolder(cardView);
-  }
-
-  @Override
-  public void onBindViewHolder(@NonNull SunEventViewHolder sunEventViewHolder, int position) {
-    SunEvent sunEvent = getSunEvent(position);
-    int typeOrdinal = sunEvent.getType().ordinal();
-    Context context = sunEventViewHolder.itemView.getContext();
-    Resources resources = context.getResources();
-
-    try (TypedArray typedArray = resources.obtainTypedArray(R.array.sun_event_bg_colors)) {
-      int bgColor = typedArray.getColor(typeOrdinal, /* defValue= */ 0);
-      sunEventViewHolder.cardView.setCardBackgroundColor(bgColor);
+    init {
+        setHasStableIds(true)
     }
 
-    try (TypedArray typedArray = resources.obtainTypedArray(R.array.sun_event_icons)) {
-      int iconId = typedArray.getResourceId(typeOrdinal, /* defValue= */ 0);
-      sunEventViewHolder.eventTimeView.setCompoundDrawablesWithIntrinsicBounds(iconId, 0, 0, 0);
+    @SuppressLint("NotifyDataSetChanged")
+    override fun onChanged(value: SunInfo) {
+        sunInfo = value
+        notifyDataSetChanged()
     }
 
-    long eventTimeMillis = sunEvent.getTime().toEpochMilli();
-    String timeText = DateUtils.formatDateTime(context, eventTimeMillis, DATE_FORMAT_FLAGS);
-    int timeStyle = position == sunInfo.getClosestEventIndex() ? Typeface.BOLD : Typeface.NORMAL;
-    sunEventViewHolder.eventTimeView.setText(timeText);
-    sunEventViewHolder.eventTimeView.setTypeface(/* tf= */ null, timeStyle);
+    override fun getItemCount() = sunInfo?.sunEvents?.size ?: 0
 
-    sunEventViewHolder.cardView.setOnClickListener(view -> sendToLiberActivity(view, typeOrdinal));
-  }
+    override fun getItemId(position: Int) = sunInfo!!.sunEvents[position].weakId
 
-  @Override
-  public int getItemCount() {
-    return sunInfo == null ? 0 : sunInfo.getSunEvents().size();
-  }
-
-  private SunEvent getSunEvent(int position) {
-    return sunInfo.getSunEvents().get(position);
-  }
-
-  private void sendToLiberActivity(View view, int typeOrdinal) {
-    view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
-    var intent = new Intent(activity, LiberActivity.class);
-    intent.putExtra(IntentExtraTags.SUN_EVENT_TYPE, typeOrdinal);
-    Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(activity).toBundle();
-    activity.startActivity(intent, bundle);
-  }
-
-  static class SunEventViewHolder extends RecyclerView.ViewHolder {
-    private final CardView cardView;
-    private final TextView eventTimeView;
-
-    SunEventViewHolder(CardView cardView) {
-      super(cardView);
-      this.cardView = cardView;
-      this.eventTimeView = cardView.findViewById(R.id.eventTime);
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SunEventViewHolder {
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val cardView = layoutInflater.inflate(
+            R.layout.sun_event, parent, /* attachToRoot= */ false
+        ) as CardView
+        return SunEventViewHolder(cardView)
     }
-  }
+
+    override fun onBindViewHolder(sunEventViewHolder: SunEventViewHolder, position: Int) {
+        val sunEvent = sunInfo!!.sunEvents[position]
+        val typeOrdinal = sunEvent.type.ordinal
+
+        activity.resources.apply {
+            obtainTypedArray(R.array.sun_event_bg_colors).use { typedArray ->
+                val bgColor = typedArray.getColor(typeOrdinal, /* defValue= */ 0)
+                sunEventViewHolder.cardView.setCardBackgroundColor(bgColor)
+            }
+
+            obtainTypedArray(R.array.sun_event_icons).use { typedArray ->
+                val iconId = typedArray.getResourceId(typeOrdinal, /* defValue= */ 0)
+                sunEventViewHolder.eventTimeView.setCompoundDrawablesWithIntrinsicBounds(
+                    iconId, 0, 0, 0
+                )
+            }
+        }
+
+        val eventTimeMillis = sunEvent.instant.toEpochMilli()
+        val timeText = formatDateTime(activity, eventTimeMillis, DATE_FORMAT_FLAGS)
+        val timeStyle =
+            if (position == sunInfo!!.closestEventIndex) Typeface.BOLD else Typeface.NORMAL
+
+        sunEventViewHolder.eventTimeView.apply {
+            text = timeText
+            setTypeface(/* tf= */ null, timeStyle)
+        }
+
+        sunEventViewHolder.cardView.setOnClickListener { view ->
+            sendToLiberActivity(view, typeOrdinal)
+        }
+    }
+
+    private fun sendToLiberActivity(view: View, typeOrdinal: Int) {
+        view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+        val intent = Intent(activity, LiberActivity::class.java)
+        intent.putExtra(IntentExtraTags.SUN_EVENT_TYPE, typeOrdinal)
+        val bundle = ActivityOptions.makeSceneTransitionAnimation(activity).toBundle()
+        activity.startActivity(intent, bundle)
+    }
+
+    internal data class SunEventViewHolder(
+        val cardView: CardView, val eventTimeView: TextView = cardView.findViewById(R.id.eventTime)
+    ) : RecyclerView.ViewHolder(cardView)
+
+    companion object {
+
+        private const val DATE_FORMAT_FLAGS =
+            FORMAT_SHOW_DATE or FORMAT_NUMERIC_DATE or FORMAT_SHOW_WEEKDAY or FORMAT_SHOW_TIME or FORMAT_ABBREV_ALL
+    }
 }

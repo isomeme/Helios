@@ -6,13 +6,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnitRunner.StrictStubs
 import org.onereed.helios.common.Place
+import org.onereed.helios.sun.SunInfo.Companion.compute
 import timber.log.Timber
 import timber.log.Timber.DebugTree
 import java.time.Instant
 
-/** Tests for [SunInfoUtil].  */
+/** Tests for [SunInfo].  */
 @RunWith(StrictStubs::class)
-class SunInfoUtilTest {
+class SunInfoTest {
 
     @Before
     fun setup() {
@@ -26,7 +27,7 @@ class SunInfoUtilTest {
     @Test
     fun testEventOverlap() {
         val instant = Instant.parse("2020-05-09T02:30:15Z")
-        val sunInfo = SunInfoUtil.getSunInfo(PLACE, instant)
+        val sunInfo = compute(PLACE, instant)
 
         val expectedSunInfo = SunInfo(
             instant, SunAzimuthInfo(289.93357351191065, true), closestEventIndex = 1, listOf(
@@ -48,7 +49,7 @@ class SunInfoUtilTest {
     @Test
     fun testEventGap() {
         val instant = Instant.parse("2020-05-18T02:50:50Z")
-        val sunInfo = SunInfoUtil.getSunInfo(PLACE, instant)
+        val sunInfo = compute(PLACE, instant)
 
         val expectedSunInfo = SunInfo(
             instant, SunAzimuthInfo(294.5638405069754, true), closestEventIndex = 0, listOf(

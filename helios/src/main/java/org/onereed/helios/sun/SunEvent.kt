@@ -11,7 +11,10 @@ import kotlin.math.abs
 
 /** Represents one sun event -- rise, noon, set, or nadir.  */
 data class SunEvent(
-    val type: Type, val time: Instant, val azimuthDeg: Double
+    val type: Type,
+    val instant: Instant,
+    val azimuthDeg: Double,
+    val weakId: Long = type.createWeakId(instant)
 ) : Comparable<SunEvent> {
 
     enum class Type(private val timeExtractor: Function<SunTimes, ZonedDateTime?>) {
@@ -22,24 +25,23 @@ data class SunEvent(
          * it is available. Rise and set events will not be available for arctic summer and winter.
          */
         fun createSunEvent(sunTimes: SunTimes, place: Place): SunEvent? {
-            return timeExtractor.apply(sunTimes)?.toInstant()
-                ?.let { SunEvent(this, it, place.asPositionParameters().on(it).execute().azimuth) }
+            return timeExtractor.apply(sunTimes)?.toInstant()?.let { instant ->
+                SunEvent(
+                    this, instant, place.asPositionParameters().on(instant).execute().azimuth
+                )
+            }
         }
-    }
 
-    val weakId: Long
-        get() {
+        fun createWeakId(time: Instant): Long {
             val timeBucket = time.epochSecond / EVENT_TIME_BUCKET_SIZE_SEC
-            val ordinalOffset = TYPE_ORDINAL_SCALE * type.ordinal
+            val ordinalOffset = ordinal * TYPE_ORDINAL_SCALE
             return timeBucket + ordinalOffset
         }
-
-
-    override fun compareTo(other: SunEvent) = compareValuesBy(this, other, { it.time }, { it.type })
-
-    fun isNear(other: SunEvent): Boolean {
-        return abs(arc(this.azimuthDeg, other.azimuthDeg)) < 20.0
     }
+
+    override fun compareTo(other: SunEvent) = compareValuesBy(this, other, { it.instant }, { it.type })
+
+    fun isNear(other: SunEvent) = abs(arc(this.azimuthDeg, other.azimuthDeg)) < 20.0
 
     companion object {
 
