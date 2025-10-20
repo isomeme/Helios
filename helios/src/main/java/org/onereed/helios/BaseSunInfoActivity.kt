@@ -4,8 +4,10 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.HapticFeedbackConstants
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.appcompat.app.AlertDialog
@@ -96,13 +98,15 @@ abstract class BaseSunInfoActivity : BaseActivity() {
       return
     }
 
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      window.decorView.performHapticFeedback(HapticFeedbackConstants.REJECT)
+    }
+
     if (shouldShowRequestPermissionRationale(ACCESS_FINE_LOCATION)) {
       AlertDialog.Builder(this)
         .setMessage(R.string.location_permission_rationale)
-        .setPositiveButton(R.string.button_continue) { dialog, which ->
-          requestLocationPermission()
-        }
-        .setNegativeButton(R.string.button_exit) { dialog, which -> finish() }
+        .setPositiveButton(R.string.button_continue) { _, _ -> requestLocationPermission() }
+        .setNegativeButton(R.string.button_exit) { _, _ -> finish() }
         .setCancelable(false)
         .create()
         .show()
@@ -115,8 +119,8 @@ abstract class BaseSunInfoActivity : BaseActivity() {
 
       AlertDialog.Builder(this)
         .setMessage(R.string.location_permission_use_settings)
-        .setPositiveButton(R.string.button_settings) { dialog, which -> go(settingsIntent) }
-        .setNegativeButton(R.string.button_exit) { dialog, which -> finish() }
+        .setPositiveButton(R.string.button_settings) { _, _ -> go(settingsIntent) }
+        .setNegativeButton(R.string.button_exit) { _, _ -> finish() }
         .setCancelable(false)
         .create()
         .show()

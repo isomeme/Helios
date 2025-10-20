@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.widget.ImageView
+import androidx.annotation.IdRes
 import androidx.annotation.Keep
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -54,12 +55,15 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
   private var compassRadiusPx = 0
   private var radiusPxRange = 0
 
+  @IdRes
+  override val myActionsMenuId = R.id.action_compass
+
   override fun onCreate(savedInstanceState: Bundle?) {
     Timber.d("onCreate")
     super.onCreate(savedInstanceState)
 
     binding = ActivityCompassBinding.inflate(layoutInflater)
-    setContentView(binding.getRoot())
+    setContentView(binding.root)
     setSupportActionBar(binding.toolbar)
 
     sunEventViews =
@@ -86,10 +90,6 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
     mainExecutor = ContextCompat.getMainExecutor(this)
 
     observeSunInfo(this)
-  }
-
-  override fun myActionsMenuId(): Int {
-    return R.id.action_compass
   }
 
   override fun onResume() {

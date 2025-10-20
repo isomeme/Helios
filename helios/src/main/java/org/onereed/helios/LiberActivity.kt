@@ -1,18 +1,18 @@
 package org.onereed.helios
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.annotation.IdRes
 import io.noties.markwon.Markwon
-import org.onereed.helios.databinding.ActivityLiberBinding
-import org.onereed.helios.sun.SunEvent
-import timber.log.Timber
 import java.io.IOException
 import java.io.UncheckedIOException
 import java.nio.charset.StandardCharsets.UTF_8
+import org.onereed.helios.databinding.ActivityLiberBinding
+import org.onereed.helios.sun.SunEvent
+import timber.log.Timber
 
 /** Activity for displaying the text of Liber Resh. */
 class LiberActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
@@ -22,6 +22,8 @@ class LiberActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
   private lateinit var markwon: Markwon
 
   private lateinit var invocationTemplate: String
+
+  @IdRes override val myActionsMenuId = R.id.action_text
 
   override fun onCreate(savedInstanceState: Bundle?) {
     Timber.d("onCreate start")
@@ -45,7 +47,7 @@ class LiberActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
       )
 
     spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-    binding.sunEventSelector.setAdapter(spinnerAdapter)
+    binding.sunEventSelector.adapter = spinnerAdapter
 
     val typeOrdinal = intent.getIntExtra(IntentExtraTags.SUN_EVENT_TYPE, SunEvent.Type.RISE.ordinal)
 
@@ -60,13 +62,9 @@ class LiberActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
     Timber.d("onCreate end")
   }
 
-  override fun myActionsMenuId(): Int {
-    return R.id.action_text
-  }
-
-  override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
+  override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
     Timber.d("onItemSelected: position=%d", position)
-    view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+    view?.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
     displayInvocation(position)
   }
 
@@ -101,10 +99,9 @@ class LiberActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
     binding.scrollView.fullScroll(View.FOCUS_UP)
   }
 
-  @SuppressLint("NewApi") // Desugared nio readAllBytes()
   private fun readAssetText(assetName: String): String {
     try {
-      return assets.open(assetName).use { String(it.readAllBytes(), UTF_8) }
+      return assets.open(assetName).use { it.readBytes().toString(UTF_8) }
     } catch (e: IOException) {
       throw UncheckedIOException(e)
     }

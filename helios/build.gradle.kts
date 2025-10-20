@@ -1,106 +1,119 @@
 plugins {
-    id("com.android.application")
-    id("com.google.gms.google-services")
-    id("org.jetbrains.kotlin.android")
+  id("com.android.application")
+  id("com.google.gms.google-services")
+  id("org.jetbrains.kotlin.android")
 }
 
 android {
-    namespace = "org.onereed.helios"
-    compileSdk = 36
+  namespace = "org.onereed.helios"
+  compileSdk = 36
 
-    defaultConfig {
-        applicationId = "org.onereed.helios"
-        versionCode = 19
-        versionName = "2.3.2"
+  defaultConfig {
+    applicationId = "org.onereed.helios"
+    versionCode = 19
+    versionName = "2.3.2"
 
-        minSdk = 26
-        targetSdk = 35
+    minSdk = 26
+    targetSdk = 35
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+  }
+
+  buildTypes {
+    getByName("release") {
+      isMinifyEnabled = true
+      isShrinkResources = true
+      proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+      versionNameSuffix = ""
     }
+    getByName("debug") { versionNameSuffix = " (debug)" }
+  }
 
-    buildTypes {
-        getByName("release") {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            versionNameSuffix = ""
-        }
-        getByName("debug") {
-            versionNameSuffix = " (debug)"
-        }
-    }
+  compileOptions {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    isCoreLibraryDesugaringEnabled = true
+  }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-        isCoreLibraryDesugaringEnabled = true
-    }
+  kotlin { jvmToolchain(17) }
 
-    kotlin {
-        jvmToolchain(17)
-    }
+  buildFeatures {
+    buildConfig = true
+    viewBinding = true
+  }
 
-    buildFeatures {
-        buildConfig = true
-        viewBinding = true
-    }
-
-    testOptions {
-        unitTests.isReturnDefaultValues = true
-    }
+  testOptions { unitTests.isReturnDefaultValues = true }
 }
 
 dependencies {
 
-    // Language
+  // Language
 
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs_nio:2.1.5")
+  coreLibraryDesugaring("com.android.tools:desugar_jdk_libs_nio:2.1.5")
 
-    // Services
+  // Services
 
-    implementation("com.google.firebase:firebase-analytics:23.0.0")
-    implementation("com.google.android.gms:play-services-location:21.3.0")
+  implementation("com.google.firebase:firebase-analytics:23.0.0")
+  implementation("com.google.android.gms:play-services-location:21.3.0")
 
-    // Android
+  // Android
 
-    implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("androidx.cardview:cardview:1.0.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
-    implementation("androidx.core:core-ktx:1.17.0")
-    implementation("androidx.recyclerview:recyclerview:1.4.0")
-    implementation("com.google.android.material:material:1.13.0")
+  implementation("androidx.appcompat:appcompat:1.7.1")
+  implementation("androidx.cardview:cardview:1.0.0")
+  implementation("androidx.constraintlayout:constraintlayout:2.2.1")
+  implementation("androidx.recyclerview:recyclerview:1.4.0")
+  implementation("com.google.android.material:material:1.13.0")
 
-    // SunCalc
+  // Android Kotlin
 
-    implementation("org.shredzone.commons:commons-suncalc:3.11")
+  // Core KTX
+  implementation("androidx.core:core-ktx:1.17.0")
 
-    // Guava
+  // Activity & Fragment KTX
+  implementation("androidx.activity:activity-ktx:1.11.0")
+  implementation("androidx.fragment:fragment-ktx:1.8.9")
 
-    implementation("com.google.guava:guava:33.5.0-android")
-    implementation("com.google.auto.value:auto-value-annotations:1.11.0")
-    annotationProcessor("com.google.auto.value:auto-value:1.11.0")
+  // Lifecycle & ViewModel KTX (use a single version variable)
+  val lifecycleVersion = "2.9.4"
+  implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
+  implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
+  implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
-    // Markdown support
+  // Navigation KTX (use a single version variable)
+  val navVersion = "2.9.5"
+  implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
+  implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
 
-    implementation("io.noties.markwon:core:4.6.2")
+  // Collection KTX
+  implementation("androidx.collection:collection-ktx:1.5.0")
 
-    // Logging
+  // SunCalc
 
-    implementation("com.jakewharton.timber:timber:5.0.1")
+  implementation("org.shredzone.commons:commons-suncalc:3.11")
 
-    // Testing
+  // Guava
 
-    testImplementation("com.google.truth:truth:1.4.5")
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
-    testImplementation("org.junit.jupiter:junit-jupiter:6.0.0")
-    testImplementation("org.mockito:mockito-core:5.20.0")
-    testImplementation(kotlin("test"))
+  implementation("com.google.guava:guava:33.5.0-android")
+  implementation("com.google.auto.value:auto-value-annotations:1.11.0")
+  annotationProcessor("com.google.auto.value:auto-value:1.11.0")
 
-    androidTestImplementation("androidx.test.ext:junit:1.3.0")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
+  // Markdown support
+
+  implementation("io.noties.markwon:core:4.6.2")
+
+  // Logging
+
+  implementation("com.jakewharton.timber:timber:5.0.1")
+
+  // Testing
+
+  testImplementation("com.google.truth:truth:1.4.5")
+  testImplementation("junit:junit:4.13.2")
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+  testImplementation("org.junit.jupiter:junit-jupiter:6.0.0")
+  testImplementation("org.mockito:mockito-core:5.20.0")
+  testImplementation(kotlin("test"))
+
+  androidTestImplementation("androidx.test.ext:junit:1.3.0")
+  androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
 }
