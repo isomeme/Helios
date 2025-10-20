@@ -1,15 +1,18 @@
 package org.onereed.helios
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import io.noties.markwon.Markwon
-import org.onereed.helios.common.AssetUtil.readAssetText
 import org.onereed.helios.databinding.ActivityLiberBinding
 import org.onereed.helios.sun.SunEvent
 import timber.log.Timber
+import java.io.IOException
+import java.io.UncheckedIOException
+import java.nio.charset.StandardCharsets.UTF_8
 
 /** Activity for displaying the text of Liber Resh. */
 class LiberActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
@@ -28,8 +31,8 @@ class LiberActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
     setContentView(binding.root)
     setSupportActionBar(binding.toolbar)
 
-    val adoration = readAssetText(this, "adoration.md")
-    invocationTemplate = readAssetText(this, "invocation_template.md")
+    val adoration = readAssetText("adoration.md")
+    invocationTemplate = readAssetText("invocation_template.md")
 
     markwon = Markwon.create(this)
     markwon.setMarkdown(binding.adorationDisplay, adoration)
@@ -96,5 +99,14 @@ class LiberActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
     markwon.setMarkdown(binding.invocationDisplay, invocation)
 
     binding.scrollView.fullScroll(View.FOCUS_UP)
+  }
+
+  @SuppressLint("NewApi") // Desugared nio readAllBytes()
+  private fun readAssetText(assetName: String): String {
+    try {
+      return assets.open(assetName).use { String(it.readAllBytes(), UTF_8) }
+    } catch (e: IOException) {
+      throw UncheckedIOException(e)
+    }
   }
 }

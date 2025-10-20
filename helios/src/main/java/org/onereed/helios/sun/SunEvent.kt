@@ -1,20 +1,17 @@
 package org.onereed.helios.sun
 
-import org.onereed.helios.common.DirectionUtil.arc
-import org.onereed.helios.common.Place
-import org.shredzone.commons.suncalc.SunTimes
-import java.time.Duration
 import java.time.Instant
 import java.time.ZonedDateTime
 import java.util.function.Function
-import kotlin.math.abs
+import org.onereed.helios.common.Place
+import org.shredzone.commons.suncalc.SunTimes
 
 /** Represents one sun event -- rise, noon, set, or nadir. */
 data class SunEvent(
   val type: Type,
   val instant: Instant,
   val azimuthDeg: Double,
-  val weakId: Long = type.createWeakId(instant),
+  val weakId: Long = createWeakId(instant, type),
 ) : Comparable<SunEvent> {
 
   enum class Type(private val timeExtractor: Function<SunTimes, ZonedDateTime?>) {
@@ -32,32 +29,27 @@ data class SunEvent(
         SunEvent(this, instant, place.asPositionParameters().on(instant).execute().azimuth)
       }
     }
-
-    fun createWeakId(time: Instant): Long {
-      val timeBucket = time.epochSecond / EVENT_TIME_BUCKET_SIZE_SEC
-      val ordinalOffset = ordinal * TYPE_ORDINAL_SCALE
-      return timeBucket + ordinalOffset
-    }
   }
 
   override fun compareTo(other: SunEvent) =
     compareValuesBy(this, other, { it.instant }, { it.type })
 
-  fun isNear(other: SunEvent) = abs(arc(this.azimuthDeg, other.azimuthDeg)) < 20.0
-
   companion object {
 
     /**
-     * Epoch seconds divided by this value yields a time bucket within which two events with
-     * different times and the same [Type] might actually be the same event.
+     * When applied with bitwise `and` to the sun event epoch second, yields a time bucket within
+     * which two events with different times and the same [Type] might actually be the same event.
+     * The bucket size is 2^14 = 16,384 seconds, or roughly 4.6 hours.
      */
-    private val EVENT_TIME_BUCKET_SIZE_SEC = Duration.ofHours(4L).seconds
+    private const val EVENT_TIME_BUCKET_MASK = 0x3FFFL.inv()
 
     /**
-     * The ordinal of the this event's [Type] is multiplied by this value before being added to the
-     * time bucket to yield a weak event ID. This value must be >> than the largest expected time
-     * bucket value.
+     * We create a weak ID for the event by separating time into ~4.6 hour buckets and adding the
+     * type ordinal to distinguish events of different types within the bucket. This is used in the
+     * UI to identify when a newly delivered event is probably the same as one from the previous
+     * update.
      */
-    private const val TYPE_ORDINAL_SCALE = 10_000_000L
+    fun createWeakId(instant: Instant, type: Type) =
+      (instant.epochSecond and EVENT_TIME_BUCKET_MASK) + type.ordinal
   }
 }

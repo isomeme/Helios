@@ -25,6 +25,7 @@ import org.onereed.helios.sun.SunInfo
 import timber.log.Timber
 import java.util.EnumSet
 import java.util.concurrent.Executor
+import kotlin.math.abs
 
 /** Displays directions to sun events. */
 class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observer<SunInfo> {
@@ -155,7 +156,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
       return
     }
 
-    val isOverlap = noonEvent.isNear(nadirEvent)
+    val isOverlap = abs(arc(noonEvent.azimuthDeg, nadirEvent.azimuthDeg)) < 20.0
     val isNoonEarlier = noonEvent.compareTo(nadirEvent) < 1
     val isNoonInset = isOverlap && !isNoonEarlier
     val isNadirInset = isOverlap && isNoonEarlier
