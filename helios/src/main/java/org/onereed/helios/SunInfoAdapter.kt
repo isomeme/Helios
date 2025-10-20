@@ -17,13 +17,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.cardview.widget.CardView
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.flow.FlowCollector
 import org.onereed.helios.SunInfoAdapter.SunEventViewHolder
 import org.onereed.helios.sun.SunInfo
 
 internal class SunInfoAdapter(private val activity: Activity) :
-  RecyclerView.Adapter<SunEventViewHolder>(), Observer<SunInfo> {
+  RecyclerView.Adapter<SunEventViewHolder>(), FlowCollector<SunInfo?> {
 
   private var sunInfo: SunInfo? = null
 
@@ -32,8 +32,8 @@ internal class SunInfoAdapter(private val activity: Activity) :
   }
 
   @SuppressLint("NotifyDataSetChanged")
-  override fun onChanged(value: SunInfo) {
-    sunInfo = value
+  override suspend fun emit(value: SunInfo?) {
+    sunInfo = value ?: return
     notifyDataSetChanged()
   }
 

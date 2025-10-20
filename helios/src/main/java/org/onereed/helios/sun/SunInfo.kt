@@ -7,7 +7,6 @@ import java.time.Duration
 import java.time.Instant
 
 data class SunInfo(
-  val instant: Instant,
   val sunAzimuthInfo: SunAzimuthInfo,
   val closestEventIndex: Int,
   val sunEvents: List<SunEvent>,
@@ -49,7 +48,7 @@ data class SunInfo(
       val closestEventIndex = getClosestEventIndex(instant, mostRecentEvent, nextEvent)
       val shownSunEvents = listOf(mostRecentEvent).plus(nextEvents)
 
-      return SunInfo(instant, sunAzimuthInfo, closestEventIndex, shownSunEvents)
+      return SunInfo(sunAzimuthInfo, closestEventIndex, shownSunEvents)
     }
 
     private fun toSunEvents(sunTimes: SunTimes, place: Place): List<SunEvent> {

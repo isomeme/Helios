@@ -10,22 +10,24 @@ import android.provider.Settings
 import android.view.HapticFeedbackConstants
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority.PRIORITY_BALANCED_POWER_ACCURACY
-import org.onereed.helios.sun.SunInfo
-import timber.log.Timber
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.launch
 import java.time.Duration
 import java.util.concurrent.Executor
+import org.onereed.helios.sun.SunInfo
+import timber.log.Timber
 
 abstract class BaseSunInfoActivity : BaseActivity() {
 
-  private lateinit var sunInfoViewModel: SunInfoViewModel
+  private val sunInfoViewModel: SunInfoViewModel by viewModels()
 
   private lateinit var locationProvider: FusedLocationProviderClient
   private lateinit var mainExecutor: Executor
@@ -35,8 +37,6 @@ abstract class BaseSunInfoActivity : BaseActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     Timber.d("onCreate")
     super.onCreate(savedInstanceState)
-
-    sunInfoViewModel = ViewModelProvider(this)[SunInfoViewModel::class.java]
 
     locationProvider = LocationServices.getFusedLocationProviderClient(this)
     mainExecutor = ContextCompat.getMainExecutor(this)
@@ -87,8 +87,10 @@ abstract class BaseSunInfoActivity : BaseActivity() {
       .addOnFailureListener { e -> Timber.e(e, "Location updates stop failed.") }
   }
 
-  protected fun observeSunInfo(sunInfoObserver: Observer<SunInfo>) {
-    sunInfoViewModel.sunInfoLiveData.observe(this, sunInfoObserver)
+  protected fun observeSunInfo(sunInfoFlowCollector: FlowCollector<SunInfo?>) {
+    lifecycleScope.launch {
+      sunInfoViewModel.sunInfo.collect(sunInfoFlowCollector)
+    }
   }
 
   private fun acceptLocationPermissionResult(isGranted: Boolean) {

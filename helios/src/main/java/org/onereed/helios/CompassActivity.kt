@@ -12,24 +12,24 @@ import androidx.annotation.Keep
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
-import androidx.lifecycle.Observer
 import com.google.android.gms.location.DeviceOrientation
 import com.google.android.gms.location.DeviceOrientationListener
 import com.google.android.gms.location.DeviceOrientationRequest
 import com.google.android.gms.location.FusedOrientationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.common.collect.ImmutableMap
+import java.util.EnumSet
+import java.util.concurrent.Executor
+import kotlin.math.abs
+import kotlinx.coroutines.flow.FlowCollector
 import org.onereed.helios.common.DirectionUtil.arc
 import org.onereed.helios.databinding.ActivityCompassBinding
 import org.onereed.helios.sun.SunEvent
 import org.onereed.helios.sun.SunInfo
 import timber.log.Timber
-import java.util.EnumSet
-import java.util.concurrent.Executor
-import kotlin.math.abs
 
 /** Displays directions to sun events. */
-class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observer<SunInfo> {
+class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCollector<SunInfo?> {
 
   private lateinit var binding: ActivityCompassBinding
 
@@ -55,8 +55,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
   private var compassRadiusPx = 0
   private var radiusPxRange = 0
 
-  @IdRes
-  override val myActionsMenuId = R.id.action_compass
+  @IdRes override val myActionsMenuId = R.id.action_compass
 
   override fun onCreate(savedInstanceState: Bundle?) {
     Timber.d("onCreate")
@@ -115,7 +114,13 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, Observ
     }
   }
 
-  override fun onChanged(value: SunInfo) {
+  override suspend fun emit(value: SunInfo?) {
+    Timber.d("emit: %s", value)
+
+    if (value == null) {
+      return
+    }
+
     val sunAzimuthInfo = value.sunAzimuthInfo
     val sunAzimuthDeg = sunAzimuthInfo.azimuthDeg
 

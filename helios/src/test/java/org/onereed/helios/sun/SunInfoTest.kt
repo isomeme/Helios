@@ -28,7 +28,6 @@ class SunInfoTest {
     val instant = Instant.parse("2020-05-09T02:30:15Z")
     val sunInfo = SunInfo.compute(PLACE, instant)
 
-    assertThat(sunInfo.instant).isEqualTo(instant)
     assertThat(sunInfo.sunAzimuthInfo.azimuthDeg).isWithin(DELTA).of(290.0)
     assertThat(sunInfo.sunAzimuthInfo.isClockwise).isTrue()
     assertThat(sunInfo.closestEventIndex).isEqualTo(1)
@@ -50,7 +49,6 @@ class SunInfoTest {
     val instant = Instant.parse("2020-05-18T02:50:50Z")
     val sunInfo = SunInfo.compute(PLACE, instant)
 
-    assertThat(sunInfo.instant).isEqualTo(instant)
     assertThat(sunInfo.sunAzimuthInfo.azimuthDeg).isWithin(DELTA).of(294.5)
     assertThat(sunInfo.sunAzimuthInfo.isClockwise).isTrue()
     assertThat(sunInfo.closestEventIndex).isEqualTo(0)
