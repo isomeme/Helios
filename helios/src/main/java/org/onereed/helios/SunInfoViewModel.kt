@@ -19,6 +19,10 @@ class SunInfoViewModel : ViewModel(), LocationListener {
 
   val sunInfo = _sunInfo.asStateFlow()
 
+  fun acceptLocation(location: Location) {
+    onLocationChanged(location)
+  }
+
   override fun onLocationChanged(location: Location) {
     val place = Place(location)
     SunInfoSource.request(place, Instant.now()).addOnCompleteListener { publishSunInfo(it) }

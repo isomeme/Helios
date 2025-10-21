@@ -3,9 +3,11 @@ package org.onereed.helios
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.provider.Settings
 import android.view.HapticFeedbackConstants
 import androidx.activity.result.ActivityResultLauncher
@@ -13,17 +15,26 @@ import androidx.activity.result.contract.ActivityResultContracts.RequestPermissi
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority.PRIORITY_BALANCED_POWER_ACCURACY
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.onFailure
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
-import java.time.Duration
-import java.util.concurrent.Executor
 import org.onereed.helios.sun.SunInfo
 import timber.log.Timber
+import java.time.Duration
+import java.util.concurrent.Executor
 
 abstract class BaseSunInfoActivity : BaseActivity() {
 
@@ -45,51 +56,53 @@ abstract class BaseSunInfoActivity : BaseActivity() {
       registerForActivityResult(RequestPermission()) { isGranted ->
         acceptLocationPermissionResult(isGranted)
       }
-  }
 
-  override fun onStart() {
-    Timber.d("onStart")
-    super.onStart()
-
-    if (checkLocationPermission()) {
-      Timber.d("Location permission already granted")
-    } else {
-      Timber.d("Requesting location permission")
-      requestLocationPermission()
+    lifecycleScope.launch {
+      lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+        getLocationUpdates().collect { sunInfoViewModel.acceptLocation(it) }
+      }
     }
   }
 
-  override fun onResume() {
-    Timber.d("onResume")
-    super.onResume()
+  fun getLocationUpdates(): Flow<Location> = callbackFlow {
+    Timber.d("getLocationUpdates start")
 
     if (checkLocationPermission()) {
-      Timber.d("About to request location updates.")
+      val locationCallback =
+        object : LocationCallback() {
+          override fun onLocationResult(locationResult: LocationResult) {
+            locationResult.lastLocation?.let { location ->
+              trySend(location).onFailure { t -> Timber.e(t, "Failed to send location.") }
+            }
+          }
+        }
 
       locationProvider
-        .requestLocationUpdates(LOCATION_REQUEST, mainExecutor, sunInfoViewModel)
+        .requestLocationUpdates(LOCATION_REQUEST, locationCallback, Looper.getMainLooper())
         .addOnSuccessListener { Timber.d("Location updates started.") }
-        .addOnFailureListener { e -> Timber.e(e, "Location updates start failed.") }
+        .addOnFailureListener { e ->
+          Timber.e(e, "Location updates start failed.")
+          close(e) // Close the flow with an error if the request fails
+        }
 
-      // TODO: Add failure indicator to UI.
+      awaitClose {
+        // Clean up resources when the flow is no longer collected
+        locationProvider
+          .removeLocationUpdates(locationCallback)
+          .addOnSuccessListener { Timber.d("Location updates stopped.") }
+          .addOnFailureListener { e -> Timber.e(e, "Location updates stop failed.") }
+      }
     } else {
       Timber.d("Not requesting location updates; permission not granted yet.")
+      close(SecurityException("Location permission not granted"))
     }
-  }
-
-  override fun onPause() {
-    Timber.d("onPause")
-    super.onPause()
-
-    locationProvider
-      .removeLocationUpdates(sunInfoViewModel)
-      .addOnSuccessListener { Timber.d("Location updates stopped.") }
-      .addOnFailureListener { e -> Timber.e(e, "Location updates stop failed.") }
   }
 
   protected fun observeSunInfo(sunInfoFlowCollector: FlowCollector<SunInfo?>) {
-    lifecycleScope.launch {
-      sunInfoViewModel.sunInfo.collect(sunInfoFlowCollector)
+    sunInfoViewModel.viewModelScope.launch {
+      lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+        sunInfoViewModel.sunInfo.collect(sunInfoFlowCollector)
+      }
     }
   }
 
@@ -131,13 +144,10 @@ abstract class BaseSunInfoActivity : BaseActivity() {
     }
   }
 
-  protected fun checkLocationPermission(): Boolean {
-    return checkSelfPermission(ACCESS_FINE_LOCATION) == PERMISSION_GRANTED
-  }
+  protected fun checkLocationPermission(): Boolean =
+    checkSelfPermission(ACCESS_FINE_LOCATION) == PERMISSION_GRANTED
 
-  private fun requestLocationPermission() {
-    requestPermissionLauncher.launch(ACCESS_FINE_LOCATION)
-  }
+  private fun requestLocationPermission() = requestPermissionLauncher.launch(ACCESS_FINE_LOCATION)
 
   companion object {
 
