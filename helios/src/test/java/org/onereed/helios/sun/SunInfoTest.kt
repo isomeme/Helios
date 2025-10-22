@@ -1,15 +1,13 @@
 package org.onereed.helios.sun
 
-import com.google.common.collect.Range
-import com.google.common.collect.TreeRangeSet
 import com.google.common.truth.Truth.assertThat
-import com.google.common.truth.Truth.assertWithMessage
+import java.time.Instant
 import org.junit.Before
 import org.junit.Test
+import org.onereed.helios.common.DirectionUtil.ang
 import org.onereed.helios.common.Place
 import timber.log.Timber
 import timber.log.Timber.DebugTree
-import java.time.Instant
 
 /** Tests for [SunInfo]. */
 class SunInfoTest {
@@ -35,7 +33,7 @@ class SunInfoTest {
 
     confirmEvent(sunInfo.sunEvents[0], "2020-05-08T19:50:33Z", SunEvent.Type.NOON, 180.0)
     confirmEvent(sunInfo.sunEvents[1], "2020-05-09T02:43:51Z", SunEvent.Type.SET, 292.0)
-    confirmEvent(sunInfo.sunEvents[2], "2020-05-09T07:50:18Z", SunEvent.Type.NADIR, 0.0, 360.0)
+    confirmEvent(sunInfo.sunEvents[2], "2020-05-09T07:50:18Z", SunEvent.Type.NADIR, 0.0)
     confirmEvent(sunInfo.sunEvents[3], "2020-05-09T12:56:55Z", SunEvent.Type.RISE, 68.0)
     confirmEvent(sunInfo.sunEvents[4], "2020-05-09T19:50:31Z", SunEvent.Type.NOON, 180.0)
   }
@@ -55,7 +53,7 @@ class SunInfoTest {
     assertThat(sunInfo.sunEvents).hasSize(5)
 
     confirmEvent(sunInfo.sunEvents[0], "2020-05-18T02:50:35Z", SunEvent.Type.SET, 294.5)
-    confirmEvent(sunInfo.sunEvents[1], "2020-05-18T07:50:21Z", SunEvent.Type.NADIR, 0.0, 360.0)
+    confirmEvent(sunInfo.sunEvents[1], "2020-05-18T07:50:21Z", SunEvent.Type.NADIR, 0.0)
     confirmEvent(sunInfo.sunEvents[2], "2020-05-18T12:50:06Z", SunEvent.Type.RISE, 65.0)
     confirmEvent(sunInfo.sunEvents[3], "2020-05-18T19:50:33Z", SunEvent.Type.NOON, 180.0)
     confirmEvent(sunInfo.sunEvents[4], "2020-05-19T02:51:19Z", SunEvent.Type.SET, 295.0)
@@ -73,15 +71,11 @@ class SunInfoTest {
       sunEvent: SunEvent,
       instantStr: String,
       type: SunEvent.Type,
-      vararg azimuthDegArray: Double,
+      azimuthDeg: Double,
     ) {
       assertThat(sunEvent.instant).isEqualTo(Instant.parse(instantStr))
       assertThat(sunEvent.type).isEqualTo(type)
-
-      val rangeSet: TreeRangeSet<Double> = TreeRangeSet.create()
-      azimuthDegArray.map { Range.closed(it - DELTA, it + DELTA) }.forEach { rangeSet.add(it) }
-
-      assertWithMessage("$sunEvent").that(rangeSet.contains(sunEvent.azimuthDeg)).isTrue()
+      assertThat(ang(sunEvent.azimuthDeg, azimuthDeg)).isWithin(DELTA).of(0.0)
     }
   }
 }

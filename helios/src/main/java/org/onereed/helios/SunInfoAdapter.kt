@@ -23,7 +23,7 @@ import org.onereed.helios.SunInfoAdapter.SunEventViewHolder
 import org.onereed.helios.sun.SunInfo
 
 internal class SunInfoAdapter(private val activity: Activity) :
-  RecyclerView.Adapter<SunEventViewHolder>(), FlowCollector<SunInfo?> {
+  RecyclerView.Adapter<SunEventViewHolder>(), FlowCollector<SunInfo> {
 
   private var sunInfo: SunInfo? = null
 
@@ -32,8 +32,8 @@ internal class SunInfoAdapter(private val activity: Activity) :
   }
 
   @SuppressLint("NotifyDataSetChanged")
-  override suspend fun emit(value: SunInfo?) {
-    sunInfo = value ?: return
+  override suspend fun emit(value: SunInfo) {
+    sunInfo = value
     notifyDataSetChanged()
   }
 

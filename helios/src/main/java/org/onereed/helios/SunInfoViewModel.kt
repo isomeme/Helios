@@ -1,32 +1,29 @@
 package org.onereed.helios
 
 import androidx.lifecycle.ViewModel
-import com.google.android.gms.tasks.Task
-import java.time.Instant
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import org.onereed.helios.common.Place
 import org.onereed.helios.sun.SunInfo
-import org.onereed.helios.sun.SunInfoSource
 import timber.log.Timber
+import java.time.Instant
 
 /** Stores and updates data needed for [SunInfo] display. */
 class SunInfoViewModel : ViewModel() {
 
-  private val _sunInfo = MutableStateFlow<SunInfo?>(null)
+  private val _sunInfoFlow = MutableSharedFlow<SunInfo>(replay = 1)
 
-  val sunInfo = _sunInfo.asStateFlow()
+  val sunInfoFlow = _sunInfoFlow.asSharedFlow()
 
   fun acceptPlace(place: Place) {
     Timber.d("acceptPlace start: $place")
-    SunInfoSource.request(place, Instant.now()).addOnCompleteListener { publishSunInfo(it) }
-  }
 
-  private fun publishSunInfo(sunInfoTask: Task<SunInfo>) {
-    if (sunInfoTask.isSuccessful) {
-      _sunInfo.value = sunInfoTask.result
-    } else {
-      Timber.e(sunInfoTask.exception, "Failure obtaining SunInfo.")
+    viewModelScope.launch(Dispatchers.Default) {
+      val sunInfo = SunInfo.compute(place, Instant.now())
+      _sunInfoFlow.emit(sunInfo)
     }
   }
 }

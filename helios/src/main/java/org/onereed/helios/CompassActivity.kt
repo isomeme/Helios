@@ -17,11 +17,10 @@ import com.google.android.gms.location.DeviceOrientationListener
 import com.google.android.gms.location.DeviceOrientationRequest
 import com.google.android.gms.location.FusedOrientationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.common.collect.ImmutableMap
 import java.util.EnumSet
 import java.util.concurrent.Executor
-import kotlin.math.abs
 import kotlinx.coroutines.flow.FlowCollector
+import org.onereed.helios.common.DirectionUtil.ang
 import org.onereed.helios.common.DirectionUtil.arc
 import org.onereed.helios.databinding.ActivityCompassBinding
 import org.onereed.helios.sun.SunEvent
@@ -29,14 +28,14 @@ import org.onereed.helios.sun.SunInfo
 import timber.log.Timber
 
 /** Displays directions to sun events. */
-class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCollector<SunInfo?> {
+class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCollector<SunInfo> {
 
   private lateinit var binding: ActivityCompassBinding
 
   private lateinit var orientationProvider: FusedOrientationProviderClient
   private lateinit var mainExecutor: Executor
 
-  private lateinit var sunEventViews: ImmutableMap<SunEvent.Type, ImageView>
+  private lateinit var sunEventViews: Map<SunEvent.Type, ImageView>
   private lateinit var compassRadiusViews: List<ImageView>
 
   private lateinit var noonWrapper: NoonNadirWrapper
@@ -66,15 +65,11 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
     setSupportActionBar(binding.toolbar)
 
     sunEventViews =
-      ImmutableMap.of(
-        SunEvent.Type.RISE,
-        binding.rise,
-        SunEvent.Type.NOON,
-        binding.noon,
-        SunEvent.Type.SET,
-        binding.set,
-        SunEvent.Type.NADIR,
-        binding.nadir,
+      mapOf(
+        SunEvent.Type.RISE to binding.rise,
+        SunEvent.Type.NOON to binding.noon,
+        SunEvent.Type.SET to binding.set,
+        SunEvent.Type.NADIR to binding.nadir,
       )
 
     // Note that noon and nadir can be inset, and sunMovement is at a fraction of the compass
@@ -114,12 +109,8 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
     }
   }
 
-  override suspend fun emit(value: SunInfo?) {
+  override suspend fun emit(value: SunInfo) {
     Timber.d("emit: %s", value)
-
-    if (value == null) {
-      return
-    }
 
     val sunAzimuthInfo = value.sunAzimuthInfo
     val sunAzimuthDeg = sunAzimuthInfo.azimuthDeg
@@ -138,7 +129,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
 
       if (!shownEvents.containsKey(type)) {
         shownEvents.put(type, sunEvent)
-        val view = sunEventViews.get(type)!!
+        val view = sunEventViews.getValue(type)
         updateCircleAngle(view, sunEvent.azimuthDeg)
         view.setVisibility(View.VISIBLE)
       }
@@ -147,7 +138,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
     val shownTypes = EnumSet.copyOf(shownEvents.keys)
     val missingTypes = EnumSet.complementOf(shownTypes)
 
-    missingTypes.forEach { type -> sunEventViews.get(type)?.setVisibility(View.INVISIBLE) }
+    missingTypes.forEach { type -> sunEventViews[type]?.setVisibility(View.INVISIBLE) }
 
     // In the tropics, noon and nadir can be at the same azimuth, so inset and dim the icon for
     // the one that comes later. We also explicitly reset the non-offset event(s) to correct
@@ -161,7 +152,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
       return
     }
 
-    val isOverlap = abs(arc(noonEvent.azimuthDeg, nadirEvent.azimuthDeg)) < 20.0
+    val isOverlap = ang(noonEvent.azimuthDeg, nadirEvent.azimuthDeg) < 20.0
     val isNoonEarlier = noonEvent.compareTo(nadirEvent) < 1
     val isNoonInset = isOverlap && !isNoonEarlier
     val isNadirInset = isOverlap && isNoonEarlier
