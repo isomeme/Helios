@@ -10,7 +10,7 @@ data class Place(
   val latDeg: Double,
   val lonDeg: Double,
   val altitudeMeters: Double,
-  val instant: Instant = Instant.now(), // Temporary to drive place source delta
+  val instant: Instant = Instant.now(),
 ) {
 
   constructor(location: Location) : this(location.latitude, location.longitude, location.altitude)

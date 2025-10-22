@@ -20,9 +20,9 @@ class SunEventTest {
         .on(instant)
         .execute()
 
-    val sunEvent = SunEvent.Type.SET.createSunEvent(sunTimes, place)
+    val sunEvent = SunEvent.from(SunEventType.SET, sunTimes, place)
 
-    assertThat(sunEvent?.type).isEqualTo(SunEvent.Type.SET)
+    assertThat(sunEvent?.sunEventType).isEqualTo(SunEventType.SET)
     assertThat(sunEvent?.instant).isEqualTo(Instant.parse("2025-10-20T01:13:31Z"))
     assertThat(sunEvent?.azimuthDeg).isWithin(1.0).of(258.0)
     assertThat(sunEvent?.weakId).isEqualTo(0x68F58002)

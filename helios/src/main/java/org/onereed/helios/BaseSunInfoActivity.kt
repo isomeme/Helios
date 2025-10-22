@@ -8,6 +8,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
+import org.onereed.helios.datasource.PlaceDataSource
 import org.onereed.helios.sun.SunInfo
 import timber.log.Timber
 

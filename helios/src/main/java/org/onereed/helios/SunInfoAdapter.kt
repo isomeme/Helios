@@ -50,7 +50,7 @@ internal class SunInfoAdapter(private val activity: Activity) :
 
   override fun onBindViewHolder(sunEventViewHolder: SunEventViewHolder, position: Int) {
     val sunEvent = sunInfo!!.sunEvents[position]
-    val typeOrdinal = sunEvent.type.ordinal
+    val typeOrdinal = sunEvent.sunEventType.ordinal
 
     activity.resources.apply {
       obtainTypedArray(R.array.sun_event_bg_colors).use { typedArray ->

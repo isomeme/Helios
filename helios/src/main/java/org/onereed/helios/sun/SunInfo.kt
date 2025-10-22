@@ -1,10 +1,8 @@
 package org.onereed.helios.sun
 
-import org.onereed.helios.common.Place
-import org.shredzone.commons.suncalc.SunTimes
-import timber.log.Timber
 import java.time.Duration
 import java.time.Instant
+import timber.log.Timber
 
 data class SunInfo(
   val sunAzimuthInfo: SunAzimuthInfo,
@@ -13,64 +11,33 @@ data class SunInfo(
 ) {
   companion object {
 
-    /**
-     * We use this value combined with [.PRECEDING_LIMIT] to include "preceding" events up to and
-     * beyond the next upcoming event, to avoid edge cases where an event happening near the time
-     * we're checking falls out of both the preceding and upcoming events lists. We then remove
-     * duplicates in the preceding events.
-     */
-    private val PRECEDING_OFFSET = Duration.ofHours(13L)
+    fun compute(sunTimeSeries: SunTimeSeries): SunInfo {
+      Timber.d("compute start")
 
-    /** See [.PRECEDING_OFFSET]. */
-    private val PRECEDING_LIMIT = Duration.ofHours(14L)
+      val parameters = sunTimeSeries.place.asPositionParameters()
+      val sunEvents =
+        sunTimeSeries.events.map {
+          SunEvent(it.sunEventType, it.instant, parameters.on(it.instant).execute().azimuth)
+        }
 
-    /**
-     * We want to display e.g. a sunset that happens 24 hrs 1 minute from now. But we don't want to
-     * confuse the display by showing a sunset that won't happen for a long time (e.g. in arctic
-     * summer). We limit the search for future events to this long from now.
-     */
-    private val FUTURE_LIMIT = Duration.ofHours(36L)
+      val sunAzimuthInfo = SunAzimuthInfo.from(sunTimeSeries.place)
+      val closestEventIndex =
+        getClosestEventIndex(sunTimeSeries.place.instant, sunEvents[0], sunEvents[1])
 
-    fun compute(place: Place, instant: Instant): SunInfo {
-      Timber.d("place=$place instant=$instant")
-
-      val parameters = place.asTimesParameters()
-      val nextSunTimes = parameters.on(instant).limit(FUTURE_LIMIT).execute()
-      val nextEvents = toSunEvents(nextSunTimes, place)
-      val nextEvent = nextEvents.first()
-
-      val precedingTime = nextEvent.instant.minus(PRECEDING_OFFSET)
-      val precedingSunTimes = parameters.on(precedingTime).limit(PRECEDING_LIMIT).execute()
-      val precedingEvents = toSunEvents(precedingSunTimes, place)
-      val mostRecentEvent = getMostRecentEvent(precedingEvents, nextEvent)
-
-      val sunAzimuthInfo = SunAzimuthInfo.from(place, instant)
-      val closestEventIndex = getClosestEventIndex(instant, mostRecentEvent, nextEvent)
-      val shownSunEvents = listOf(mostRecentEvent).plus(nextEvents)
-
-      return SunInfo(sunAzimuthInfo, closestEventIndex, shownSunEvents)
-    }
-
-    private fun toSunEvents(sunTimes: SunTimes, place: Place): List<SunEvent> {
-      return SunEvent.Type.entries.mapNotNull { it.createSunEvent(sunTimes, place) }.sorted()
-    }
-
-    private fun getMostRecentEvent(precedingEvents: List<SunEvent>, nextEvent: SunEvent): SunEvent {
-      return precedingEvents
-        .filter { it.type != nextEvent.type }
-        .last { it.instant.isBefore(nextEvent.instant) }
+      return SunInfo(sunAzimuthInfo, closestEventIndex, sunEvents)
     }
 
     private fun getClosestEventIndex(
       instant: Instant,
-      mostRecentEvent: SunEvent,
+      lastEvent: SunEvent,
       nextEvent: SunEvent,
-    ): Int {
-      val beforeTime = mostRecentEvent.instant
-      val afterTime = nextEvent.instant
-      val between = Duration.between(beforeTime, afterTime)
-      val halfway = beforeTime.plus(between.dividedBy(2L))
-      return if (instant.isBefore(halfway)) 0 else 1
-    }
+    ): Int =
+      if (
+        Duration.between(lastEvent.instant, instant) < Duration.between(instant, nextEvent.instant)
+      ) {
+        0
+      } else {
+        1
+      }
   }
 }

@@ -24,6 +24,7 @@ import org.onereed.helios.common.DirectionUtil.ang
 import org.onereed.helios.common.DirectionUtil.arc
 import org.onereed.helios.databinding.ActivityCompassBinding
 import org.onereed.helios.sun.SunEvent
+import org.onereed.helios.sun.SunEventType
 import org.onereed.helios.sun.SunInfo
 import timber.log.Timber
 
@@ -35,7 +36,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
   private lateinit var orientationProvider: FusedOrientationProviderClient
   private lateinit var mainExecutor: Executor
 
-  private lateinit var sunEventViews: Map<SunEvent.Type, ImageView>
+  private lateinit var sunEventViews: Map<SunEventType, ImageView>
   private lateinit var compassRadiusViews: List<ImageView>
 
   private lateinit var noonWrapper: NoonNadirWrapper
@@ -66,10 +67,10 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
 
     sunEventViews =
       mapOf(
-        SunEvent.Type.RISE to binding.rise,
-        SunEvent.Type.NOON to binding.noon,
-        SunEvent.Type.SET to binding.set,
-        SunEvent.Type.NADIR to binding.nadir,
+        SunEventType.RISE to binding.rise,
+        SunEventType.NOON to binding.noon,
+        SunEventType.SET to binding.set,
+        SunEventType.NADIR to binding.nadir,
       )
 
     // Note that noon and nadir can be inset, and sunMovement is at a fraction of the compass
@@ -122,10 +123,10 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
       if (sunAzimuthInfo.isClockwise) sunAzimuthDeg else sunAzimuthDeg + 180.0f
     binding.sunMovement.rotation = sunMovementRotation.toFloat()
 
-    val shownEvents = mutableMapOf<SunEvent.Type, SunEvent>()
+    val shownEvents = mutableMapOf<SunEventType, SunEvent>()
 
     value.sunEvents.forEach { sunEvent ->
-      val type = sunEvent.type
+      val type = sunEvent.sunEventType
 
       if (!shownEvents.containsKey(type)) {
         shownEvents.put(type, sunEvent)
@@ -144,8 +145,8 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
     // the one that comes later. We also explicitly reset the non-offset event(s) to correct
     // previous later-event status.
 
-    val noonEvent = shownEvents[SunEvent.Type.NOON]
-    val nadirEvent = shownEvents[SunEvent.Type.NADIR]
+    val noonEvent = shownEvents[SunEventType.NOON]
+    val nadirEvent = shownEvents[SunEventType.NADIR]
 
     if (noonEvent == null || nadirEvent == null) {
       Timber.e("Noon or nadir missing; shownEvents=%s", shownEvents)

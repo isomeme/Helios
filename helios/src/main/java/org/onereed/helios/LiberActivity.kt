@@ -11,7 +11,7 @@ import java.io.IOException
 import java.io.UncheckedIOException
 import java.nio.charset.StandardCharsets.UTF_8
 import org.onereed.helios.databinding.ActivityLiberBinding
-import org.onereed.helios.sun.SunEvent
+import org.onereed.helios.sun.SunEventType
 import timber.log.Timber
 
 /** Activity for displaying the text of Liber Resh. */
@@ -49,7 +49,7 @@ class LiberActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
     spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
     binding.sunEventSelector.adapter = spinnerAdapter
 
-    val typeOrdinal = intent.getIntExtra(IntentExtraTags.SUN_EVENT_TYPE, SunEvent.Type.RISE.ordinal)
+    val typeOrdinal = intent.getIntExtra(IntentExtraTags.SUN_EVENT_TYPE, SunEventType.RISE.ordinal)
 
     // The animate=false argument tells the item selected listener not to run based on this
     // initial selection. This avoids a double haptic click, one from the activity transition and
