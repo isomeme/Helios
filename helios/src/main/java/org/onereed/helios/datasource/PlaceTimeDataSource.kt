@@ -24,6 +24,8 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import java.time.Duration
+import java.time.Instant
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
@@ -32,22 +34,21 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import org.onereed.helios.R
-import org.onereed.helios.common.Place
+import org.onereed.helios.common.PlaceTime
 import timber.log.Timber
-import java.time.Duration
 
-class PlaceDataSource(private val activity: AppCompatActivity) {
+class PlaceTimeDataSource(private val activity: AppCompatActivity) {
 
   private val locationProvider: FusedLocationProviderClient
 
   private val requestPermissionLauncher: ActivityResultLauncher<String>
 
-  private val _placeFlow = MutableSharedFlow<Place>(replay = 1)
+  private val _placeTimeFlow = MutableSharedFlow<PlaceTime>(replay = 1)
 
-  val placeFlow = _placeFlow.asSharedFlow()
+  val placeTimeFlow = _placeTimeFlow.asSharedFlow()
 
   init {
-    Timber.Forest.d("init start")
+    Timber.d("init start")
 
     locationProvider = LocationServices.getFusedLocationProviderClient(activity)
 
@@ -56,79 +57,78 @@ class PlaceDataSource(private val activity: AppCompatActivity) {
         acceptLocationPermissionResult(isGranted)
       }
 
-    activity.lifecycle.addObserver(object : DefaultLifecycleObserver {
-      override fun onStart(owner: LifecycleOwner) {
-        maybeRequestLocationPermission()
+    activity.lifecycle.addObserver(
+      object : DefaultLifecycleObserver {
+        override fun onStart(owner: LifecycleOwner) {
+          maybeRequestLocationPermission()
+        }
       }
-    })
+    )
 
     activity.lifecycleScope.launch {
       activity.repeatOnLifecycle(Lifecycle.State.RESUMED) {
         getLocationUpdates().collect {
-          Timber.Forest.d("Location update: $it")
-          _placeFlow.emit(Place(it))
+          Timber.d("Location update: $it")
+          _placeTimeFlow.emit(PlaceTime(it, Instant.now()))
         }
       }
     }
   }
 
   private fun getLocationUpdates(): Flow<Location> = callbackFlow {
-      Timber.Forest.d("getLocationUpdates start")
+    Timber.d("getLocationUpdates start")
 
-      if (!checkLocationPermission()) {
-          Timber.Forest.d("Not requesting location updates; permission not granted yet.")
-          close()
-          return@callbackFlow
+    if (!checkLocationPermission()) {
+      Timber.d("Not requesting location updates; permission not granted yet.")
+      close()
+      return@callbackFlow
+    }
+
+    val locationCallback =
+      object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult) {
+          locationResult.lastLocation?.let { location ->
+            trySend(location).onFailure { t -> Timber.e(t, "Failed to send location.") }
+          }
+        }
       }
 
-      val locationCallback =
-          object : LocationCallback() {
-              override fun onLocationResult(locationResult: LocationResult) {
-                  locationResult.lastLocation?.let { location ->
-                      trySend(location).onFailure { t ->
-                          Timber.Forest.e(
-                              t,
-                              "Failed to send location."
-                          )
-                      }
-                  }
-              }
-          }
+    locationProvider
+      .requestLocationUpdates(LOCATION_REQUEST, locationCallback, Looper.getMainLooper())
+      .addOnSuccessListener { Timber.d("Location updates started.") }
+      .addOnFailureListener { e ->
+        Timber.e(e, "Location updates start failed.")
+        close(e)
+      }
 
+    awaitClose {
       locationProvider
-          .requestLocationUpdates(LOCATION_REQUEST, locationCallback, Looper.getMainLooper())
-          .addOnSuccessListener { Timber.Forest.d("Location updates started.") }
-          .addOnFailureListener { e ->
-              Timber.Forest.e(e, "Location updates start failed.")
-              close(e)
-          }
-
-      awaitClose {
-          locationProvider
-              .removeLocationUpdates(locationCallback)
-              .addOnSuccessListener { Timber.Forest.d("Location updates stopped.") }
-              .addOnFailureListener { e -> Timber.Forest.e(e, "Location updates stop failed.") }
-      }
+        .removeLocationUpdates(locationCallback)
+        .addOnSuccessListener { Timber.d("Location updates stopped.") }
+        .addOnFailureListener { e -> Timber.e(e, "Location updates stop failed.") }
+    }
   }
 
   private fun maybeRequestLocationPermission() {
-    Timber.Forest.d("maybeRequestLocationPermission start")
+    Timber.d("maybeRequestLocationPermission start")
 
     if (checkLocationPermission()) {
-      Timber.Forest.d("Location permission already granted.")
+      Timber.d("Location permission already granted.")
     } else {
-      Timber.Forest.d("Requesting location permission.")
+      Timber.d("Requesting location permission.")
       requestLocationPermission()
     }
   }
 
   private fun checkLocationPermission(): Boolean =
-    activity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    activity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) ==
+      PackageManager.PERMISSION_GRANTED
 
-  private fun requestLocationPermission() = requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+  private fun requestLocationPermission() =
+    requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
 
   private fun acceptLocationPermissionResult(isGranted: Boolean) {
-    Timber.Forest.d("acceptLocationPermissionResult: isGranted=$isGranted")
+    Timber.d("acceptLocationPermissionResult: isGranted=$isGranted")
 
     if (isGranted) {
       return
@@ -147,7 +147,7 @@ class PlaceDataSource(private val activity: AppCompatActivity) {
         .create()
         .show()
 
-      Timber.Forest.d("Launched rationale dialog.")
+      Timber.d("Launched rationale dialog.")
     } else {
       val settingsIntent =
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
@@ -155,13 +155,15 @@ class PlaceDataSource(private val activity: AppCompatActivity) {
 
       AlertDialog.Builder(activity)
         .setMessage(R.string.location_permission_use_settings)
-        .setPositiveButton(R.string.button_settings) { _, _ -> activity.startActivity(settingsIntent) }
+        .setPositiveButton(R.string.button_settings) { _, _ ->
+          activity.startActivity(settingsIntent)
+        }
         .setNegativeButton(R.string.button_exit) { _, _ -> activity.finish() }
         .setCancelable(false)
         .create()
         .show()
 
-      Timber.Forest.d("Launched use-settings dialog.")
+      Timber.d("Launched use-settings dialog.")
     }
   }
 

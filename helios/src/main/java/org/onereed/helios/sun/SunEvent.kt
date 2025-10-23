@@ -1,7 +1,7 @@
 package org.onereed.helios.sun
 
 import java.time.Instant
-import org.onereed.helios.common.Place
+import org.onereed.helios.common.PlaceTime
 import org.shredzone.commons.suncalc.SunTimes
 
 /** Represents one sun event -- rise, noon, set, or nadir. */
@@ -21,9 +21,9 @@ data class SunEvent(
      * Returns the [SunEvent] corresponding to [sunEventType] in [sunTimes], if it is available.
      * Rise and set events will not be available for arctic summer and winter.
      */
-    fun from(sunEventType: SunEventType, sunTimes: SunTimes, place: Place): SunEvent? {
+    fun from(sunEventType: SunEventType, sunTimes: SunTimes, placeTime: PlaceTime): SunEvent? {
       return sunEventType.instantOf(sunTimes)?.let { instant ->
-        SunEvent(sunEventType, instant, place.asPositionParameters().on(instant).execute().azimuth)
+        SunEvent(sunEventType, instant, placeTime.atInstant(instant).computeSunAzimuth())
       }
     }
 

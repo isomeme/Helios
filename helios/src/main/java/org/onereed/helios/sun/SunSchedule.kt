@@ -16,7 +16,7 @@ data class SunSchedule(val events: List<Event>) {
     fun compute(sunTimeSeries: SunTimeSeries): SunSchedule {
       val closestEventIndex =
         getClosestEventIndex(
-          sunTimeSeries.place.instant,
+          sunTimeSeries.placeTime.instant,
           sunTimeSeries.events[0].instant,
           sunTimeSeries.events[1].instant,
         )
@@ -24,7 +24,7 @@ data class SunSchedule(val events: List<Event>) {
       val events =
         sunTimeSeries.events.mapIndexed { index, event ->
           val isClosestEvent = index == closestEventIndex
-          val weakId = createWeakId(event)
+          val weakId = weakIdOf(event)
           Event(event.sunEventType, event.instant, isClosestEvent, weakId)
         }
 
@@ -42,12 +42,12 @@ data class SunSchedule(val events: List<Event>) {
     private const val EVENT_TIME_BUCKET_MASK = 0x3FFFL.inv()
 
     /**
-     * We create a weak ID for the event by separating time into ~4.6 hour buckets and adding the
-     * type ordinal to distinguish events of different types within the bucket. This is used in the
-     * UI to identify when a newly delivered event is probably the same as one from the previous
+     * We calculate the weak ID for the event by separating time into ~4.6 hour buckets and adding
+     * the type ordinal to distinguish events of different types within the bucket. This is used in
+     * the UI to identify when a newly delivered event is probably the same as one from the previous
      * update.
      */
-    private fun createWeakId(event: SunTimeSeries.Event) =
+    private fun weakIdOf(event: SunTimeSeries.Event) =
       (event.instant.epochSecond and EVENT_TIME_BUCKET_MASK) + event.sunEventType.ordinal
   }
 }

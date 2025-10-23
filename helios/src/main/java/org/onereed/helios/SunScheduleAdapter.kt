@@ -18,39 +18,40 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.flow.FlowCollector
-import org.onereed.helios.SunInfoAdapter.SunEventViewHolder
-import org.onereed.helios.sun.SunInfo
+import org.onereed.helios.SunScheduleAdapter.EventViewHolder
+import org.onereed.helios.sun.SunSchedule
+import timber.log.Timber
 
-internal class SunInfoAdapter(private val activity: Activity) :
-  RecyclerView.Adapter<SunEventViewHolder>(), FlowCollector<SunInfo> {
+internal class SunScheduleAdapter(private val activity: Activity) :
+  RecyclerView.Adapter<EventViewHolder>() {
 
-  private var sunInfo: SunInfo? = null
+  private var sunSchedule: SunSchedule? = null
 
   init {
     setHasStableIds(true)
   }
 
   @SuppressLint("NotifyDataSetChanged")
-  override suspend fun emit(value: SunInfo) {
-    sunInfo = value
+  fun acceptSunSchedule(value: SunSchedule) {
+    Timber.d("acceptSunSchedule start")
+    sunSchedule = value
     notifyDataSetChanged()
   }
 
-  override fun getItemCount() = sunInfo?.sunEvents?.size ?: 0
+  override fun getItemCount() = sunSchedule?.events?.size ?: 0
 
-  override fun getItemId(position: Int) = sunInfo!!.sunEvents[position].weakId
+  override fun getItemId(position: Int) = sunSchedule!!.events[position].weakId
 
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SunEventViewHolder {
+  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventViewHolder {
     val layoutInflater = LayoutInflater.from(parent.context)
     val cardView =
       layoutInflater.inflate(R.layout.sun_event, parent, /* attachToRoot= */ false) as CardView
-    return SunEventViewHolder(cardView)
+    return EventViewHolder(cardView)
   }
 
-  override fun onBindViewHolder(sunEventViewHolder: SunEventViewHolder, position: Int) {
-    val sunEvent = sunInfo!!.sunEvents[position]
-    val typeOrdinal = sunEvent.sunEventType.ordinal
+  override fun onBindViewHolder(sunEventViewHolder: EventViewHolder, position: Int) {
+    val event = sunSchedule!!.events[position]
+    val typeOrdinal = event.sunEventType.ordinal
 
     activity.resources.apply {
       obtainTypedArray(R.array.sun_event_bg_colors).use { typedArray ->
@@ -64,9 +65,9 @@ internal class SunInfoAdapter(private val activity: Activity) :
       }
     }
 
-    val eventTimeMillis = sunEvent.instant.toEpochMilli()
+    val eventTimeMillis = event.instant.toEpochMilli()
     val timeText = formatDateTime(activity, eventTimeMillis, DATE_FORMAT_FLAGS)
-    val timeStyle = if (position == sunInfo!!.closestEventIndex) Typeface.BOLD else Typeface.NORMAL
+    val timeStyle = if (event.isClosestEvent) Typeface.BOLD else Typeface.NORMAL
 
     sunEventViewHolder.eventTimeView.apply {
       text = timeText
@@ -86,7 +87,7 @@ internal class SunInfoAdapter(private val activity: Activity) :
     activity.startActivity(intent, bundle)
   }
 
-  internal data class SunEventViewHolder(
+  internal data class EventViewHolder(
     val cardView: CardView,
     val eventTimeView: TextView = cardView.findViewById(R.id.eventTime),
   ) : RecyclerView.ViewHolder(cardView)

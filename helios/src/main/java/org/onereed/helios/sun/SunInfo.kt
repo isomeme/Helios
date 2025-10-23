@@ -14,15 +14,15 @@ data class SunInfo(
     fun compute(sunTimeSeries: SunTimeSeries): SunInfo {
       Timber.d("compute start")
 
-      val parameters = sunTimeSeries.place.asPositionParameters()
+      val placeTime = sunTimeSeries.placeTime
       val sunEvents =
         sunTimeSeries.events.map {
-          SunEvent(it.sunEventType, it.instant, parameters.on(it.instant).execute().azimuth)
+          SunEvent(it.sunEventType, it.instant, placeTime.atInstant(it.instant).computeSunAzimuth())
         }
 
-      val sunAzimuthInfo = SunAzimuthInfo.from(sunTimeSeries.place)
+      val sunAzimuthInfo = SunAzimuthInfo.from(sunTimeSeries.placeTime)
       val closestEventIndex =
-        getClosestEventIndex(sunTimeSeries.place.instant, sunEvents[0], sunEvents[1])
+        getClosestEventIndex(sunTimeSeries.placeTime.instant, sunEvents[0], sunEvents[1])
 
       return SunInfo(sunAzimuthInfo, closestEventIndex, sunEvents)
     }

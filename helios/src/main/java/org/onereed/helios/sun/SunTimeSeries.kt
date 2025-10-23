@@ -2,13 +2,11 @@ package org.onereed.helios.sun
 
 import java.time.Duration
 import java.time.Instant
-import org.onereed.helios.common.Place
-import org.onereed.helios.sun.SunTimeSeries.Companion.PRECEDING_LIMIT
-import org.onereed.helios.sun.SunTimeSeries.Companion.PRECEDING_OFFSET
+import org.onereed.helios.common.PlaceTime
 import org.shredzone.commons.suncalc.SunTimes
 import timber.log.Timber
 
-data class SunTimeSeries(val events: List<Event>, val place: Place) {
+data class SunTimeSeries(val events: List<Event>, val placeTime: PlaceTime) {
   data class Event(val sunEventType: SunEventType, val instant: Instant) : Comparable<Event> {
 
     override fun compareTo(other: Event) =
@@ -30,30 +28,28 @@ data class SunTimeSeries(val events: List<Event>, val place: Place) {
      * checking falls out of both the preceding and upcoming events lists. We then remove duplicates
      * in the preceding events.
      */
-    private val PRECEDING_OFFSET = Duration.ofHours(13L)
+    private val PRECEDING_OFFSET = Duration.ofHours(13L).negated()
 
     /** See [PRECEDING_OFFSET]. */
     private val PRECEDING_LIMIT = Duration.ofHours(14L)
 
-    fun compute(place: Place): SunTimeSeries {
-      Timber.d("compute place=$place")
+    fun compute(placeTime: PlaceTime): SunTimeSeries {
+      Timber.d("compute placeTime=$placeTime")
 
-      val parameters = place.asTimesParameters()
-
-      val futureSunTimes = parameters.on(place.instant).limit(FUTURE_LIMIT).execute()
+      val futureSunTimes = placeTime.computeSunTimes(FUTURE_LIMIT)
       val futureEvents = toEvents(futureSunTimes)
       val nextEvent = futureEvents.first()
 
-      val earlierTime = place.instant.minus(PRECEDING_OFFSET)
-      val pastSunTimes = parameters.on(earlierTime).limit(PRECEDING_LIMIT).execute()
+      val earlierPlaceTime = placeTime.plusDuration(PRECEDING_OFFSET)
+      val pastSunTimes = earlierPlaceTime.computeSunTimes(PRECEDING_LIMIT)
       val pastEvents = toEvents(pastSunTimes)
       val lastEvent =
         pastEvents
           .filter { it.sunEventType != nextEvent.sunEventType }
-          .last { it.instant.isBefore(place.instant) }
+          .last { it.instant.isBefore(placeTime.instant) }
 
       val events = listOf(lastEvent) + futureEvents
-      return SunTimeSeries(events, place)
+      return SunTimeSeries(events, placeTime)
     }
 
     private fun toEvents(sunTimes: SunTimes): List<Event> {

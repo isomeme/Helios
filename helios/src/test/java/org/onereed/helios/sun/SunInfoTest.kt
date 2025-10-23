@@ -5,7 +5,7 @@ import java.time.Instant
 import org.junit.Before
 import org.junit.Test
 import org.onereed.helios.common.DirectionUtil.ang
-import org.onereed.helios.common.Place
+import org.onereed.helios.common.PlaceTime
 import timber.log.Timber
 import timber.log.Timber.DebugTree
 
@@ -24,11 +24,11 @@ class SunInfoTest {
   @Test
   fun testEventOverlap() {
     val instant = Instant.parse("2020-05-09T02:30:15Z")
-    val place = Place(34.0, -118.5, 0.0, instant)
+    val place = PlaceTime(34.0, -118.5, 0.0, instant)
     val sunTimeSeries = SunTimeSeries.compute(place)
     val sunInfo = SunInfo.compute(sunTimeSeries)
 
-    assertThat(sunInfo.sunAzimuthInfo.azimuthDeg).isWithin(DELTA).of(290.0)
+    assertThat(sunInfo.sunAzimuthInfo.deg).isWithin(DELTA).of(290.0)
     assertThat(sunInfo.sunAzimuthInfo.isClockwise).isTrue()
     assertThat(sunInfo.closestEventIndex).isEqualTo(1)
     assertThat(sunInfo.sunEvents).hasSize(5)
@@ -47,11 +47,11 @@ class SunInfoTest {
   @Test
   fun testEventGap() {
     val instant = Instant.parse("2020-05-18T02:50:50Z")
-    val place = Place(34.0, -118.5, 0.0, instant)
+    val place = PlaceTime(34.0, -118.5, 0.0, instant)
     val sunTimeSeries = SunTimeSeries.compute(place)
     val sunInfo = SunInfo.compute(sunTimeSeries)
 
-    assertThat(sunInfo.sunAzimuthInfo.azimuthDeg).isWithin(DELTA).of(294.5)
+    assertThat(sunInfo.sunAzimuthInfo.deg).isWithin(DELTA).of(294.5)
     assertThat(sunInfo.sunAzimuthInfo.isClockwise).isTrue()
     assertThat(sunInfo.closestEventIndex).isEqualTo(0)
     assertThat(sunInfo.sunEvents).hasSize(5)

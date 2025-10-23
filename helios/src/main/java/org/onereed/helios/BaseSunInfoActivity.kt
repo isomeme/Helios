@@ -8,13 +8,13 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
-import org.onereed.helios.datasource.PlaceDataSource
+import org.onereed.helios.datasource.PlaceTimeDataSource
 import org.onereed.helios.sun.SunInfo
 import timber.log.Timber
 
 abstract class BaseSunInfoActivity : BaseActivity() {
 
-  private lateinit var placeDataSource: PlaceDataSource
+  private lateinit var placeTimeDataSource: PlaceTimeDataSource
 
   private val sunInfoViewModel: SunInfoViewModel by viewModels()
 
@@ -22,11 +22,11 @@ abstract class BaseSunInfoActivity : BaseActivity() {
     Timber.d("onCreate")
     super.onCreate(savedInstanceState)
 
-    placeDataSource = PlaceDataSource(this)
+    placeTimeDataSource = PlaceTimeDataSource(this)
 
     lifecycleScope.launch {
       lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-        placeDataSource.placeFlow.collect { sunInfoViewModel.acceptPlace(it) }
+        placeTimeDataSource.placeTimeFlow.collect { sunInfoViewModel.acceptPlace(it) }
       }
     }
   }

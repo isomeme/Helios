@@ -114,7 +114,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
     Timber.d("emit: %s", value)
 
     val sunAzimuthInfo = value.sunAzimuthInfo
-    val sunAzimuthDeg = sunAzimuthInfo.azimuthDeg
+    val sunAzimuthDeg = sunAzimuthInfo.deg
 
     updateCircleAngle(binding.sun, sunAzimuthDeg)
     updateCircleAngle(binding.sunMovement, sunAzimuthDeg)
