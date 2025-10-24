@@ -7,11 +7,15 @@ import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.widget.ImageView
+import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.Keep
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.gms.location.DeviceOrientation
 import com.google.android.gms.location.DeviceOrientationListener
 import com.google.android.gms.location.DeviceOrientationRequest
@@ -19,17 +23,17 @@ import com.google.android.gms.location.FusedOrientationProviderClient
 import com.google.android.gms.location.LocationServices
 import java.util.EnumSet
 import java.util.concurrent.Executor
-import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.launch
 import org.onereed.helios.common.DirectionUtil.ang
 import org.onereed.helios.common.DirectionUtil.arc
 import org.onereed.helios.databinding.ActivityCompassBinding
-import org.onereed.helios.sun.SunEvent
+import org.onereed.helios.datasource.PlaceTimeDataSource
+import org.onereed.helios.sun.SunCompass
 import org.onereed.helios.sun.SunEventType
-import org.onereed.helios.sun.SunInfo
 import timber.log.Timber
 
 /** Displays directions to sun events. */
-class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCollector<SunInfo> {
+class CompassActivity : BaseActivity(), DeviceOrientationListener {
 
   private lateinit var binding: ActivityCompassBinding
 
@@ -51,7 +55,11 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
 
   private lateinit var compassDisplayState: CompassDisplayState
 
-  private var lastRotationDeg = 0.0
+  private lateinit var placeTimeDataSource: PlaceTimeDataSource
+
+  private val sunCompassViewModel: SunCompassViewModel by viewModels()
+
+  private var lastRotation = 0.0
   private var compassRadiusPx = 0
   private var radiusPxRange = 0
 
@@ -81,10 +89,22 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
     noonWrapper = NoonNadirWrapper(binding.noon)
     nadirWrapper = NoonNadirWrapper(binding.nadir)
 
+    placeTimeDataSource = PlaceTimeDataSource(this)
+
+    lifecycleScope.launch {
+      lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+        placeTimeDataSource.placeTimeFlow.collect { sunCompassViewModel.acceptPlaceTime(it) }
+      }
+    }
+
+    lifecycleScope.launch {
+      lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+        sunCompassViewModel.sunCompassFlow.collect { acceptSunCompass(it) }
+      }
+    }
+
     orientationProvider = LocationServices.getFusedOrientationProviderClient(this)
     mainExecutor = ContextCompat.getMainExecutor(this)
-
-    observeSunInfo(this)
   }
 
   override fun onResume() {
@@ -110,51 +130,40 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
     }
   }
 
-  override suspend fun emit(value: SunInfo) {
-    Timber.d("emit: %s", value)
+  fun acceptSunCompass(sunCompass: SunCompass) {
+    Timber.d("acceptSunCompass start: $sunCompass")
 
-    val sunAzimuthInfo = value.sunAzimuthInfo
-    val sunAzimuthDeg = sunAzimuthInfo.deg
+    val sunAzimuthInfo = sunCompass.sunAzimuthInfo
+    val events = sunCompass.events
 
-    updateCircleAngle(binding.sun, sunAzimuthDeg)
-    updateCircleAngle(binding.sunMovement, sunAzimuthDeg)
+    updateCircleAngle(binding.sun, sunAzimuthInfo.azimuth)
+    updateCircleAngle(binding.sunMovement, sunAzimuthInfo.azimuth)
 
     val sunMovementRotation =
-      if (sunAzimuthInfo.isClockwise) sunAzimuthDeg else sunAzimuthDeg + 180.0f
+      if (sunAzimuthInfo.isClockwise) sunAzimuthInfo.azimuth else sunAzimuthInfo.azimuth + 180.0f
+
     binding.sunMovement.rotation = sunMovementRotation.toFloat()
 
-    val shownEvents = mutableMapOf<SunEventType, SunEvent>()
-
-    value.sunEvents.forEach { sunEvent ->
-      val type = sunEvent.sunEventType
-
-      if (!shownEvents.containsKey(type)) {
-        shownEvents.put(type, sunEvent)
-        val view = sunEventViews.getValue(type)
-        updateCircleAngle(view, sunEvent.azimuthDeg)
-        view.setVisibility(View.VISIBLE)
-      }
+    events.forEach { type, event ->
+      val view = sunEventViews.getValue(type)
+      updateCircleAngle(view, event.azimuth)
+      view.setVisibility(View.VISIBLE)
     }
 
-    val shownTypes = EnumSet.copyOf(shownEvents.keys)
+    val shownTypes = EnumSet.copyOf(events.keys)
     val missingTypes = EnumSet.complementOf(shownTypes)
 
-    missingTypes.forEach { type -> sunEventViews[type]?.setVisibility(View.INVISIBLE) }
+    missingTypes.forEach { type -> sunEventViews.getValue(type).setVisibility(View.INVISIBLE) }
 
     // In the tropics, noon and nadir can be at the same azimuth, so inset and dim the icon for
     // the one that comes later. We also explicitly reset the non-offset event(s) to correct
     // previous later-event status.
 
-    val noonEvent = shownEvents[SunEventType.NOON]
-    val nadirEvent = shownEvents[SunEventType.NADIR]
+    val noonEvent = events.getValue(SunEventType.NOON)
+    val nadirEvent = events.getValue(SunEventType.NADIR)
 
-    if (noonEvent == null || nadirEvent == null) {
-      Timber.e("Noon or nadir missing; shownEvents=%s", shownEvents)
-      return
-    }
-
-    val isOverlap = ang(noonEvent.azimuthDeg, nadirEvent.azimuthDeg) < 20.0
-    val isNoonEarlier = noonEvent.compareTo(nadirEvent) < 1
+    val isOverlap = ang(noonEvent.azimuth, nadirEvent.azimuth) < 20.0
+    val isNoonEarlier = noonEvent < nadirEvent
     val isNoonInset = isOverlap && !isNoonEarlier
     val isNadirInset = isOverlap && isNoonEarlier
 
@@ -163,7 +172,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
   }
 
   override fun onDeviceOrientationChanged(deviceOrientation: DeviceOrientation) {
-    val compassAzimuthDeg = deviceOrientation.headingDegrees.toDouble()
+    val compassAzimuth = deviceOrientation.headingDegrees.toDouble()
 
     when (compassDisplayState) {
       CompassDisplayState.LOCKED,
@@ -176,7 +185,7 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
         compassDisplayState = CompassDisplayState.UNLOCKING
 
         rotateCompass(
-          compassAzimuthDeg,
+          compassAzimuth,
           object : AnimatorListenerAdapter() {
             override fun onAnimationCancel(animation: Animator) {
               compassDisplayState = CompassDisplayState.UNLOCKED
@@ -185,11 +194,11 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
             override fun onAnimationEnd(animation: Animator) {
               compassDisplayState = CompassDisplayState.UNLOCKED
             }
-          },
+          }
         )
       }
 
-      CompassDisplayState.UNLOCKED -> rotateCompass(compassAzimuthDeg, listener = null)
+      CompassDisplayState.UNLOCKED -> rotateCompass(compassAzimuth)
     }
   }
 
@@ -232,7 +241,6 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
 
   private fun applyCompassRadius() {
     val widthPx = binding.compassFace.width
-    Timber.d("widthPx=%d", widthPx)
 
     val pxPerDp = widthPx.toDouble() / COMPASS_SIDE_DP
     compassRadiusPx = (pxPerDp * COMPASS_RADIUS_DP).toInt()
@@ -272,36 +280,37 @@ class CompassActivity : BaseSunInfoActivity(), DeviceOrientationListener, FlowCo
   }
 
   private fun rotateCompassToLockedPosition() {
-    rotateCompass(if (binding.southAtTop.isChecked) 180.0 else 0.0, listener = null)
+    rotateCompass(if (binding.southAtTop.isChecked) 180.0 else 0.0)
   }
 
   /**
    * Executes an animated sweep from the old compass rotation to the new one, and updates the old
    * one to the new value to prepare for the next update.
    */
-  private fun rotateCompass(compassAzimuthDeg: Double, listener: Animator.AnimatorListener?) {
+  private fun rotateCompass(
+    compassAzimuth: Double,
+    animatorListener: Animator.AnimatorListener? = null,
+  ) {
     // When animating from -179 to +179, we don't want to go the long way around the circle.
 
-    val deltaDeg = arc(lastRotationDeg, -compassAzimuthDeg)
-    val desiredRotationDeg = lastRotationDeg + deltaDeg
+    val delta = arc(lastRotation, -compassAzimuth)
+    val desiredRotation = lastRotation + delta
 
     val compassAnimator =
       ObjectAnimator.ofFloat(
           binding.compassRotating,
           "rotation",
-          lastRotationDeg.toFloat(),
-          desiredRotationDeg.toFloat(),
+          lastRotation.toFloat(),
+          desiredRotation.toFloat(),
         )
         .setDuration(ROTATION_ANIMATION_DURATION_MILLIS)
 
-    if (listener != null) {
-      compassAnimator.addListener(listener)
-    }
+    animatorListener?.let { compassAnimator.addListener(it) }
 
     compassAnimator.setAutoCancel(true)
     compassAnimator.start()
 
-    lastRotationDeg = desiredRotationDeg
+    lastRotation = desiredRotation
   }
 
   /**

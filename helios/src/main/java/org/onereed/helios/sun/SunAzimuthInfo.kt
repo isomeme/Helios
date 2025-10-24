@@ -5,7 +5,7 @@ import org.onereed.helios.common.PlaceTime
 import java.time.Duration
 
 /** Sun azimuth and azimuth movement direction (clockwise or counterclockwise). */
-data class SunAzimuthInfo(val deg: Double, val isClockwise: Boolean) {
+data class SunAzimuthInfo(val azimuth: Double, val isClockwise: Boolean) {
 
   companion object {
 

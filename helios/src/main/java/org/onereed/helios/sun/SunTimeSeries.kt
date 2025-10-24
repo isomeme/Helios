@@ -28,7 +28,7 @@ data class SunTimeSeries(val events: List<Event>, val placeTime: PlaceTime) {
      * checking falls out of both the preceding and upcoming events lists. We then remove duplicates
      * in the preceding events.
      */
-    private val PRECEDING_OFFSET = Duration.ofHours(13L).negated()
+    private val PRECEDING_OFFSET = Duration.ofHours(13L)
 
     /** See [PRECEDING_OFFSET]. */
     private val PRECEDING_LIMIT = Duration.ofHours(14L)
@@ -40,7 +40,7 @@ data class SunTimeSeries(val events: List<Event>, val placeTime: PlaceTime) {
       val futureEvents = toEvents(futureSunTimes)
       val nextEvent = futureEvents.first()
 
-      val earlierPlaceTime = placeTime.plusDuration(PRECEDING_OFFSET)
+      val earlierPlaceTime = placeTime.minusDuration(PRECEDING_OFFSET)
       val pastSunTimes = earlierPlaceTime.computeSunTimes(PRECEDING_LIMIT)
       val pastEvents = toEvents(pastSunTimes)
       val lastEvent =

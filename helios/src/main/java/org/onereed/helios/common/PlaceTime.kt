@@ -8,9 +8,9 @@ import org.shredzone.commons.suncalc.SunTimes
 
 /** Represents a point in latitude, longitude, altitude, and time. */
 data class PlaceTime(
-  val latDeg: Double,
-  val lonDeg: Double,
-  val altMeters: Double,
+  val lat: Double,
+  val lon: Double,
+  val alt: Double,
   val instant: Instant,
 ) {
 
@@ -23,9 +23,11 @@ data class PlaceTime(
 
   fun plusDuration(duration: Duration): PlaceTime = copy(instant = instant.plus(duration))
 
+  fun minusDuration(duration: Duration): PlaceTime = copy(instant = instant.minus(duration))
+
   fun computeSunAzimuth(): Double =
-    SunPosition.compute().at(latDeg, lonDeg).elevation(altMeters).on(instant).execute().azimuth
+    SunPosition.compute().at(lat, lon).elevation(alt).on(instant).execute().azimuth
 
   fun computeSunTimes(limit: Duration): SunTimes =
-    SunTimes.compute().at(latDeg, lonDeg).elevation(altMeters).on(instant).limit(limit).execute()
+    SunTimes.compute().at(lat, lon).elevation(alt).on(instant).limit(limit).execute()
 }
