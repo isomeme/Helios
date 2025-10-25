@@ -9,10 +9,6 @@ import java.util.Locale
 
 class LifecycleLogger  : LifecycleEventObserver {
 
-  private data class SourceId(val className: String, val hashCode: Int) {
-    constructor(source: LifecycleOwner) : this(source.javaClass.simpleName, source.hashCode())
-  }
-
   override fun onStateChanged(source: LifecycleOwner, event: Event) {
     val tag = getTag(source)
     val state = event.targetState
@@ -27,6 +23,10 @@ class LifecycleLogger  : LifecycleEventObserver {
   }
 
   companion object {
+
+    private data class SourceId(val className: String, val hashCode: Int) {
+      constructor(source: LifecycleOwner) : this(source.javaClass.simpleName, source.hashCode())
+    }
 
     private val classInstanceCounts = HashMultiset.create<String>()
     private val sourceIdTags = mutableMapOf<SourceId, String>()
