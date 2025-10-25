@@ -13,12 +13,16 @@ import android.widget.Toast
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
+import org.onereed.helios.util.LifecycleLogger
 
 /** Parent class for Helios activities. */
 abstract class BaseActivity : AppCompatActivity() {
 
-  @get:IdRes
-  protected abstract val myActionsMenuId: Int
+  @get:IdRes protected abstract val myActionsMenuId: Int
+
+  init {
+    lifecycle.addObserver(LifecycleLogger())
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

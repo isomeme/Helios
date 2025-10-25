@@ -26,7 +26,7 @@ class LiberActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
   @IdRes override val myActionsMenuId = R.id.action_text
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    Timber.d("onCreate start")
+    Timber.d("onCreate")
     super.onCreate(savedInstanceState)
 
     binding = ActivityLiberBinding.inflate(layoutInflater)
@@ -58,23 +58,18 @@ class LiberActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
     binding.sunEventSelector.setSelection(typeOrdinal, /* animate= */ false)
     binding.sunEventSelector.onItemSelectedListener = this
     displayInvocation(typeOrdinal)
-
-    Timber.d("onCreate end")
   }
 
   override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-    Timber.d("onItemSelected: position=%d", position)
     view?.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
     displayInvocation(position)
   }
 
   override fun onNothingSelected(parent: AdapterView<*>?) {
-    Timber.d("onNothingSelected")
+    // Not relevant
   }
 
   private fun displayInvocation(ix: Int) {
-    Timber.d("displayInvocation: ix=%d", ix)
-
     resources.obtainTypedArray(R.array.sun_event_icons).use { icons ->
       val icon = icons.getDrawable(ix)
       binding.iconDisplay.setImageDrawable(icon)

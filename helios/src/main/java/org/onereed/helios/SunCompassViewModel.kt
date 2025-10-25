@@ -19,7 +19,7 @@ class SunCompassViewModel : ViewModel() {
   val sunCompassFlow = _sunCompassFlow.asSharedFlow()
 
   fun acceptPlaceTime(placeTime: PlaceTime) {
-    Timber.d("acceptPlaceTime start: $placeTime")
+    Timber.d("placeTime=$placeTime")
 
     viewModelScope.launch(Dispatchers.Default) {
       val sunTimeSeries = SunTimeSeries.compute(placeTime)

@@ -66,7 +66,6 @@ class CompassActivity : BaseActivity(), DeviceOrientationListener {
   @IdRes override val myActionsMenuId = R.id.action_compass
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    Timber.d("onCreate")
     super.onCreate(savedInstanceState)
 
     binding = ActivityCompassBinding.inflate(layoutInflater)
@@ -108,7 +107,6 @@ class CompassActivity : BaseActivity(), DeviceOrientationListener {
   }
 
   override fun onResume() {
-    Timber.d("onResume")
     super.onResume()
 
     applyPreferences()
@@ -119,7 +117,6 @@ class CompassActivity : BaseActivity(), DeviceOrientationListener {
   }
 
   override fun onPause() {
-    Timber.d("onPause")
     super.onPause()
 
     ignoreOrientation()
@@ -131,7 +128,7 @@ class CompassActivity : BaseActivity(), DeviceOrientationListener {
   }
 
   fun acceptSunCompass(sunCompass: SunCompass) {
-    Timber.d("acceptSunCompass start: $sunCompass")
+    Timber.d("sunCompass=$sunCompass")
 
     val sunAzimuthInfo = sunCompass.sunAzimuthInfo
     val events = sunCompass.events
@@ -260,7 +257,6 @@ class CompassActivity : BaseActivity(), DeviceOrientationListener {
     orientationProvider
       .requestOrientationUpdates(DEVICE_ORIENTATION_REQUEST, mainExecutor, this)
       .addOnSuccessListener { _ ->
-        Timber.d("Request for orientation updates succeeded.")
         compassDisplayState = CompassDisplayState.UNLOCK_PENDING
         binding.southAtTop.isEnabled = false
       }
@@ -275,7 +271,6 @@ class CompassActivity : BaseActivity(), DeviceOrientationListener {
   private fun ignoreOrientation() {
     orientationProvider
       .removeOrientationUpdates(this)
-      .addOnSuccessListener { Timber.d("Orientation updates removed.") }
       .addOnFailureListener { Timber.e(it, "Failed to remove orientation updates.") }
   }
 

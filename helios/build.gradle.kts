@@ -109,10 +109,10 @@ dependencies {
 
   testImplementation("com.google.truth:truth:1.4.5")
   testImplementation("junit:junit:4.13.2")
+  testImplementation("org.jetbrains.kotlin:kotlin-test:2.2.20")
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
   testImplementation("org.junit.jupiter:junit-jupiter:6.0.0")
   testImplementation("org.mockito:mockito-core:5.20.0")
-  testImplementation("org.jetbrains.kotlin:kotlin-test:2.2.20")
 
   androidTestImplementation("androidx.test.ext:junit:1.3.0")
   androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")

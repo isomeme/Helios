@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
 import org.onereed.helios.databinding.ActivityMainBinding
 import org.onereed.helios.datasource.PlaceTimeDataSource
-import timber.log.Timber
 
 /** Main activity for Helios. */
 class MainActivity : BaseActivity() {
@@ -22,7 +21,6 @@ class MainActivity : BaseActivity() {
   @IdRes override val myActionsMenuId = R.id.action_schedule
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    Timber.d("onCreate")
     super.onCreate(savedInstanceState)
 
     val binding = ActivityMainBinding.inflate(layoutInflater)
