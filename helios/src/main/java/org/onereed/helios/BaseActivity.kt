@@ -13,10 +13,13 @@ import android.widget.Toast
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
+import org.onereed.helios.datasource.LocationPermissionManager
 import org.onereed.helios.util.LifecycleLogger
 
 /** Parent class for Helios activities. */
 abstract class BaseActivity : AppCompatActivity() {
+
+  private lateinit var locationPermissionManager: LocationPermissionManager
 
   @get:IdRes protected abstract val myActionsMenuId: Int
 
@@ -26,6 +29,8 @@ abstract class BaseActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    locationPermissionManager = LocationPermissionManager(this)
 
     window.apply {
       enterTransition = Fade()
@@ -43,8 +48,8 @@ abstract class BaseActivity : AppCompatActivity() {
     window.decorView.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
 
     when (item.itemId) {
-      R.id.action_schedule -> go(Intent(this, MainActivity::class.java))
-      R.id.action_text -> go(Intent(this, LiberActivity::class.java))
+      R.id.action_schedule -> go(Intent(this, ScheduleActivity::class.java))
+      R.id.action_text -> go(Intent(this, TextActivity::class.java))
       R.id.action_compass -> go(Intent(this, CompassActivity::class.java))
       R.id.action_help -> openHelp()
       else -> return super.onOptionsItemSelected(item)

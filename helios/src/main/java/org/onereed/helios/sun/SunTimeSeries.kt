@@ -52,6 +52,9 @@ data class SunTimeSeries(val events: List<Event>, val placeTime: PlaceTime) {
       return SunTimeSeries(events, placeTime)
     }
 
+    private fun PlaceTime.computeSunTimes(limit: Duration): SunTimes =
+      SunTimes.compute().at(lat, lon).elevation(alt).on(instant).limit(limit).execute()
+
     private fun toEvents(sunTimes: SunTimes): List<Event> {
       return SunEventType.entries
         .map { Pair(it, it.instantOf(sunTimes)) }

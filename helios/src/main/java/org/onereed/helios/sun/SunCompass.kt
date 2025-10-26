@@ -1,11 +1,16 @@
 package org.onereed.helios.sun
 
+import org.onereed.helios.common.DirectionUtil.arc
+import org.onereed.helios.common.PlaceTime
+import org.shredzone.commons.suncalc.SunPosition
 import timber.log.Timber
+import java.time.Duration
 import java.time.Instant
 import java.util.EnumMap
 
 data class SunCompass(
-  val sunAzimuthInfo: SunAzimuthInfo,
+  val sunAzimuth: Double,
+  val isSunClockwise: Boolean,
   val events: EnumMap<SunEventType, Event>,
 ) {
   data class Event(val instant: Instant, val azimuth: Double) : Comparable<Event> {
@@ -16,11 +21,20 @@ data class SunCompass(
 
   companion object {
 
+    /** The (short) time interval over which sun movement direction is determined. */
+    private val DELTA_TIME: Duration = Duration.ofMinutes(1L)
+
     fun compute(sunTimeSeries: SunTimeSeries): SunCompass {
       Timber.d("compute start")
 
       val placeTime = sunTimeSeries.placeTime
-      val sunAzimuthInfo = SunAzimuthInfo.from(placeTime)
+
+      // Calculate current sun azimuth and movement direction.
+
+      val sunAzimuth = placeTime.computeSunAzimuth()
+      val sunAzimuthSoon = placeTime.plusDuration(DELTA_TIME).computeSunAzimuth()
+      val deltaAzimuth = arc(sunAzimuth, sunAzimuthSoon)
+      val isSunClockwise = deltaAzimuth >= 0
 
       /*
        * sunTimeSeries.events will typically contain 5 events in time order, 1 in the past and 4 in
@@ -35,7 +49,11 @@ data class SunCompass(
           it.sunEventType to Event(it.instant, placeTime.atInstant(it.instant).computeSunAzimuth())
         }
 
-      return SunCompass(sunAzimuthInfo, EnumMap(events))
+      return SunCompass(sunAzimuth, isSunClockwise, EnumMap(events))
     }
+
+    private fun PlaceTime.computeSunAzimuth(): Double =
+      SunPosition.compute().at(lat, lon).elevation(alt).on(instant).execute().azimuth
+
   }
 }

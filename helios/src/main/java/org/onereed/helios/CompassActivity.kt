@@ -32,7 +32,7 @@ import org.onereed.helios.sun.SunCompass
 import org.onereed.helios.sun.SunEventType
 import timber.log.Timber
 
-/** Displays directions to sun events. */
+/** Displays a compass view of the directions of sun events. */
 class CompassActivity : BaseActivity(), DeviceOrientationListener {
 
   private lateinit var binding: ActivityCompassBinding
@@ -130,42 +130,40 @@ class CompassActivity : BaseActivity(), DeviceOrientationListener {
   fun acceptSunCompass(sunCompass: SunCompass) {
     Timber.d("sunCompass=$sunCompass")
 
-    val sunAzimuthInfo = sunCompass.sunAzimuthInfo
-    val events = sunCompass.events
+    with(sunCompass) {
+      updateCircleAngle(binding.sun, sunAzimuth)
+      updateCircleAngle(binding.sunMovement, sunAzimuth)
 
-    updateCircleAngle(binding.sun, sunAzimuthInfo.azimuth)
-    updateCircleAngle(binding.sunMovement, sunAzimuthInfo.azimuth)
+      val sunMovementRotation = if (isSunClockwise) sunAzimuth else sunAzimuth + 180.0f
 
-    val sunMovementRotation =
-      if (sunAzimuthInfo.isClockwise) sunAzimuthInfo.azimuth else sunAzimuthInfo.azimuth + 180.0f
+      binding.sunMovement.rotation = sunMovementRotation.toFloat()
 
-    binding.sunMovement.rotation = sunMovementRotation.toFloat()
+      events.forEach { type, event ->
+        val view = sunEventViews.getValue(type)
+        updateCircleAngle(view, event.azimuth)
+        view.setVisibility(View.VISIBLE)
+      }
 
-    events.forEach { type, event ->
-      val view = sunEventViews.getValue(type)
-      updateCircleAngle(view, event.azimuth)
-      view.setVisibility(View.VISIBLE)
+      val shownTypes = EnumSet.copyOf(events.keys)
+      val missingTypes = EnumSet.complementOf(shownTypes)
+
+      missingTypes.forEach { type -> sunEventViews.getValue(type).setVisibility(View.INVISIBLE) }
+
+      // In the tropics, noon and nadir can be at the same azimuth, so inset and dim the icon for
+      // the one that comes later. We also explicitly reset the non-offset event(s) to correct
+      // previous later-event status.
+
+      val noonEvent = events.getValue(SunEventType.NOON)
+      val nadirEvent = events.getValue(SunEventType.NADIR)
+
+      val isOverlap = ang(noonEvent.azimuth, nadirEvent.azimuth) < 20.0
+      val isNoonEarlier = noonEvent < nadirEvent
+      val isNoonInset = isOverlap && !isNoonEarlier
+      val isNadirInset = isOverlap && isNoonEarlier
+
+      noonWrapper.selectInset(isNoonInset)
+      nadirWrapper.selectInset(isNadirInset)
     }
-
-    val shownTypes = EnumSet.copyOf(events.keys)
-    val missingTypes = EnumSet.complementOf(shownTypes)
-
-    missingTypes.forEach { type -> sunEventViews.getValue(type).setVisibility(View.INVISIBLE) }
-
-    // In the tropics, noon and nadir can be at the same azimuth, so inset and dim the icon for
-    // the one that comes later. We also explicitly reset the non-offset event(s) to correct
-    // previous later-event status.
-
-    val noonEvent = events.getValue(SunEventType.NOON)
-    val nadirEvent = events.getValue(SunEventType.NADIR)
-
-    val isOverlap = ang(noonEvent.azimuth, nadirEvent.azimuth) < 20.0
-    val isNoonEarlier = noonEvent < nadirEvent
-    val isNoonInset = isOverlap && !isNoonEarlier
-    val isNadirInset = isOverlap && isNoonEarlier
-
-    noonWrapper.selectInset(isNoonInset)
-    nadirWrapper.selectInset(isNadirInset)
   }
 
   override fun onDeviceOrientationChanged(deviceOrientation: DeviceOrientation) {
@@ -191,7 +189,7 @@ class CompassActivity : BaseActivity(), DeviceOrientationListener {
             override fun onAnimationEnd(animation: Animator) {
               compassDisplayState = CompassDisplayState.UNLOCKED
             }
-          }
+          },
         )
       }
 
@@ -269,9 +267,9 @@ class CompassActivity : BaseActivity(), DeviceOrientationListener {
   }
 
   private fun ignoreOrientation() {
-    orientationProvider
-      .removeOrientationUpdates(this)
-      .addOnFailureListener { Timber.e(it, "Failed to remove orientation updates.") }
+    orientationProvider.removeOrientationUpdates(this).addOnFailureListener {
+      Timber.e(it, "Failed to remove orientation updates.")
+    }
   }
 
   private fun rotateCompassToLockedPosition() {
@@ -291,19 +289,19 @@ class CompassActivity : BaseActivity(), DeviceOrientationListener {
     val delta = arc(lastRotation, -compassAzimuth)
     val desiredRotation = lastRotation + delta
 
-    val compassAnimator =
+    with(
       ObjectAnimator.ofFloat(
-          binding.compassRotating,
-          "rotation",
-          lastRotation.toFloat(),
-          desiredRotation.toFloat(),
-        )
-        .setDuration(ROTATION_ANIMATION_DURATION_MILLIS)
-
-    animatorListener?.let { compassAnimator.addListener(it) }
-
-    compassAnimator.setAutoCancel(true)
-    compassAnimator.start()
+        binding.compassRotating,
+        "rotation",
+        lastRotation.toFloat(),
+        desiredRotation.toFloat(),
+      )
+    ) {
+      setDuration(ROTATION_ANIMATION_DURATION_MILLIS)
+      animatorListener?.let { addListener(it) }
+      setAutoCancel(true)
+      start()
+    }
 
     lastRotation = desiredRotation
   }

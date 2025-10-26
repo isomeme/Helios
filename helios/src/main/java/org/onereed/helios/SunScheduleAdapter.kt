@@ -81,7 +81,7 @@ internal class SunScheduleAdapter(private val activity: Activity) :
 
   private fun sendToLiberActivity(view: View, typeOrdinal: Int) {
     view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-    val intent = Intent(activity, LiberActivity::class.java)
+    val intent = Intent(activity, TextActivity::class.java)
     intent.putExtra(IntentExtraTags.SUN_EVENT_TYPE, typeOrdinal)
     val bundle = ActivityOptions.makeSceneTransitionAnimation(activity).toBundle()
     activity.startActivity(intent, bundle)

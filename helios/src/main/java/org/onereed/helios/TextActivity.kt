@@ -12,10 +12,9 @@ import java.io.UncheckedIOException
 import java.nio.charset.StandardCharsets.UTF_8
 import org.onereed.helios.databinding.ActivityLiberBinding
 import org.onereed.helios.sun.SunEventType
-import timber.log.Timber
 
-/** Activity for displaying the text of Liber Resh. */
-class LiberActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
+/** Displays the text of Liber Resh. */
+class TextActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
 
   private lateinit var binding: ActivityLiberBinding
 
@@ -26,7 +25,6 @@ class LiberActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
   @IdRes override val myActionsMenuId = R.id.action_text
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    Timber.d("onCreate")
     super.onCreate(savedInstanceState)
 
     binding = ActivityLiberBinding.inflate(layoutInflater)

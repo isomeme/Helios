@@ -11,8 +11,8 @@ import kotlinx.coroutines.launch
 import org.onereed.helios.databinding.ActivityMainBinding
 import org.onereed.helios.datasource.PlaceTimeDataSource
 
-/** Main activity for Helios. */
-class MainActivity : BaseActivity() {
+/** Displays the schedule of sun events. */
+class ScheduleActivity : BaseActivity() {
 
   private lateinit var placeTimeDataSource: PlaceTimeDataSource
 
@@ -30,7 +30,7 @@ class MainActivity : BaseActivity() {
     val sunScheduleAdapter = SunScheduleAdapter(this)
 
     binding.sunEventsRecyclerView.apply {
-      layoutManager = LinearLayoutManager(this@MainActivity)
+      layoutManager = LinearLayoutManager(this@ScheduleActivity)
       adapter = sunScheduleAdapter
     }
 

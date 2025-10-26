@@ -12,7 +12,7 @@
         android:supportsRtl="false"
         android:theme="@style/Theme.Helios">
         <activity
-            android:name=".MainActivity"
+            android:name=".ScheduleActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,11 +20,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".LiberActivity"
-            android:parentActivityName=".MainActivity" />
+            android:name=".TextActivity"
+            android:parentActivityName=".ScheduleActivity" />
         <activity
             android:name=".CompassActivity"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".ScheduleActivity"
             android:screenOrientation="nosensor" />
     </application>
 

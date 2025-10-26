@@ -3,16 +3,9 @@ package org.onereed.helios.common
 import android.location.Location
 import java.time.Duration
 import java.time.Instant
-import org.shredzone.commons.suncalc.SunPosition
-import org.shredzone.commons.suncalc.SunTimes
 
 /** Represents a point in latitude, longitude, altitude, and time. */
-data class PlaceTime(
-  val lat: Double,
-  val lon: Double,
-  val alt: Double,
-  val instant: Instant,
-) {
+data class PlaceTime(val lat: Double, val lon: Double, val alt: Double, val instant: Instant) {
 
   constructor(
     location: Location,
@@ -24,10 +17,4 @@ data class PlaceTime(
   fun plusDuration(duration: Duration): PlaceTime = copy(instant = instant.plus(duration))
 
   fun minusDuration(duration: Duration): PlaceTime = copy(instant = instant.minus(duration))
-
-  fun computeSunAzimuth(): Double =
-    SunPosition.compute().at(lat, lon).elevation(alt).on(instant).execute().azimuth
-
-  fun computeSunTimes(limit: Duration): SunTimes =
-    SunTimes.compute().at(lat, lon).elevation(alt).on(instant).limit(limit).execute()
 }
