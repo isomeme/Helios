@@ -2,7 +2,7 @@ package org.onereed.helios
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.ActivityOptions
+import android.app.ActivityOptions.makeSceneTransitionAnimation
 import android.content.Intent
 import android.graphics.Typeface
 import android.text.format.DateUtils.FORMAT_ABBREV_ALL
@@ -20,7 +20,6 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import org.onereed.helios.SunScheduleAdapter.EventViewHolder
 import org.onereed.helios.sun.SunSchedule
-import timber.log.Timber
 
 internal class SunScheduleAdapter(private val activity: Activity) :
   RecyclerView.Adapter<EventViewHolder>() {
@@ -33,7 +32,6 @@ internal class SunScheduleAdapter(private val activity: Activity) :
 
   @SuppressLint("NotifyDataSetChanged")
   fun acceptSunSchedule(value: SunSchedule) {
-    Timber.d("acceptSunSchedule start")
     sunSchedule = value
     notifyDataSetChanged()
   }
@@ -75,15 +73,16 @@ internal class SunScheduleAdapter(private val activity: Activity) :
     }
 
     sunEventViewHolder.cardView.setOnClickListener { view ->
-      sendToLiberActivity(view, typeOrdinal)
+      sendToTextActivity(view, typeOrdinal)
     }
   }
 
-  private fun sendToLiberActivity(view: View, typeOrdinal: Int) {
+  private fun sendToTextActivity(view: View, typeOrdinal: Int) {
     view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-    val intent = Intent(activity, TextActivity::class.java)
-    intent.putExtra(IntentExtraTags.SUN_EVENT_TYPE, typeOrdinal)
-    val bundle = ActivityOptions.makeSceneTransitionAnimation(activity).toBundle()
+    val intent =
+      Intent(activity, TextActivity::class.java)
+        .putExtra(TextActivity.SUN_EVENT_TYPE_ORDINAL, typeOrdinal)
+    val bundle = makeSceneTransitionAnimation(activity).toBundle()
     activity.startActivity(intent, bundle)
   }
 

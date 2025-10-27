@@ -14,7 +14,7 @@ import org.onereed.helios.databinding.ActivityLiberBinding
 import org.onereed.helios.sun.SunEventType
 
 /** Displays the text of Liber Resh. */
-class TextActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
+class TextActivity : BaseActivity() {
 
   private lateinit var binding: ActivityLiberBinding
 
@@ -47,24 +47,26 @@ class TextActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
     spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
     binding.sunEventSelector.adapter = spinnerAdapter
 
-    val typeOrdinal = intent.getIntExtra(IntentExtraTags.SUN_EVENT_TYPE, SunEventType.RISE.ordinal)
+    val typeOrdinal = intent.getIntExtra(SUN_EVENT_TYPE_ORDINAL, SunEventType.RISE.ordinal)
 
     // The animate=false argument tells the item selected listener not to run based on this
     // initial selection. This avoids a double haptic click, one from the activity transition and
     // one from onItemSelected. Instead, we call displayInvocation directly for the initial load.
 
     binding.sunEventSelector.setSelection(typeOrdinal, /* animate= */ false)
-    binding.sunEventSelector.onItemSelectedListener = this
+    binding.sunEventSelector.onItemSelectedListener =
+      object : AdapterView.OnItemSelectedListener {
+        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+          view?.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+          displayInvocation(position)
+        }
+
+        override fun onNothingSelected(parent: AdapterView<*>?) {
+          // Not relevant
+        }
+      }
+
     displayInvocation(typeOrdinal)
-  }
-
-  override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-    view?.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-    displayInvocation(position)
-  }
-
-  override fun onNothingSelected(parent: AdapterView<*>?) {
-    // Not relevant
   }
 
   private fun displayInvocation(ix: Int) {
@@ -98,5 +100,11 @@ class TextActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
     } catch (e: IOException) {
       throw UncheckedIOException(e)
     }
+  }
+
+  companion object {
+
+    /** Intent extra name for the ordinal index of a [SunEventType] value. */
+    const val SUN_EVENT_TYPE_ORDINAL = "org.onereed.helios.SunEventTypeOrdinal"
   }
 }

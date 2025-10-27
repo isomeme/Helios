@@ -1,6 +1,6 @@
 package org.onereed.helios
 
-import android.app.ActivityOptions
+import android.app.ActivityOptions.makeSceneTransitionAnimation
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Build
@@ -19,6 +19,8 @@ import org.onereed.helios.util.LifecycleLogger
 /** Parent class for Helios activities. */
 abstract class BaseActivity : AppCompatActivity() {
 
+  private lateinit var navMap: Map<Int, Intent>
+
   private lateinit var locationPermissionManager: LocationPermissionManager
 
   @get:IdRes protected abstract val myActionsMenuId: Int
@@ -29,6 +31,13 @@ abstract class BaseActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    navMap = mapOf(
+      R.id.action_schedule to Intent(this, ScheduleActivity::class.java),
+      R.id.action_text to Intent(this, TextActivity::class.java),
+      R.id.action_compass to Intent(this, CompassActivity::class.java),
+      R.id.action_help to HELP_INTENT,
+    )
 
     locationPermissionManager = LocationPermissionManager(this)
 
@@ -47,35 +56,25 @@ abstract class BaseActivity : AppCompatActivity() {
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     window.decorView.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
 
-    when (item.itemId) {
-      R.id.action_schedule -> go(Intent(this, ScheduleActivity::class.java))
-      R.id.action_text -> go(Intent(this, TextActivity::class.java))
-      R.id.action_compass -> go(Intent(this, CompassActivity::class.java))
-      R.id.action_help -> openHelp()
-      else -> return super.onOptionsItemSelected(item)
-    }
+    val intent = navMap.getValue(item.itemId)
+    val bundle = makeSceneTransitionAnimation(this).toBundle()
 
-    return true
-  }
-
-  private fun openHelp() {
     try {
-      go(HELP_INTENT)
+      startActivity(intent, bundle)
     } catch (_: ActivityNotFoundException) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         window.decorView.performHapticFeedback(HapticFeedbackConstants.REJECT)
       }
       runOnUiThread {
-        Toast.makeText(this, getString(R.string.toast_no_browser), Toast.LENGTH_LONG).show()
+        Toast.makeText(this, getString(R.string.toast_activity_not_found), Toast.LENGTH_LONG).show()
       }
     }
-  }
 
-  protected fun go(intent: Intent) {
-    startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle())
+    return true
   }
 
   companion object {
+
     private const val HELP_PAGE_URL = "https://www.one-reed.org/helios"
     private val HELP_INTENT = Intent(Intent.ACTION_VIEW, HELP_PAGE_URL.toUri())
   }
