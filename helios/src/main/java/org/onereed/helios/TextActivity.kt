@@ -10,13 +10,13 @@ import io.noties.markwon.Markwon
 import java.io.IOException
 import java.io.UncheckedIOException
 import java.nio.charset.StandardCharsets.UTF_8
-import org.onereed.helios.databinding.ActivityLiberBinding
+import org.onereed.helios.databinding.ActivityTextBinding
 import org.onereed.helios.sun.SunEventType
 
 /** Displays the text of Liber Resh. */
 class TextActivity : BaseActivity() {
 
-  private lateinit var binding: ActivityLiberBinding
+  private lateinit var binding: ActivityTextBinding
 
   private lateinit var markwon: Markwon
 
@@ -27,7 +27,7 @@ class TextActivity : BaseActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    binding = ActivityLiberBinding.inflate(layoutInflater)
+    binding = ActivityTextBinding.inflate(layoutInflater)
     setContentView(binding.root)
     setSupportActionBar(binding.toolbar)
 

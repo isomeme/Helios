@@ -8,7 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
-import org.onereed.helios.databinding.ActivityMainBinding
+import org.onereed.helios.databinding.ActivityScheduleBinding
 import org.onereed.helios.datasource.PlaceTimeDataSource
 
 /** Displays the schedule of sun events. */
@@ -23,7 +23,7 @@ class ScheduleActivity : BaseActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    val binding = ActivityMainBinding.inflate(layoutInflater)
+    val binding = ActivityScheduleBinding.inflate(layoutInflater)
     setContentView(binding.root)
     setSupportActionBar(binding.toolbar)
 
