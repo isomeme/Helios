@@ -2,6 +2,7 @@ plugins {
   id("com.android.application")
   id("com.google.gms.google-services")
   id("org.jetbrains.kotlin.android")
+  id("org.jetbrains.kotlin.plugin.compose") version "2.2.21"
 }
 
 android {
@@ -40,10 +41,16 @@ android {
   buildFeatures {
     buildConfig = true
     viewBinding = true
+    compose = true
   }
 
   testOptions { unitTests.isReturnDefaultValues = true }
 }
+//
+//composeCompiler {
+//  reportsDestination = layout.buildDirectory.dir("compose_compiler")
+//  stabilityConfigurationFile = rootProject.layout.projectDirectory.file("stability_config.conf")
+//}
 
 dependencies {
 
@@ -87,6 +94,14 @@ dependencies {
   // Collection KTX
   implementation("androidx.collection:collection-ktx:1.5.0")
 
+  // Compose
+  val composeVersion = "1.9.4"
+  implementation("androidx.activity:activity-compose:1.11.0")
+  implementation("androidx.compose.ui:ui:$composeVersion")
+  implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
+  implementation("androidx.compose.material3:material3:1.4.0")
+  debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
+
   // SunCalc
 
   implementation("org.shredzone.commons:commons-suncalc:3.11")
@@ -109,10 +124,10 @@ dependencies {
 
   testImplementation("com.google.truth:truth:1.4.5")
   testImplementation("junit:junit:4.13.2")
-  testImplementation("org.jetbrains.kotlin:kotlin-test:2.2.20")
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
   testImplementation("org.junit.jupiter:junit-jupiter:6.0.0")
   testImplementation("org.mockito:mockito-core:5.20.0")
+  testImplementation("org.jetbrains.kotlin:kotlin-test:2.2.20")
 
   androidTestImplementation("androidx.test.ext:junit:1.3.0")
   androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
