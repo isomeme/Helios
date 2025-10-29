@@ -114,7 +114,7 @@ dependencies {
 
   // Markdown support
 
-  implementation("io.noties.markwon:core:4.6.2")
+  implementation("com.github.jeziellago:compose-markdown:0.5.7")
 
   // Logging
 

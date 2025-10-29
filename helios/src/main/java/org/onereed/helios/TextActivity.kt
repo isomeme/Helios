@@ -1,31 +1,28 @@
 package org.onereed.helios
 
-import android.graphics.Typeface
 import android.os.Bundle
-import android.text.Spanned
-import android.text.style.BackgroundColorSpan
-import android.text.style.ForegroundColorSpan
-import android.text.style.StrikethroughSpan
-import android.text.style.StyleSpan
-import android.text.style.URLSpan
-import android.text.style.UnderlineSpan
 import android.view.HapticFeedbackConstants
 import androidx.annotation.IdRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,14 +39,9 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import io.noties.markwon.Markwon
+import dev.jeziellago.compose.markdowntext.MarkdownText
 import java.io.IOException
 import java.io.UncheckedIOException
 import java.nio.charset.StandardCharsets.UTF_8
@@ -60,8 +52,6 @@ import org.onereed.helios.sun.SunEventType
 class TextActivity : BaseActivity() {
 
   private lateinit var binding: ActivityTextBinding
-
-  private lateinit var markwon: Markwon
 
   private lateinit var invocationTemplate: String
 
@@ -76,10 +66,8 @@ class TextActivity : BaseActivity() {
     setContentView(binding.root)
     setSupportActionBar(binding.toolbar)
 
-    adoration = readAssetText("adoration.md")
     invocationTemplate = readAssetText("invocation_template.md")
-
-    markwon = Markwon.create(this)
+    adoration = readAssetText("adoration.md")
 
     val typeOrdinal = intent.getIntExtra(SUN_EVENT_TYPE_ORDINAL, SunEventType.RISE.ordinal)
 
@@ -87,7 +75,6 @@ class TextActivity : BaseActivity() {
       MaterialTheme {
         TextScreen(
           initialIndex = typeOrdinal,
-          markwon = markwon,
           invocationTemplate = invocationTemplate,
           adoration = adoration,
         )
@@ -96,12 +83,7 @@ class TextActivity : BaseActivity() {
   }
 
   @Composable
-  private fun TextScreen(
-    initialIndex: Int,
-    markwon: Markwon,
-    invocationTemplate: String,
-    adoration: String,
-  ) {
+  private fun TextScreen(initialIndex: Int, invocationTemplate: String, adoration: String) {
 
     var selectedIndex by remember { mutableIntStateOf(initialIndex) }
     val scrollState = rememberScrollState()
@@ -115,31 +97,33 @@ class TextActivity : BaseActivity() {
     val title = sunEventNames[selectedIndex]
     val headingColor = Color(resources.getIntArray(R.array.sun_event_fg_colors)[selectedIndex])
     val bodyColor = Color(resources.getColor(R.color.activities_menu_icon_default))
-    val menuBgColor = Color(resources.getColor(R.color.compass_dial))
 
     val subs = invocationMadLib.map { resources.getStringArray(it)[selectedIndex] }.toTypedArray()
     val invocation = String.format(invocationTemplate, *subs)
 
-    val invocationRendered = markwon.toMarkdown(invocation).toAnnotatedString()
-    val adorationRendered = remember { markwon.toMarkdown(adoration).toAnnotatedString() }
-
     LaunchedEffect(selectedIndex) { scrollState.scrollTo(0) }
 
     Column(modifier = Modifier.fillMaxSize()) {
-      Box(
-        modifier =
-          Modifier.padding(start = 15.dp, top = 10.dp, bottom = 10.dp).background(menuBgColor)
-      ) {
-        Text(
-          text = sunEventNames[selectedIndex],
-          modifier = Modifier.clickable { expanded = true },
-          style = MaterialTheme.typography.titleMedium,
-          color = bodyColor,
-        )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+      Box(modifier = Modifier.padding(start = 15.dp, top = 10.dp, bottom = 10.dp)) {
+        OutlinedButton(
+          onClick = { expanded = true },
+          contentPadding = PaddingValues(horizontal = 15.dp, vertical = 0.dp),
+          colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.LightGray),
+          border = BorderStroke(width = 1.dp, color = Color.DarkGray),
+        ) {
+          Text(stringResource(R.string.button_select))
+        }
+
+        DropdownMenu(
+          expanded = expanded,
+          onDismissRequest = { expanded = false },
+          modifier = Modifier.background(Color.DarkGray).wrapContentWidth(),
+          offset = DpOffset(0.dp, 15.dp),
+        ) {
           sunEventNames.forEachIndexed { index, name ->
             DropdownMenuItem(
               text = { Text(name) },
+              colors = MenuDefaults.itemColors(textColor = Color.White),
               onClick = {
                 view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
                 selectedIndex = index
@@ -166,20 +150,18 @@ class TextActivity : BaseActivity() {
 
         Spacer(modifier = Modifier.height(25.dp))
 
-        Text(
-          text = invocationRendered,
-          style = MaterialTheme.typography.bodyMedium,
+        MarkdownText(
+          markdown = invocation,
+          style = MaterialTheme.typography.bodyMedium.copy(color = bodyColor),
           modifier = Modifier.fillMaxWidth(),
-          color = bodyColor,
         )
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        Text(
-          text = adorationRendered,
-          style = MaterialTheme.typography.bodyMedium,
+        MarkdownText(
+          markdown = adoration,
+          style = MaterialTheme.typography.bodyMedium.copy(color = bodyColor),
           modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
-          color = bodyColor,
         )
       }
     }
@@ -206,40 +188,5 @@ class TextActivity : BaseActivity() {
         R.array.invocation_events,
         R.array.invocation_abodes,
       )
-
-    /**
-     * I can't believe there's no standard method for this. My implementation is cobbled together
-     * from things I found on the web.
-     */
-    private fun Spanned.toAnnotatedString(): AnnotatedString = buildAnnotatedString {
-      // Step 1: Copy over the raw text.
-      append(this@toAnnotatedString.toString())
-
-      // Step 2: Go through each span and apply corresponding styles.
-      getSpans(0, length, Any::class.java).forEach { span ->
-        val start = getSpanStart(span)
-        val end = getSpanEnd(span)
-
-        when (span) {
-          is StyleSpan -> {
-            when (span.style) {
-              Typeface.BOLD -> addStyle(SpanStyle(fontWeight = FontWeight.Bold), start, end)
-              Typeface.ITALIC -> addStyle(SpanStyle(fontStyle = FontStyle.Italic), start, end)
-            // Handle BOLD_ITALIC if needed
-            }
-          }
-          is UnderlineSpan ->
-            addStyle(SpanStyle(textDecoration = TextDecoration.Underline), start, end)
-          is StrikethroughSpan ->
-            addStyle(SpanStyle(textDecoration = TextDecoration.LineThrough), start, end)
-          is ForegroundColorSpan ->
-            addStyle(SpanStyle(color = Color(span.foregroundColor)), start, end)
-          is BackgroundColorSpan ->
-            addStyle(SpanStyle(background = Color(span.backgroundColor)), start, end)
-          // Add more span types as needed, such as URLSpan for clickable links
-          is URLSpan -> addStringAnnotation("URL", span.url, start, end)
-        }
-      }
-    }
   }
 }
