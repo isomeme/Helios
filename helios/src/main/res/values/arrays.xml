@@ -29,35 +29,35 @@
         <item>Midnight</item>
     </string-array>
 
-    <string-array name="invocation_gods">
+    <string-array name="rubric_gods">
         <item>Ra</item>
         <item>Ahathoor</item>
         <item>Tum</item>
         <item>Kephra</item>
     </string-array>
 
-    <string-array name="invocation_gerunds">
+    <string-array name="rubric_gerunds">
         <item>rising</item>
         <item>triumphing</item>
         <item>setting</item>
         <item>hiding</item>
     </string-array>
 
-    <string-array name="invocation_nouns">
+    <string-array name="rubric_nouns">
         <item>strength</item>
         <item>beauty</item>
         <item>joy</item>
         <item>silence</item>
     </string-array>
 
-    <string-array name="invocation_events">
+    <string-array name="rubric_events">
         <item>Uprising</item>
         <item>Mid-course</item>
         <item>Down-going</item>
         <item>Midnight Hour</item>
     </string-array>
 
-    <string-array name="invocation_abodes">
+    <string-array name="rubric_abodes">
         <item>Night</item>
         <item>Morning</item>
         <item>Day</item>

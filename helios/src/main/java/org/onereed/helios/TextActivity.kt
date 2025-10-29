@@ -1,11 +1,12 @@
 package org.onereed.helios
 
+import android.content.Context
 import android.os.Bundle
-import android.view.HapticFeedbackConstants
 import androidx.annotation.IdRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,7 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -53,9 +56,7 @@ class TextActivity : BaseActivity() {
 
   private lateinit var binding: ActivityTextBinding
 
-  private lateinit var invocationTemplate: String
-
-  private lateinit var adoration: String
+  private lateinit var rubricTemplate: String
 
   @IdRes override val myActionsMenuId = R.id.action_text
 
@@ -66,40 +67,38 @@ class TextActivity : BaseActivity() {
     setContentView(binding.root)
     setSupportActionBar(binding.toolbar)
 
-    invocationTemplate = readAssetText("invocation_template.md")
-    adoration = readAssetText("adoration.md")
+    rubricTemplate = readRubricTemplate()
 
     val typeOrdinal = intent.getIntExtra(SUN_EVENT_TYPE_ORDINAL, SunEventType.RISE.ordinal)
 
     binding.composeView.setContent {
-      MaterialTheme {
-        TextScreen(
-          initialIndex = typeOrdinal,
-          invocationTemplate = invocationTemplate,
-          adoration = adoration,
-        )
-      }
+      MaterialTheme { TextScreen(initialIndex = typeOrdinal, rubricTemplate = rubricTemplate) }
     }
   }
 
   @Composable
-  private fun TextScreen(initialIndex: Int, invocationTemplate: String, adoration: String) {
+  private fun TextScreen(initialIndex: Int, rubricTemplate: String) {
 
     var selectedIndex by remember { mutableIntStateOf(initialIndex) }
     val scrollState = rememberScrollState()
     val sunEventNames = stringArrayResource(R.array.sun_event_names)
     var expanded by remember { mutableStateOf(false) }
-    val view = LocalView.current
 
-    val resources = view.context.resources
-    val iconId =
-      resources.obtainTypedArray(R.array.sun_event_icons).use { it.getResourceId(selectedIndex, 0) }
+    val resources = LocalResources.current
+    val sunColors = resources.getIntArray(R.array.sun_event_fg_colors).map(::Color)
+    val sunIcons =
+      resources.obtainTypedArray(R.array.sun_event_icons).use { typedArray ->
+        (0..3).map { ix -> typedArray.getResourceId(ix, 0) }
+      }
+
     val title = sunEventNames[selectedIndex]
-    val headingColor = Color(resources.getIntArray(R.array.sun_event_fg_colors)[selectedIndex])
-    val bodyColor = Color(resources.getColor(R.color.activities_menu_icon_default))
+    val headingColor = sunColors[selectedIndex]
+    val headingIcon = sunIcons[selectedIndex]
 
-    val subs = invocationMadLib.map { resources.getStringArray(it)[selectedIndex] }.toTypedArray()
-    val invocation = String.format(invocationTemplate, *subs)
+    val subs = rubricMadLib.map { resources.getStringArray(it)[selectedIndex] }.toTypedArray()
+    val rubric = rubricTemplate.format(*subs)
+
+    val haptics = LocalHapticFeedback.current
 
     LaunchedEffect(selectedIndex) { scrollState.scrollTo(0) }
 
@@ -117,18 +116,38 @@ class TextActivity : BaseActivity() {
         DropdownMenu(
           expanded = expanded,
           onDismissRequest = { expanded = false },
-          modifier = Modifier.background(Color.DarkGray).wrapContentWidth(),
+          modifier =
+            Modifier.wrapContentWidth()
+              .background(Color.Black)
+              .border(width = 1.dp, color = Color.DarkGray),
           offset = DpOffset(0.dp, 15.dp),
         ) {
           sunEventNames.forEachIndexed { index, name ->
+            val isCurrent = selectedIndex == index
+
             DropdownMenuItem(
+              leadingIcon = {
+                Image(
+                  painter = painterResource(id = sunIcons[index]),
+                  contentDescription = stringResource(R.string.sun_event_icon_description),
+                  colorFilter =
+                    ColorFilter.tint(
+                      if (isCurrent) Color.DarkGray else sunColors[index]
+                    ),
+                )
+              },
               text = { Text(name) },
-              colors = MenuDefaults.itemColors(textColor = Color.White),
+              enabled = !isCurrent,
               onClick = {
-                view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                 selectedIndex = index
                 expanded = false
               },
+              colors =
+                MenuDefaults.itemColors(
+                  textColor = sunColors[index],
+                  disabledTextColor = Color.DarkGray,
+                ),
             )
           }
         }
@@ -139,7 +158,7 @@ class TextActivity : BaseActivity() {
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
         Image(
-          painter = painterResource(id = iconId),
+          painter = painterResource(id = headingIcon),
           contentDescription = stringResource(R.string.sun_event_icon_description),
           colorFilter = ColorFilter.tint(headingColor),
         )
@@ -151,27 +170,11 @@ class TextActivity : BaseActivity() {
         Spacer(modifier = Modifier.height(25.dp))
 
         MarkdownText(
-          markdown = invocation,
-          style = MaterialTheme.typography.bodyMedium.copy(color = bodyColor),
-          modifier = Modifier.fillMaxWidth(),
-        )
-
-        Spacer(modifier = Modifier.height(15.dp))
-
-        MarkdownText(
-          markdown = adoration,
-          style = MaterialTheme.typography.bodyMedium.copy(color = bodyColor),
+          markdown = rubric,
+          style = MaterialTheme.typography.bodyMedium.copy(color = Color.White),
           modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
         )
       }
-    }
-  }
-
-  private fun readAssetText(assetName: String): String {
-    try {
-      return assets.open(assetName).use { it.readBytes().toString(UTF_8) }
-    } catch (e: IOException) {
-      throw UncheckedIOException(e)
     }
   }
 
@@ -180,13 +183,23 @@ class TextActivity : BaseActivity() {
     /** Intent extra name for the ordinal index of a [SunEventType] value. */
     const val SUN_EVENT_TYPE_ORDINAL = "org.onereed.helios.SunEventTypeOrdinal"
 
-    private val invocationMadLib =
+    private val rubricMadLib =
       listOf(
-        R.array.invocation_gods,
-        R.array.invocation_gerunds,
-        R.array.invocation_nouns,
-        R.array.invocation_events,
-        R.array.invocation_abodes,
+        R.array.rubric_gods,
+        R.array.rubric_gerunds,
+        R.array.rubric_nouns,
+        R.array.rubric_events,
+        R.array.rubric_abodes,
       )
+
+    private const val RUBRIC_ASSET = "rubric_template.md"
+
+    private fun Context.readRubricTemplate(): String {
+      try {
+        return assets.open(RUBRIC_ASSET).bufferedReader(UTF_8).use { it.readText() }
+      } catch (e: IOException) {
+        throw UncheckedIOException(e)
+      }
+    }
   }
 }
