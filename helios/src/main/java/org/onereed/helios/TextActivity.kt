@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -56,8 +57,6 @@ class TextActivity : BaseActivity() {
 
   private lateinit var binding: ActivityTextBinding
 
-  private lateinit var rubricTemplate: String
-
   @IdRes override val myActionsMenuId = R.id.action_text
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,9 +66,8 @@ class TextActivity : BaseActivity() {
     setContentView(binding.root)
     setSupportActionBar(binding.toolbar)
 
-    rubricTemplate = readRubricTemplate()
-
     val typeOrdinal = intent.getIntExtra(SUN_EVENT_TYPE_ORDINAL, SunEventType.RISE.ordinal)
+    val rubricTemplate = readRubricTemplate()
 
     binding.composeView.setContent {
       MaterialTheme { TextScreen(initialIndex = typeOrdinal, rubricTemplate = rubricTemplate) }
@@ -78,24 +76,16 @@ class TextActivity : BaseActivity() {
 
   @Composable
   private fun TextScreen(initialIndex: Int, rubricTemplate: String) {
-
     var selectedIndex by remember { mutableIntStateOf(initialIndex) }
-    val scrollState = rememberScrollState()
-    val sunEventNames = stringArrayResource(R.array.sun_event_names)
     var expanded by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
 
-    val resources = LocalResources.current
-    val sunColors = resources.getIntArray(R.array.sun_event_fg_colors).map(::Color)
-    val sunIcons =
-      resources.obtainTypedArray(R.array.sun_event_icons).use { typedArray ->
-        (0..3).map { ix -> typedArray.getResourceId(ix, 0) }
-      }
+    val sunRes = SunResources.from(LocalResources.current)
+    val title = sunRes.eventNames[selectedIndex]
+    val headingColor = sunRes.fgColors[selectedIndex]
+    val headingIcon = sunRes.icons[selectedIndex]
 
-    val title = sunEventNames[selectedIndex]
-    val headingColor = sunColors[selectedIndex]
-    val headingIcon = sunIcons[selectedIndex]
-
-    val subs = rubricMadLib.map { resources.getStringArray(it)[selectedIndex] }.toTypedArray()
+    val subs = rubricMadLib.map { stringArrayResource(it)[selectedIndex] }.toTypedArray()
     val rubric = rubricTemplate.format(*subs)
 
     val haptics = LocalHapticFeedback.current
@@ -118,25 +108,23 @@ class TextActivity : BaseActivity() {
           onDismissRequest = { expanded = false },
           modifier =
             Modifier.wrapContentWidth()
-              .background(Color.Black)
+              .background(colorResource(R.color.screen_bg))
               .border(width = 1.dp, color = Color.DarkGray),
           offset = DpOffset(0.dp, 15.dp),
         ) {
-          sunEventNames.forEachIndexed { index, name ->
+          sunRes.eventNames.forEachIndexed { index, name ->
             val isCurrent = selectedIndex == index
 
             DropdownMenuItem(
               leadingIcon = {
                 Image(
-                  painter = painterResource(id = sunIcons[index]),
+                  painter = painterResource(id = sunRes.icons[index]),
                   contentDescription = stringResource(R.string.sun_event_icon_description),
                   colorFilter =
-                    ColorFilter.tint(
-                      if (isCurrent) Color.DarkGray else sunColors[index]
-                    ),
+                    ColorFilter.tint(if (isCurrent) Color.DarkGray else sunRes.fgColors[index]),
                 )
               },
-              text = { Text(name) },
+              text = { Text(text = name, style = MaterialTheme.typography.labelLarge) },
               enabled = !isCurrent,
               onClick = {
                 haptics.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -145,7 +133,7 @@ class TextActivity : BaseActivity() {
               },
               colors =
                 MenuDefaults.itemColors(
-                  textColor = sunColors[index],
+                  textColor = sunRes.fgColors[index],
                   disabledTextColor = Color.DarkGray,
                 ),
             )
