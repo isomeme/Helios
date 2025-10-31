@@ -13,12 +13,16 @@
         android:supportsRtl="false"
         android:theme="@style/Theme.Helios">
         <activity
-            android:name=".ScheduleActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".ScheduleActivity"
+            android:exported="true">
         </activity>
         <activity
             android:name=".TextActivity"
