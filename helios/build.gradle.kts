@@ -98,7 +98,6 @@ dependencies {
   testImplementation(composeBom)
   androidTestImplementation(composeBom)
 
-  implementation("androidx.compose.material:material-icons-extended-android")
   implementation("androidx.compose.material3:material3")
   implementation("androidx.compose.material3:material3-adaptive-navigation-suite")
   implementation("androidx.compose.ui:ui")

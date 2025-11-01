@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import timber.log.Timber
 
 private val lightScheme =
   lightColorScheme(
@@ -273,6 +274,8 @@ fun HeliosTheme(
       darkTheme -> darkScheme
       else -> lightScheme
     }
+
+  Timber.d("Is dark theme? %s", colorScheme == darkScheme)
 
   MaterialTheme(colorScheme = colorScheme, typography = AppTypography, content = content)
 }
