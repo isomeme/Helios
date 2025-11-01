@@ -80,6 +80,7 @@ dependencies {
   implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
+  implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
 
   // Navigation KTX (use a single version variable)
   val navVersion = "2.9.5"
@@ -92,6 +93,7 @@ dependencies {
   // Compose
 
   implementation("androidx.activity:activity-compose:1.11.0")
+  implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
 
   val composeBom = platform("androidx.compose:compose-bom:2025.10.01")
   implementation(composeBom)
