@@ -26,7 +26,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -43,7 +42,7 @@ internal fun TextScreen(
 ) {
   Timber.d("TextScreen selectedIndex=$selectedIndex")
 
-  var expanded by remember { mutableStateOf(false) }
+  var eventMenuExpanded by remember { mutableStateOf(false) }
   val scrollState = rememberScrollState()
 
   val eventSets = SunResources.load(LocalContext.current).eventSets
@@ -70,17 +69,17 @@ internal fun TextScreen(
             bottom.linkTo(parent.bottom)
           }
       ) {
-        OutlinedButton(onClick = { expanded = true }) {
+        OutlinedButton(onClick = { eventMenuExpanded = true }) {
           Icon(
             painter = painterResource(id = selectedEventSet.icon),
             tint = selectedEventSet.fgColor,
-            contentDescription = stringResource(R.string.sun_event_icon_description),
+            contentDescription = selectedEventSet.name,
           )
         }
 
         DropdownMenu(
-          expanded = expanded,
-          onDismissRequest = { expanded = false },
+          expanded = eventMenuExpanded,
+          onDismissRequest = { eventMenuExpanded = false },
           offset = DpOffset(0.dp, 10.dp),
         ) {
           eventSets.forEachIndexed { index, eventSet ->
@@ -89,7 +88,7 @@ internal fun TextScreen(
               onClick = {
                 haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                 onSelectedIndexChanged(index)
-                expanded = false
+                eventMenuExpanded = false
               },
               colors =
                 MenuDefaults.itemColors(
@@ -99,7 +98,7 @@ internal fun TextScreen(
               leadingIcon = {
                 Icon(
                   painter = painterResource(id = eventSet.icon),
-                  contentDescription = stringResource(R.string.sun_event_icon_description),
+                  contentDescription = eventSet.name,
                 )
               },
               text = { Text(text = eventSet.name, style = MaterialTheme.typography.labelLarge) },

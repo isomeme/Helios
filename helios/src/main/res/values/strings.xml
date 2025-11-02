@@ -36,5 +36,4 @@
     </string>
 
     <string name="toast_activity_not_found">Target is not available.</string>
-    <string name="sun_event_icon_description">The sun event icon</string>
 </resources>
