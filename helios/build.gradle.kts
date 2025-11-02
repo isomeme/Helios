@@ -98,6 +98,7 @@ dependencies {
 
   implementation("androidx.activity:activity-compose:1.11.0")
   implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
+  implementation("androidx.work:work-runtime:2.11.0")
 
   val composeBom = platform("androidx.compose:compose-bom:2025.10.01")
   implementation(composeBom)

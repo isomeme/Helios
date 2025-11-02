@@ -126,6 +126,7 @@ internal fun TextScreen(
     MarkdownText(
       markdown = selectedEventSet.rubric,
       style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+      isTextSelectable = true,
       modifier = Modifier.fillMaxWidth().padding(all = 20.dp).verticalScroll(scrollState),
     )
   }
