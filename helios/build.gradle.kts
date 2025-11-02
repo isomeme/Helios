@@ -1,8 +1,12 @@
 plugins {
   id("com.android.application")
+  id("com.google.dagger.hilt.android")
   id("com.google.gms.google-services")
   id("org.jetbrains.kotlin.android")
-  id("org.jetbrains.kotlin.plugin.compose") version "2.2.21"
+  id("org.jetbrains.kotlin.plugin.compose")
+
+  // This may need to go last to pick up resources from other plugins.
+  id("com.google.devtools.ksp")
 }
 
 android {
@@ -110,6 +114,17 @@ dependencies {
   debugImplementation("androidx.compose.ui:ui-test-manifest")
   debugImplementation("androidx.compose.ui:ui-tooling")
 
+  // Hilt
+
+  val hiltVersion = "2.57.2"
+  implementation("com.google.dagger:hilt-android:$hiltVersion")
+  ksp("com.google.dagger:hilt-compiler:$hiltVersion")
+
+  val androidxHiltVersion = "1.3.0"
+  implementation("androidx.hilt:hilt-navigation-fragment:${androidxHiltVersion}")
+  implementation("androidx.hilt:hilt-work:$androidxHiltVersion")
+  ksp("androidx.hilt:hilt-compiler:$androidxHiltVersion")
+
   // SunCalc
 
   implementation("org.shredzone.commons:commons-suncalc:3.11")
@@ -118,7 +133,6 @@ dependencies {
 
   implementation("com.google.guava:guava:33.5.0-android")
   implementation("com.google.auto.value:auto-value-annotations:1.11.0")
-  annotationProcessor("com.google.auto.value:auto-value:1.11.0")
 
   // Markdown support
 
