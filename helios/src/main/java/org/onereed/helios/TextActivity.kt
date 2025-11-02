@@ -21,10 +21,9 @@ class TextActivity : BaseActivity() {
     setSupportActionBar(binding.toolbar)
 
     val typeOrdinal = intent.getIntExtra(SUN_EVENT_TYPE_ORDINAL, SunEventType.RISE.ordinal)
-    val sunResources = SunResources.from(this)
 
     binding.composeView.setContent {
-      HeliosTheme { TextDisplay(initialIndex = typeOrdinal, sunResources = sunResources) }
+      HeliosTheme { TextScreen(selectedIndex = typeOrdinal) }
     }
   }
 

@@ -7,9 +7,8 @@ import java.io.UncheckedIOException
 import java.nio.charset.StandardCharsets.UTF_8
 import org.onereed.helios.sun.SunEventType
 
-internal data class SunResources(
-  val eventSets: List<EventSet>,
-) {
+/** TODO: This should be injected with a context dependency once we have DI set up. */
+internal data class SunResources(val eventSets: List<EventSet>) {
   data class EventSet(
     val name: String,
     val fgColor: Color,
@@ -20,7 +19,7 @@ internal data class SunResources(
 
   companion object {
 
-    fun from(context: Context): SunResources {
+    fun load(context: Context): SunResources {
       val resources = context.resources
       val names = resources.getStringArray(R.array.sun_event_names).toList()
       val fgColors = resources.getIntArray(R.array.sun_event_fg_colors).map(::Color)
@@ -39,9 +38,10 @@ internal data class SunResources(
           rubricTemplate.format(*subs)
         }
 
-      val eventSets = sunEventOrdinals.map {
-        EventSet(names[it], fgColors[it], bgColors[it], icons[it], rubrics[it])
-      }
+      val eventSets =
+        sunEventOrdinals.map {
+          EventSet(names[it], fgColors[it], bgColors[it], icons[it], rubrics[it])
+        }
 
       return SunResources(eventSets)
     }

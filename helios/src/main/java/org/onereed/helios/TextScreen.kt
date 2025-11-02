@@ -18,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,18 +33,20 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import org.onereed.helios.ui.theme.HeliosTheme
+import timber.log.Timber
 
 @Composable
-internal fun TextDisplay(
-  initialIndex: Int,
-  sunResources: SunResources,
+internal fun TextScreen(
+  selectedIndex: Int,
+  onSelectedIndexChanged: (Int) -> Unit = {},
   padding: PaddingValues = PaddingValues(),
 ) {
-  var selectedIndex by remember { mutableIntStateOf(initialIndex) }
+  Timber.d("TextScreen selectedIndex=$selectedIndex")
+
   var expanded by remember { mutableStateOf(false) }
   val scrollState = rememberScrollState()
 
-  val eventSets = sunResources.eventSets
+  val eventSets = SunResources.load(LocalContext.current).eventSets
   val selectedEventSet = eventSets[selectedIndex]
 
   val haptics = LocalHapticFeedback.current
@@ -53,8 +54,13 @@ internal fun TextDisplay(
   LaunchedEffect(selectedIndex) { scrollState.scrollTo(0) }
 
   Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+    // Top of screen: select button on the left, title centered.
+
     ConstraintLayout(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(all = 10.dp)) {
       val (button, title) = createRefs()
+
+      // Enclosing the select button with its dropdown menu in a column makes the menu pop up just
+      // below the button.
 
       Column(
         modifier =
@@ -82,7 +88,7 @@ internal fun TextDisplay(
               enabled = selectedIndex != index,
               onClick = {
                 haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                selectedIndex = index
+                onSelectedIndexChanged(index)
                 expanded = false
               },
               colors =
@@ -116,6 +122,8 @@ internal fun TextDisplay(
       )
     }
 
+    // Rubric text
+
     MarkdownText(
       markdown = selectedEventSet.rubric,
       style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
@@ -126,8 +134,6 @@ internal fun TextDisplay(
 
 @Preview
 @Composable
-fun TextDisplayPreview() {
-  HeliosTheme {
-    TextDisplay(initialIndex = 0, sunResources = SunResources.from(LocalContext.current))
-  }
+fun TextScreenPreview() {
+  HeliosTheme { TextScreen(2) }
 }

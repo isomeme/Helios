@@ -4,18 +4,20 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
@@ -32,9 +34,8 @@ class MainActivity : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun HeliosApp() {
-  var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.SCHEDULE) }
-
-  val sunResources = SunResources.from(LocalContext.current)
+  var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.TEXT) }
+  var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
 
   NavigationSuiteScaffold(
     navigationSuiteItems = {
@@ -49,7 +50,15 @@ fun HeliosApp() {
     }
   ) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-      TextDisplay(2, sunResources, innerPadding)
+      when (currentDestination) {
+        AppDestinations.SCHEDULE -> Greeting("Schedule", padding = innerPadding)
+        AppDestinations.TEXT -> TextScreen(
+          selectedIndex = selectedIndex,
+          onSelectedIndexChanged = { selectedIndex = it },
+          padding = innerPadding)
+        AppDestinations.COMPASS -> Greeting("Compass", padding = innerPadding)
+        AppDestinations.HELP -> Greeting("Help", padding = innerPadding)
+      }
     }
   }
 }
@@ -62,8 +71,8 @@ enum class AppDestinations(val label: String, val iconId: Int) {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-  Text(text = "Hello $name!", modifier = modifier)
+fun Greeting(name: String, padding: PaddingValues = PaddingValues()) {
+  Text(text = "Hello $name!", Modifier.padding(padding))
 }
 
 @Preview(showBackground = true)
