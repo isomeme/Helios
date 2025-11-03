@@ -1,14 +1,14 @@
-package org.onereed.helios
+package org.onereed.helios.compose
 
 import android.content.Context
 import androidx.compose.ui.graphics.Color
+import org.onereed.helios.R
 import java.io.IOException
 import java.io.UncheckedIOException
 import java.nio.charset.StandardCharsets.UTF_8
 import org.onereed.helios.sun.SunEventType
 
-/** TODO: This should be injected with a context dependency once we have DI set up. */
-internal data class SunResources(val eventSets: List<EventSet>) {
+data class SunResources(val eventSets: List<EventSet>) {
   data class EventSet(
     val name: String,
     val fgColor: Color,

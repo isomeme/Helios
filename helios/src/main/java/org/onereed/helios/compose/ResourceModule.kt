@@ -1,0 +1,17 @@
+package org.onereed.helios.compose
+
+import android.content.Context
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+
+@Module
+@InstallIn(SingletonComponent::class)
+object ResourceModule {
+
+  @Provides
+  fun provideSunResources(@ApplicationContext context: Context): SunResources =
+    SunResources.load(context)
+}

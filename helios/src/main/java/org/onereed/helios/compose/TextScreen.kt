@@ -1,4 +1,4 @@
-package org.onereed.helios
+package org.onereed.helios.compose
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,6 +38,7 @@ import timber.log.Timber
 internal fun TextScreen(
   selectedIndex: Int,
   onSelectedIndexChanged: (Int) -> Unit = {},
+  sunResources: SunResources,
   padding: PaddingValues = PaddingValues(),
 ) {
   Timber.d("TextScreen selectedIndex=$selectedIndex")
@@ -45,7 +46,7 @@ internal fun TextScreen(
   var eventMenuExpanded by remember { mutableStateOf(false) }
   val scrollState = rememberScrollState()
 
-  val eventSets = SunResources.load(LocalContext.current).eventSets
+  val eventSets = sunResources.eventSets
   val selectedEventSet = eventSets[selectedIndex]
 
   val haptics = LocalHapticFeedback.current
@@ -132,8 +133,10 @@ internal fun TextScreen(
   }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun TextScreenPreview() {
-  HeliosTheme { TextScreen(2) }
+  HeliosTheme {
+    TextScreen(selectedIndex = 2, sunResources = SunResources.load(LocalContext.current))
+  }
 }

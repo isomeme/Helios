@@ -1,4 +1,4 @@
-package org.onereed.helios
+package org.onereed.helios.compose
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -18,24 +18,30 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import org.onereed.helios.R
 import org.onereed.helios.ui.theme.HeliosTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+  @Inject lateinit var sunResources: SunResources
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
     enableEdgeToEdge()
-    setContent { HeliosTheme { HeliosApp() } }
+    setContent { HeliosTheme { HeliosApp(sunResources) } }
   }
 }
 
-@PreviewScreenSizes
 @Composable
-fun HeliosApp() {
+fun HeliosApp(sunResources: SunResources) {
   var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.TEXT) }
   var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
 
@@ -54,10 +60,13 @@ fun HeliosApp() {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
       when (currentDestination) {
         AppDestinations.SCHEDULE -> Greeting("Schedule", padding = innerPadding)
-        AppDestinations.TEXT -> TextScreen(
-          selectedIndex = selectedIndex,
-          onSelectedIndexChanged = { selectedIndex = it },
-          padding = innerPadding)
+        AppDestinations.TEXT ->
+          TextScreen(
+            selectedIndex = selectedIndex,
+            onSelectedIndexChanged = { selectedIndex = it },
+            sunResources = sunResources,
+            padding = innerPadding,
+          )
         AppDestinations.COMPASS -> Greeting("Compass", padding = innerPadding)
         AppDestinations.HELP -> Greeting("Help", padding = innerPadding)
       }
@@ -81,4 +90,10 @@ fun Greeting(name: String, padding: PaddingValues = PaddingValues()) {
 @Composable
 fun GreetingPreview() {
   HeliosTheme { Greeting("Android") }
+}
+
+@PreviewScreenSizes
+@Composable
+fun HeliosAppPreview() {
+  HeliosTheme { HeliosApp(SunResources.load(LocalContext.current)) }
 }
