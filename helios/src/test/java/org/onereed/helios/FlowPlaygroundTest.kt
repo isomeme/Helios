@@ -1,21 +1,27 @@
 package org.onereed.helios
 
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.onSubscription
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
+import org.onereed.helios.common.Ticker
 import org.onereed.helios.util.TimberRule
 import timber.log.Timber
 
@@ -24,7 +30,7 @@ class FlowPlaygroundTest {
   @get:Rule val timberRule = TimberRule()
 
   @Test
-  fun playground() = runBlocking {
+  fun subscription() = runBlocking {
     createDataSource()
     delay(3.seconds)
 
@@ -38,6 +44,53 @@ class FlowPlaygroundTest {
 
     delay(3.seconds)
     Timber.d("Program finished")
+  }
+
+  @OptIn(ExperimentalTime::class)
+  @Test
+  fun callbackFlowLifecycle(): Unit = runBlocking {
+    val flow: Flow<Int> = callbackFlow {
+      Timber.d("callbackFlow block called")
+      trySend(1)
+      delay(5.seconds)
+      trySend(2)
+      delay(5.seconds)
+      close()
+
+      awaitClose { Timber.d("awaitClose called") }
+    }
+
+    Timber.d("Waiting to read from flow...")
+    delay(2.seconds)
+
+    Timber.d("Reading from flow...")
+    flow.onEach { Timber.d("Received $it") }.collect { Timber.d("Collected $it") }
+  }
+
+  @OptIn(ExperimentalTime::class)
+  @Test
+  fun tickerFlow(): Unit = runBlocking {
+    Timber.d("Creating ticker")
+    val ticker = Ticker(1.seconds)
+
+    Timber.d("Waiting 3 seconds")
+    delay(3.seconds)
+
+    Timber.d("Current ticker state: ${ticker.stateFlow.value}")
+
+    ticker.stateFlow.take(4).collect { Timber.d("Received $it from take") }
+
+    Timber.d("Waiting for unsubscription to be noticed")
+    delay(10.seconds)
+
+    Timber.d("Trying a restart")
+
+    ticker.stateFlow.take(3).collect { Timber.d("Received $it from take") }
+
+    Timber.d("Waiting for restart to lose its subscriber")
+    delay(10.seconds)
+
+    Timber.d("Done")
   }
 
   companion object {

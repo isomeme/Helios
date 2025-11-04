@@ -179,20 +179,8 @@ class CompassActivity : BaseActivity(), DeviceOrientationListener {
 
         compassDisplayState = CompassDisplayState.UNLOCKING
 
-        rotateCompass(
-          compassAzimuth,
-          object : AnimatorListenerAdapter() {
-            override fun onAnimationCancel(animation: Animator) {
-              compassDisplayState = CompassDisplayState.UNLOCKED
-            }
-
-            override fun onAnimationEnd(animation: Animator) {
-              compassDisplayState = CompassDisplayState.UNLOCKED
-            }
-          },
-        )
+        rotateCompass(compassAzimuth) { compassDisplayState = CompassDisplayState.UNLOCKED }
       }
-
       CompassDisplayState.UNLOCKED -> rotateCompass(compassAzimuth)
     }
   }
@@ -280,28 +268,34 @@ class CompassActivity : BaseActivity(), DeviceOrientationListener {
    * Executes an animated sweep from the old compass rotation to the new one, and updates the old
    * one to the new value to prepare for the next update.
    */
-  private fun rotateCompass(
-    compassAzimuth: Double,
-    animatorListener: Animator.AnimatorListener? = null,
-  ) {
+  private fun rotateCompass(compassAzimuth: Double, onAnimationDone: () -> Unit = {}) {
     // When animating from -179 to +179, we don't want to go the long way around the circle.
 
     val delta = arc(lastRotation, -compassAzimuth)
     val desiredRotation = lastRotation + delta
 
-    with(
-      ObjectAnimator.ofFloat(
+    ObjectAnimator.ofFloat(
         binding.compassRotating,
         "rotation",
         lastRotation.toFloat(),
         desiredRotation.toFloat(),
       )
-    ) {
-      setDuration(ROTATION_ANIMATION_DURATION_MILLIS)
-      animatorListener?.let { addListener(it) }
-      setAutoCancel(true)
-      start()
-    }
+      .apply {
+        setDuration(ROTATION_ANIMATION_DURATION_MILLIS)
+        addListener(
+          object : AnimatorListenerAdapter() {
+            override fun onAnimationCancel(animation: Animator) {
+              onAnimationDone()
+            }
+
+            override fun onAnimationEnd(animation: Animator) {
+              onAnimationDone()
+            }
+          }
+        )
+        setAutoCancel(true)
+        start()
+      }
 
     lastRotation = desiredRotation
   }
