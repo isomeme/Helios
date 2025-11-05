@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import dagger.hilt.android.AndroidEntryPoint
 import org.onereed.helios.R
 import org.onereed.helios.ui.theme.HeliosTheme
@@ -79,7 +80,7 @@ fun GreetingPreview() {
   HeliosTheme { Greeting("Android") }
 }
 
-@Preview // ScreenSizes
+@PreviewScreenSizes
 @Composable
 fun HeliosAppPreview() {
   HeliosTheme { HeliosApp() }

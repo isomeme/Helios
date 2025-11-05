@@ -1,5 +1,6 @@
 package org.onereed.helios.compose
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,13 +42,6 @@ internal fun TextScreen(
   textViewModel: TextViewModel = viewModel(),
 ) {
   val textState by textViewModel.textStateFlow.collectAsState()
-
-  TextScreenImpl(textState, padding)
-}
-
-// By isolating the ViewModel dependency above, we can preview this version.
-@Composable
-internal fun TextScreenImpl(textState: TextState, padding: PaddingValues = PaddingValues()) {
   var eventMenuExpanded by remember { mutableStateOf(false) }
   val scrollState = rememberScrollState()
 
@@ -135,11 +129,14 @@ internal fun TextScreenImpl(textState: TextState, padding: PaddingValues = Paddi
   }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, backgroundColor = 0xFF0F1416)
 @Composable
+@SuppressLint("ViewModelConstructorInComposable")
 fun TextScreenPreview() {
   val sunResources = SunResources.load(LocalContext.current)
-  val textState = TextState.create(sunResources, 2) {}
+  val stateHolder = TextSelectedIndexStateHolder()
+  stateHolder.updateSelectedIndex(2) // Sunset
 
-  HeliosTheme { TextScreenImpl(textState) }
+  val textViewModel = TextViewModel(stateHolder, sunResources)
+  HeliosTheme { TextScreen(textViewModel = textViewModel) }
 }
