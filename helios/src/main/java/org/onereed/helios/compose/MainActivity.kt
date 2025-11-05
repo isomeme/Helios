@@ -19,7 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import dagger.hilt.android.AndroidEntryPoint
 import org.onereed.helios.R
 import org.onereed.helios.ui.theme.HeliosTheme
@@ -37,7 +36,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun HeliosApp() {
-  var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.TEXT) }
+  var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.SCHEDULE) }
 
   NavigationSuiteScaffold(
     navigationSuiteItems = {
@@ -49,7 +48,7 @@ fun HeliosApp() {
           onClick = { currentDestination = it },
         )
       }
-    }
+    },
   ) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
       when (currentDestination) {
@@ -80,7 +79,7 @@ fun GreetingPreview() {
   HeliosTheme { Greeting("Android") }
 }
 
-@PreviewScreenSizes
+@Preview // ScreenSizes
 @Composable
 fun HeliosAppPreview() {
   HeliosTheme { HeliosApp() }
