@@ -23,6 +23,7 @@ import org.onereed.helios.ui.theme.HeliosTheme
 @Composable
 internal fun ScheduleScreen(
   padding: PaddingValues = PaddingValues(),
+  navToText: () -> Unit = {},
   scheduleUi: ScheduleUi = hiltViewModel<ScheduleViewModel>().ui,
 ) {
   Box(
@@ -35,7 +36,7 @@ internal fun ScheduleScreen(
       verticalArrangement = Arrangement.Center,
     ) {
       scheduleUi.buttons.forEachIndexed { index, ui ->
-        FilledTonalButton(modifier = Modifier.fillMaxWidth(), onClick = { ui.onSelect() }) {
+        FilledTonalButton(modifier = Modifier.fillMaxWidth(), onClick = { navToText() }) {
           Text(ui.name)
         }
       }
@@ -48,6 +49,6 @@ internal fun ScheduleScreen(
 @SuppressLint("ViewModelConstructorInComposable")
 internal fun ScheduleScreenPreview() {
   val sunResources = SunResources.load(LocalContext.current)
-  val scheduleUi = ScheduleUi.create(sunResources) {}
+  val scheduleUi = ScheduleUi.create(sunResources)
   HeliosTheme { ScheduleScreen(scheduleUi = scheduleUi) }
 }

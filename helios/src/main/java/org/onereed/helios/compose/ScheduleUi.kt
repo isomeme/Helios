@@ -1,14 +1,14 @@
 package org.onereed.helios.compose
 
 data class ScheduleUi(val buttons: List<EventUi>) {
-  data class EventUi(val name: String, val onSelect: () -> Unit = {})
+  data class EventUi(val name: String, val ordinal: Int)
 
   companion object {
 
-    fun create(sunResources: SunResources, selectionConsumer: (Int) -> Unit): ScheduleUi {
+    fun create(sunResources: SunResources): ScheduleUi {
       val buttons =
         sunResources.eventSets.mapIndexed { ix, eventSet ->
-          EventUi(name = eventSet.name, onSelect = { selectionConsumer(ix) })
+          EventUi(name = eventSet.name, ordinal = ix)
         }
 
       return ScheduleUi(buttons)

@@ -10,13 +10,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import org.onereed.helios.ui.theme.HeliosTheme
 
@@ -31,9 +36,12 @@ class MainActivity : ComponentActivity() {
   }
 }
 
+@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
 @Composable
-fun HeliosApp(navigator: Navigator = hiltViewModel<NavigatorViewModel>().navigator) {
-  val currentDestination = navigator.currentDestination
+fun HeliosApp() {
+  val navController = rememberNavController()
+  val currentBackStackEntry by navController.currentBackStackEntryAsState()
+  val currentRoute = currentBackStackEntry?.destination?.route
 
   NavigationSuiteScaffold(
     navigationSuiteItems = {
@@ -41,18 +49,24 @@ fun HeliosApp(navigator: Navigator = hiltViewModel<NavigatorViewModel>().navigat
         item(
           icon = { Icon(painterResource(it.iconId), it.label) },
           label = { Text(it.label) },
-          selected = it == currentDestination,
-          onClick = { navigator.navigateTo(it) },
+          selected = currentRoute == it.route,
+          onClick = { navController.navigate(it.route) },
         )
       }
     }
   ) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-      when (currentDestination) {
-        AppDestination.SCHEDULE -> ScheduleScreen(padding = innerPadding)
-        AppDestination.TEXT -> TextScreen(padding = innerPadding)
-        AppDestination.COMPASS -> Greeting("Compass", padding = innerPadding)
-        AppDestination.HELP -> Greeting("Help", padding = innerPadding)
+      NavHost(
+        navController = navController,
+        startDestination = Screen.Schedule.route,
+        modifier = Modifier.padding(innerPadding),
+      ) {
+        composable(Screen.Schedule.route) {
+          ScheduleScreen(navToText = { navController.navigate(Screen.Text.route) })
+        }
+        composable(Screen.Text.route) { TextScreen() }
+        composable(Screen.Compass.route) { Greeting("compass") }
+        composable(Screen.Help.route) { Greeting("help") }
       }
     }
   }
@@ -72,5 +86,5 @@ fun GreetingPreview() {
 @PreviewScreenSizes
 @Composable
 fun HeliosAppPreview() {
-  HeliosTheme { HeliosApp(Navigator()) }
+  HeliosTheme { HeliosApp() }
 }
