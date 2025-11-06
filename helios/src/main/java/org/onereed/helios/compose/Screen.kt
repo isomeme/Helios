@@ -1,12 +1,18 @@
 package org.onereed.helios.compose
 
-/** Navigation routes. */
-sealed class Screen(val route: String) {
-  object Schedule : Screen("schedule")
+import kotlinx.serialization.Serializable
 
-  object Text : Screen("text")
+sealed class Screen {
 
-  object Compass : Screen("compass")
+  @Serializable
+  object Schedule : Screen()
 
-  object Help : Screen("help")
+  @Serializable
+  object Text : Screen()
+
+  @Serializable
+  object Compass : Screen()
+
+  @Serializable
+  object Help : Screen()
 }

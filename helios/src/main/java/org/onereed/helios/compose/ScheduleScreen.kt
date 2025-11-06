@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.onereed.helios.ui.theme.HeliosTheme
 
@@ -26,17 +27,17 @@ internal fun ScheduleScreen(
   navToText: () -> Unit = {},
   scheduleUi: ScheduleUi = hiltViewModel<ScheduleViewModel>().ui,
 ) {
-  Box(
-    modifier = Modifier.fillMaxSize(),
-    contentAlignment = Alignment.Center,
-  ) {
+  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
     Column(
       modifier = Modifier.width(IntrinsicSize.Min).padding(padding),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center,
     ) {
       scheduleUi.buttons.forEachIndexed { index, ui ->
-        FilledTonalButton(modifier = Modifier.fillMaxWidth(), onClick = { navToText() }) {
+        FilledTonalButton(
+          modifier = Modifier.fillMaxWidth().padding(all = 5.dp),
+          onClick = { navToText() },
+        ) {
           Text(ui.name)
         }
       }

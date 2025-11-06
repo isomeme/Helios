@@ -90,7 +90,7 @@ dependencies {
   implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
 
   // Navigation KTX (use a single version variable)
-  val navVersion = "2.9.5"
+  val navVersion = "2.9.6"
   implementation("androidx.navigation:navigation-compose:${navVersion}")
   implementation("androidx.navigation:navigation-dynamic-features-fragment:${navVersion}")
   implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
