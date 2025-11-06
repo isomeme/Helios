@@ -13,12 +13,12 @@ import kotlinx.coroutines.flow.stateIn
 class TextViewModel
 @Inject
 constructor(
-  private val stateHolder: TextStateHolder,
+  private val textStateHolder: TextStateHolder,
   private val sunResources: SunResources,
 ) : ViewModel() {
 
   val textUiFlow =
-    stateHolder.selectedIndexFlow
+    textStateHolder.selectedIndexFlow
       .map { toTextUi(it) }
       .stateIn(
         scope = viewModelScope,
@@ -27,7 +27,7 @@ constructor(
       )
 
   private fun toTextUi(index: Int): TextUi {
-    return TextUi.create(sunResources, index) { stateHolder.selectIndex(it) }
+    return TextUi.create(sunResources, index) { textStateHolder.selectIndex(it) }
   }
 
   companion object {

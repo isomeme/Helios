@@ -5,8 +5,11 @@ plugins {
   id("org.jetbrains.kotlin.android")
   id("org.jetbrains.kotlin.plugin.compose")
 
-  // This may need to go last to pick up resources from other plugins.
+  // This may need to be the last ordinary plugin, to pick up resources from other plugins.
   id("com.google.devtools.ksp")
+
+  // Kotlin serialization plugin for type safe routes and navigation arguments.
+  kotlin("plugin.serialization") version "2.0.21"
 }
 
 android {
@@ -88,8 +91,14 @@ dependencies {
 
   // Navigation KTX (use a single version variable)
   val navVersion = "2.9.5"
+  implementation("androidx.navigation:navigation-compose:${navVersion}")
+  implementation("androidx.navigation:navigation-dynamic-features-fragment:${navVersion}")
   implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
   implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
+  androidTestImplementation("androidx.navigation:navigation-testing:$navVersion")
+
+  // JSON serialization library, works with the Kotlin serialization plugin
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 
   // Collection KTX
   implementation("androidx.collection:collection-ktx:1.5.0")

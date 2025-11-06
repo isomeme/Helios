@@ -42,6 +42,9 @@ internal fun TextScreen(
   textViewModel: TextViewModel = hiltViewModel()
 ) {
   val textUi by textViewModel.textUiFlow.collectAsState()
+
+  // These state values are internal to TextScreen.
+
   var eventMenuExpanded by remember { mutableStateOf(false) }
   val scrollState = rememberScrollState()
 

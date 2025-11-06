@@ -49,7 +49,7 @@ fun HeliosApp(navigator: Navigator = hiltViewModel<NavigatorViewModel>().navigat
   ) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
       when (currentDestination) {
-        AppDestination.SCHEDULE -> Greeting("Schedule", padding = innerPadding)
+        AppDestination.SCHEDULE -> ScheduleScreen(padding = innerPadding)
         AppDestination.TEXT -> TextScreen(padding = innerPadding)
         AppDestination.COMPASS -> Greeting("Compass", padding = innerPadding)
         AppDestination.HELP -> Greeting("Help", padding = innerPadding)
