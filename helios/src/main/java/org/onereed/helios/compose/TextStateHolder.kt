@@ -6,13 +6,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @Singleton
-class TextSelectedIndexStateHolder @Inject constructor() {
+class TextStateHolder @Inject constructor() {
 
   private val _selectedIndexFlow = MutableStateFlow(0)
 
   val selectedIndexFlow = _selectedIndexFlow.asStateFlow()
 
-  fun updateSelectedIndex(index: Int) {
+  fun selectIndex(index: Int) {
     _selectedIndexFlow.value = index
   }
 }

@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
 import dagger.hilt.android.AndroidEntryPoint
 import org.onereed.helios.compose.TextScreen
-import org.onereed.helios.compose.TextSelectedIndexStateHolder
+import org.onereed.helios.compose.TextStateHolder
 import org.onereed.helios.databinding.ActivityTextBinding
 import org.onereed.helios.sun.SunEventType
 import org.onereed.helios.ui.theme.HeliosTheme
@@ -18,7 +18,7 @@ class TextActivity : BaseActivity() {
 
   private lateinit var binding: ActivityTextBinding
 
-  @Inject lateinit var textSelectedIndexStateHolder: TextSelectedIndexStateHolder
+  @Inject lateinit var textStateHolder: TextStateHolder
 
   @IdRes override val myActionsMenuId = R.id.action_text
 
@@ -30,7 +30,7 @@ class TextActivity : BaseActivity() {
     setSupportActionBar(binding.toolbar)
 
     val typeOrdinal = intent.getIntExtra(SUN_EVENT_TYPE_ORDINAL, SunEventType.RISE.ordinal)
-    textSelectedIndexStateHolder.updateSelectedIndex(typeOrdinal)
+    textStateHolder.selectIndex(typeOrdinal)
 
     binding.composeView.setContent {
       HeliosTheme { TextScreen(padding = PaddingValues(top = 15.dp)) }

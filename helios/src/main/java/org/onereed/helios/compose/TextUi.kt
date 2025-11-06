@@ -2,8 +2,8 @@ package org.onereed.helios.compose
 
 import androidx.compose.ui.graphics.Color
 
-data class TextState(val menu: List<EventDisplay>, val selected: EventDisplay, val rubric: String) {
-  data class EventDisplay(
+data class TextUi(val menu: List<EventUi>, val selected: EventUi, val rubric: String) {
+  data class EventUi(
     val icon: Int,
     val color: Color,
     val name: String,
@@ -21,10 +21,10 @@ data class TextState(val menu: List<EventDisplay>, val selected: EventDisplay, v
       sunResources: SunResources,
       selectedIndex: Int,
       selectionConsumer: (Int) -> Unit,
-    ): TextState {
+    ): TextUi {
       val menu =
         sunResources.eventSets.mapIndexed { ix, eventSet ->
-          EventDisplay(
+          EventUi(
             icon = eventSet.icon,
             color = eventSet.fgColor,
             name = eventSet.name,
@@ -36,7 +36,7 @@ data class TextState(val menu: List<EventDisplay>, val selected: EventDisplay, v
       val selected = menu[selectedIndex]
       val rubric = sunResources.eventSets[selectedIndex].rubric
 
-      return TextState(menu, selected, rubric)
+      return TextUi(menu, selected, rubric)
     }
   }
 }

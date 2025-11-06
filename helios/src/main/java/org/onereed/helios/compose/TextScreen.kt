@@ -32,22 +32,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import org.onereed.helios.ui.theme.HeliosTheme
 
 @Composable
 internal fun TextScreen(
   padding: PaddingValues = PaddingValues(),
-  textViewModel: TextViewModel = viewModel(),
+  textViewModel: TextViewModel = hiltViewModel()
 ) {
-  val textState by textViewModel.textStateFlow.collectAsState()
+  val textUi by textViewModel.textUiFlow.collectAsState()
   var eventMenuExpanded by remember { mutableStateOf(false) }
   val scrollState = rememberScrollState()
 
   val haptics = LocalHapticFeedback.current
 
-  LaunchedEffect(textState) { scrollState.scrollTo(0) }
+  LaunchedEffect(textUi) { scrollState.scrollTo(0) }
 
   Column(modifier = Modifier.fillMaxSize().padding(padding)) {
     // Top of screen: select button on the left, title centered.
@@ -68,9 +68,9 @@ internal fun TextScreen(
       ) {
         OutlinedButton(onClick = { eventMenuExpanded = true }) {
           Icon(
-            painter = painterResource(id = textState.selected.icon),
-            tint = textState.selected.color,
-            contentDescription = textState.selected.name,
+            painter = painterResource(id = textUi.selected.icon),
+            tint = textUi.selected.color,
+            contentDescription = textUi.selected.name,
           )
         }
 
@@ -79,34 +79,34 @@ internal fun TextScreen(
           onDismissRequest = { eventMenuExpanded = false },
           offset = DpOffset(0.dp, 10.dp),
         ) {
-          textState.menu.forEach { eventDisplay ->
+          textUi.menu.forEach { eventUi ->
             DropdownMenuItem(
-              enabled = eventDisplay.enabled,
+              enabled = eventUi.enabled,
               onClick = {
                 haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                eventDisplay.onSelect()
+                eventUi.onSelect()
                 eventMenuExpanded = false
               },
               colors =
                 MenuDefaults.itemColors(
-                  leadingIconColor = eventDisplay.color,
-                  textColor = eventDisplay.color,
+                  leadingIconColor = eventUi.color,
+                  textColor = eventUi.color,
                 ),
               leadingIcon = {
                 Icon(
-                  painter = painterResource(id = eventDisplay.icon),
-                  contentDescription = eventDisplay.name,
+                  painter = painterResource(id = eventUi.icon),
+                  contentDescription = eventUi.name,
                 )
               },
-              text = { Text(text = eventDisplay.name, style = MaterialTheme.typography.labelLarge) },
+              text = { Text(text = eventUi.name, style = MaterialTheme.typography.labelLarge) },
             )
           }
         }
       }
 
       Text(
-        text = textState.selected.name,
-        color = textState.selected.color,
+        text = textUi.selected.name,
+        color = textUi.selected.color,
         style = MaterialTheme.typography.headlineMedium,
         modifier =
           Modifier.constrainAs(title) {
@@ -121,9 +121,9 @@ internal fun TextScreen(
     // Rubric text
 
     MarkdownText(
-      markdown = textState.rubric,
-      style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+      markdown = textUi.rubric,
       isTextSelectable = true,
+      style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
       modifier = Modifier.fillMaxWidth().padding(all = 20.dp).verticalScroll(scrollState),
     )
   }
@@ -134,8 +134,8 @@ internal fun TextScreen(
 @SuppressLint("ViewModelConstructorInComposable")
 fun TextScreenPreview() {
   val sunResources = SunResources.load(LocalContext.current)
-  val stateHolder = TextSelectedIndexStateHolder()
-  stateHolder.updateSelectedIndex(2) // Sunset
+  val stateHolder = TextStateHolder()
+  stateHolder.selectIndex(2) // Sunset
 
   val textViewModel = TextViewModel(stateHolder, sunResources)
   HeliosTheme { TextScreen(textViewModel = textViewModel) }

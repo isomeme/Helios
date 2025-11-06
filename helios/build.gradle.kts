@@ -122,6 +122,7 @@ dependencies {
   ksp("com.google.dagger:hilt-compiler:$hiltVersion")
 
   val androidxHiltVersion = "1.3.0"
+  implementation("androidx.hilt:hilt-navigation-compose:${androidxHiltVersion}")
   implementation("androidx.hilt:hilt-navigation-fragment:${androidxHiltVersion}")
   implementation("androidx.hilt:hilt-work:$androidxHiltVersion")
   ksp("androidx.hilt:hilt-compiler:$androidxHiltVersion")
