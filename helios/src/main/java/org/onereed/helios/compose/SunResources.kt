@@ -29,7 +29,7 @@ data class SunResources(val eventSets: List<EventSet>) {
           sunEventOrdinals.map { typedArray.getResourceId(it, 0) }
         }
 
-      val rubricTemplate = context.readRubricTemplate()
+      val rubricTemplate = readRubricTemplate(context)
       val slotLists = rubricMadLib.map { resources.getStringArray(it) }
 
       val rubrics =
@@ -46,9 +46,9 @@ data class SunResources(val eventSets: List<EventSet>) {
       return SunResources(eventSets)
     }
 
-    private fun Context.readRubricTemplate(): String {
+    private fun readRubricTemplate(context: Context): String {
       try {
-        return assets.open("rubric_template.md").bufferedReader(UTF_8).use { it.readText() }
+        return context.assets.open("rubric_template.md").bufferedReader(UTF_8).use { it.readText() }
       } catch (e: IOException) {
         throw UncheckedIOException(e)
       }

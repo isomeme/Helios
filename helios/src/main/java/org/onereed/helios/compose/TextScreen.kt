@@ -1,6 +1,7 @@
 package org.onereed.helios.compose
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -31,7 +33,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import org.onereed.helios.ui.theme.HeliosTheme
@@ -39,7 +40,7 @@ import org.onereed.helios.ui.theme.HeliosTheme
 @Composable
 internal fun TextScreen(
   padding: PaddingValues = PaddingValues(),
-  textViewModel: TextViewModel = hiltViewModel()
+  textViewModel: TextViewModel = hiltViewModel(),
 ) {
   val textUi by textViewModel.textUiFlow.collectAsState()
 
@@ -55,20 +56,11 @@ internal fun TextScreen(
   Column(modifier = Modifier.fillMaxSize().padding(padding)) {
     // Top of screen: select button on the left, title centered.
 
-    ConstraintLayout(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(all = 10.dp)) {
-      val (button, title) = createRefs()
-
+    Box(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(all = 10.dp)) {
       // Enclosing the select button with its dropdown menu in a column makes the menu pop up just
       // below the button.
 
-      Column(
-        modifier =
-          Modifier.constrainAs(button) {
-            start.linkTo(parent.start)
-            top.linkTo(parent.top)
-            bottom.linkTo(parent.bottom)
-          }
-      ) {
+      Column(modifier = Modifier.align(Alignment.CenterStart)) {
         OutlinedButton(onClick = { eventMenuExpanded = true }) {
           Icon(
             painter = painterResource(id = textUi.selected.icon),
@@ -111,13 +103,7 @@ internal fun TextScreen(
         text = textUi.selected.name,
         color = textUi.selected.color,
         style = MaterialTheme.typography.headlineMedium,
-        modifier =
-          Modifier.constrainAs(title) {
-            start.linkTo(parent.start)
-            end.linkTo(parent.end)
-            top.linkTo(parent.top)
-            bottom.linkTo(parent.bottom)
-          },
+        modifier = Modifier.align(Alignment.Center),
       )
     }
 
