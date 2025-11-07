@@ -2,15 +2,11 @@ package org.onereed.helios
 
 import android.os.Bundle
 import androidx.annotation.IdRes
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.ui.unit.dp
 import dagger.hilt.android.AndroidEntryPoint
-import org.onereed.helios.compose.TextScreen
+import javax.inject.Inject
 import org.onereed.helios.compose.TextStateHolder
 import org.onereed.helios.databinding.ActivityTextBinding
 import org.onereed.helios.sun.SunEventType
-import org.onereed.helios.ui.theme.HeliosTheme
-import javax.inject.Inject
 
 /** Displays the text of Liber Resh. */
 @AndroidEntryPoint
@@ -32,9 +28,7 @@ class TextActivity : BaseActivity() {
     val typeOrdinal = intent.getIntExtra(SUN_EVENT_TYPE_ORDINAL, SunEventType.RISE.ordinal)
     textStateHolder.selectIndex(typeOrdinal)
 
-    binding.composeView.setContent {
-      HeliosTheme { TextScreen(padding = PaddingValues(top = 15.dp)) }
-    }
+    // We've gone too far to keep the compose version working here.
   }
 
   companion object {

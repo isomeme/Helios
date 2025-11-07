@@ -13,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -22,11 +21,8 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import dagger.hilt.android.AndroidEntryPoint
-import org.onereed.helios.R
 import org.onereed.helios.ui.theme.HeliosTheme
 
 @AndroidEntryPoint
@@ -42,78 +38,48 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
 @Composable
-fun HeliosApp() {
-  val navController = rememberNavController()
-  val currentBackStackEntry by navController.currentBackStackEntryAsState()
-  val currentDestination = currentBackStackEntry?.destination
+fun HeliosApp(appState: HeliosAppState = rememberHeliosAppState()) {
 
-  fun navToTextIndex(index: Int) = navController.navigate(Screen.Text(index))
+  // Read the @Composable property here, in a @Composable context.
+  val currentDestination = appState.currentDestination
 
   NavigationSuiteScaffold(
     navigationSuiteItems = {
-      item(
-        icon = {
-          Icon(
-            painterResource(R.drawable.schedule_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
-            stringResource(R.string.screen_schedule),
-          )
-        },
-        label = { Text(stringResource(R.string.screen_schedule)) },
-        selected = currentDestination?.hasRoute<Screen.Schedule>() ?: false,
-        onClick = { navController.navigate(Screen.Schedule) },
-      )
-      item(
-        icon = {
-          Icon(
-            painterResource(R.drawable.article_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
-            stringResource(R.string.screen_text),
-          )
-        },
-        label = { Text(stringResource(R.string.screen_text)) },
-        selected = currentDestination?.hasRoute<Screen.Text>() ?: false,
-        onClick = { navController.navigate(Screen.Text()) },
-      )
-      item(
-        icon = {
-          Icon(
-            painterResource(R.drawable.navigation_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
-            stringResource(R.string.screen_compass),
-          )
-        },
-        label = { Text(stringResource(R.string.screen_compass)) },
-        selected = currentDestination?.hasRoute<Screen.Compass>() ?: false,
-        onClick = { navController.navigate(Screen.Compass) },
-      )
-      item(
-        icon = {
-          Icon(
-            painterResource(R.drawable.help_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
-            stringResource(R.string.screen_help),
-          )
-        },
-        label = { Text(stringResource(R.string.screen_help)) },
-        selected = currentDestination?.hasRoute<Screen.Help>() ?: false,
-        onClick = { navController.navigate(Screen.Help) },
-      )
+      Screen.TopLevelScreens.forEach { screen ->
+        item(
+          icon = { Icon(painterResource(screen.iconRes), stringResource(screen.titleRes)) },
+          label = { Text(stringResource(screen.titleRes)) },
+          selected = currentDestination?.hasRoute(screen::class) ?: false,
+          onClick = { appState.navigateToTopLevelScreen(screen) },
+        )
+      }
     }
   ) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
       NavHost(
-        navController = navController,
+        navController = appState.navController,
         startDestination = Screen.Schedule,
         modifier = Modifier.padding(innerPadding),
       ) {
         composable<Screen.Schedule> {
-          ScheduleScreen(navToTextIndex = ::navToTextIndex)
+          val actions =
+            object : ScheduleScreenActions {
+              override fun onTextIndexSelected(index: Int) = appState.navigateToTextIndex(index)
+            }
+          ScheduleScreen(actions = actions)
         }
+
         composable<Screen.Text> { backStackEntry ->
           val screenText: Screen.Text = backStackEntry.toRoute()
-          TextScreen(
-            selectedIndexFromNav = screenText.selectedIndex,
-            navToTextIndex = ::navToTextIndex,
-          )
+          val actions =
+            object : TextScreenActions {
+              override fun onTextIndexSelected(index: Int) = appState.navigateToTextIndex(index)
+            }
+          TextScreen(selectedIndexFromNav = screenText.selectedIndex, actions = actions)
         }
+
         composable<Screen.Compass> { Greeting("compass") }
+
         composable<Screen.Help> { Greeting("help") }
       }
     }

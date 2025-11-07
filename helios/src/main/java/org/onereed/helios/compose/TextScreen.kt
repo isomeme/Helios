@@ -37,10 +37,16 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import org.onereed.helios.ui.theme.HeliosTheme
 
+interface TextScreenActions {
+  fun onTextIndexSelected(index: Int) {
+    // Default: Do nothing.
+  }
+}
+
 @Composable
 internal fun TextScreen(
   selectedIndexFromNav: Int? = null,
-  navToTextIndex: (Int) -> Unit = {},
+  actions: TextScreenActions,
   padding: PaddingValues = PaddingValues(),
   textViewModel: TextViewModel = hiltViewModel(),
 ) {
@@ -83,7 +89,7 @@ internal fun TextScreen(
               enabled = eventUi.enabled,
               onClick = {
                 haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                navToTextIndex(eventUi.index)
+                actions.onTextIndexSelected(eventUi.index)
                 eventMenuExpanded = false
               },
               colors =
@@ -131,5 +137,5 @@ fun TextScreenPreview() {
   stateHolder.selectIndex(2) // Sunset
 
   val textViewModel = TextViewModel(stateHolder, sunResources)
-  HeliosTheme { TextScreen(textViewModel = textViewModel) }
+  HeliosTheme { TextScreen(actions = object : TextScreenActions {}, textViewModel = textViewModel) }
 }

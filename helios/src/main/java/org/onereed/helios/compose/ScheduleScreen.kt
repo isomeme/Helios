@@ -21,22 +21,32 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.onereed.helios.ui.theme.HeliosTheme
 
+interface ScheduleScreenActions {
+  fun onTextIndexSelected(index: Int) {
+    // Default: Do nothing.
+  }
+}
+
 @Composable
 internal fun ScheduleScreen(
-  navToTextIndex: (Int) -> Unit = {},
+  actions: ScheduleScreenActions,
   padding: PaddingValues = PaddingValues(),
   scheduleUi: ScheduleUi = hiltViewModel<ScheduleViewModel>().ui,
 ) {
   Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
     Column(
-      modifier = Modifier.width(IntrinsicSize.Min).padding(padding),
+      modifier = Modifier
+        .width(IntrinsicSize.Min)
+        .padding(padding),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center,
     ) {
       scheduleUi.buttons.forEachIndexed { index, ui ->
         FilledTonalButton(
-          modifier = Modifier.fillMaxWidth().padding(all = 5.dp),
-          onClick = { navToTextIndex(index) },
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(all = 5.dp),
+          onClick = { actions.onTextIndexSelected(index) },
         ) {
           Text(ui.name)
         }
@@ -51,5 +61,7 @@ internal fun ScheduleScreen(
 internal fun ScheduleScreenPreview() {
   val sunResources = SunResources.load(LocalContext.current)
   val scheduleUi = ScheduleUi.create(sunResources)
-  HeliosTheme { ScheduleScreen(scheduleUi = scheduleUi) }
+  HeliosTheme { ScheduleScreen(
+    actions = object : ScheduleScreenActions {},
+    scheduleUi = scheduleUi) }
 }
