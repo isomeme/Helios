@@ -23,8 +23,8 @@ import org.onereed.helios.ui.theme.HeliosTheme
 
 @Composable
 internal fun ScheduleScreen(
+  navToTextIndex: (Int) -> Unit = {},
   padding: PaddingValues = PaddingValues(),
-  navToText: () -> Unit = {},
   scheduleUi: ScheduleUi = hiltViewModel<ScheduleViewModel>().ui,
 ) {
   Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -36,7 +36,7 @@ internal fun ScheduleScreen(
       scheduleUi.buttons.forEachIndexed { index, ui ->
         FilledTonalButton(
           modifier = Modifier.fillMaxWidth().padding(all = 5.dp),
-          onClick = { navToText() },
+          onClick = { navToTextIndex(index) },
         ) {
           Text(ui.name)
         }

@@ -7,12 +7,8 @@ data class TextUi(val menu: List<EventUi>, val selected: EventUi, val rubric: St
     val icon: Int,
     val color: Color,
     val name: String,
-
-    // The last two fields are only meaningful in the menu, so we provide default values for
-    // convenience in populating TextState.selected in tests and previews.
-
-    val enabled: Boolean = true,
-    val onSelect: () -> Unit = {},
+    val enabled: Boolean,
+    val index: Int,
   )
 
   companion object {
@@ -20,7 +16,6 @@ data class TextUi(val menu: List<EventUi>, val selected: EventUi, val rubric: St
     fun create(
       sunResources: SunResources,
       selectedIndex: Int,
-      selectionConsumer: (Int) -> Unit,
     ): TextUi {
       val menu =
         sunResources.eventSets.mapIndexed { ix, eventSet ->
@@ -29,7 +24,7 @@ data class TextUi(val menu: List<EventUi>, val selected: EventUi, val rubric: St
             color = eventSet.fgColor,
             name = eventSet.name,
             enabled = ix != selectedIndex,
-            onSelect = { selectionConsumer(ix) },
+            index = ix,
           )
         }
 

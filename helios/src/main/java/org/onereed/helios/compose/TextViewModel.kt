@@ -26,9 +26,10 @@ constructor(
         initialValue = toTextUi(0),
       )
 
-  private fun toTextUi(index: Int): TextUi {
-    return TextUi.create(sunResources, index) { textStateHolder.selectIndex(it) }
-  }
+  fun selectIndex(index: Int) = textStateHolder.selectIndex(index)
+
+  private fun toTextUi(selectedIndex: Int): TextUi =
+    TextUi.create(sunResources, selectedIndex)
 
   companion object {
 

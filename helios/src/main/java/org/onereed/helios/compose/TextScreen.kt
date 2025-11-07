@@ -39,9 +39,13 @@ import org.onereed.helios.ui.theme.HeliosTheme
 
 @Composable
 internal fun TextScreen(
+  selectedIndexFromNav: Int? = null,
+  navToTextIndex: (Int) -> Unit = {},
   padding: PaddingValues = PaddingValues(),
   textViewModel: TextViewModel = hiltViewModel(),
 ) {
+  selectedIndexFromNav?.let { textViewModel.selectIndex(it) }
+
   val textUi by textViewModel.textUiFlow.collectAsState()
 
   // These state values are internal to TextScreen.
@@ -79,7 +83,7 @@ internal fun TextScreen(
               enabled = eventUi.enabled,
               onClick = {
                 haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                eventUi.onSelect()
+                navToTextIndex(eventUi.index)
                 eventMenuExpanded = false
               },
               colors =

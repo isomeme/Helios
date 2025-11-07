@@ -24,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import dagger.hilt.android.AndroidEntryPoint
 import org.onereed.helios.R
 import org.onereed.helios.ui.theme.HeliosTheme
@@ -45,6 +46,8 @@ fun HeliosApp() {
   val navController = rememberNavController()
   val currentBackStackEntry by navController.currentBackStackEntryAsState()
   val currentDestination = currentBackStackEntry?.destination
+
+  fun navToTextIndex(index: Int) = navController.navigate(Screen.Text(index))
 
   NavigationSuiteScaffold(
     navigationSuiteItems = {
@@ -68,7 +71,7 @@ fun HeliosApp() {
         },
         label = { Text(stringResource(R.string.screen_text)) },
         selected = currentDestination?.hasRoute<Screen.Text>() ?: false,
-        onClick = { navController.navigate(Screen.Text) },
+        onClick = { navController.navigate(Screen.Text()) },
       )
       item(
         icon = {
@@ -101,9 +104,15 @@ fun HeliosApp() {
         modifier = Modifier.padding(innerPadding),
       ) {
         composable<Screen.Schedule> {
-          ScheduleScreen(navToText = { navController.navigate(Screen.Text) })
+          ScheduleScreen(navToTextIndex = ::navToTextIndex)
         }
-        composable<Screen.Text> { TextScreen() }
+        composable<Screen.Text> { backStackEntry ->
+          val screenText: Screen.Text = backStackEntry.toRoute()
+          TextScreen(
+            selectedIndexFromNav = screenText.selectedIndex,
+            navToTextIndex = ::navToTextIndex,
+          )
+        }
         composable<Screen.Compass> { Greeting("compass") }
         composable<Screen.Help> { Greeting("help") }
       }
