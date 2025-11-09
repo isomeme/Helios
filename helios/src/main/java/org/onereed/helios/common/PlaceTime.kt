@@ -17,4 +17,9 @@ data class PlaceTime(val lat: Double, val lon: Double, val alt: Double, val inst
   fun plusDuration(duration: Duration): PlaceTime = copy(instant = instant.plus(duration))
 
   fun minusDuration(duration: Duration): PlaceTime = copy(instant = instant.minus(duration))
+
+  companion object {
+
+    val NONE = PlaceTime(0.0, 0.0, 0.0, Instant.EPOCH)
+  }
 }

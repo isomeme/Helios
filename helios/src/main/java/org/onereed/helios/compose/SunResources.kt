@@ -2,6 +2,7 @@ package org.onereed.helios.compose
 
 import android.content.Context
 import androidx.compose.ui.graphics.Color
+import androidx.core.content.res.use
 import org.onereed.helios.R
 import java.io.IOException
 import java.io.UncheckedIOException
