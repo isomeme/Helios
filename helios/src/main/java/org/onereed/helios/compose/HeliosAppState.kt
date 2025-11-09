@@ -37,21 +37,17 @@ class HeliosAppState(val navController: NavHostController) {
     navController.navigate(screen, topLevelNavOptions)
   }
 
-  /**
-   * Navigates to a specific screen, typically a detail screen. This allows the back stack to build
-   * up naturally.
-   */
+  /** Navigates to a non-top-level screen, allowing backstack accumulation.. */
   private fun navigateTo(screen: Screen) {
     navController.navigate(screen)
   }
 
-  // This specific action now correctly uses the general navigateTo function
+  /** Navigates to the Text screen with a particular sun event index selected. */
   fun navigateToTextIndex(index: Int) {
     navigateTo(Screen.Text(index))
   }
 }
 
-// A composable to remember this state holder
 @Composable
 fun rememberHeliosAppState(
   navController: NavHostController = rememberNavController()

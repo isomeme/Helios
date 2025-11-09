@@ -7,25 +7,22 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.view.HapticFeedbackConstants
-import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import org.onereed.helios.R
 import timber.log.Timber
 
-class LocationPermissionManager(private val activity: AppCompatActivity) {
+class LocationPermissionManager(private val activity: ComponentActivity) {
 
-  private val requestPermissionLauncher: ActivityResultLauncher<String>
+  private val requestPermissionLauncher =
+    activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+      acceptLocationPermissionResult(isGranted)
+    }
 
   init {
-    requestPermissionLauncher =
-      activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        acceptLocationPermissionResult(isGranted)
-      }
-
     activity.lifecycle.addObserver(
       object : DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) {
@@ -44,8 +41,7 @@ class LocationPermissionManager(private val activity: AppCompatActivity) {
     }
   }
 
-  private fun requestLocationPermission() =
-    requestPermissionLauncher.launch(ACCESS_FINE_LOCATION)
+  private fun requestLocationPermission() = requestPermissionLauncher.launch(ACCESS_FINE_LOCATION)
 
   private fun acceptLocationPermissionResult(isGranted: Boolean) {
     Timber.d("acceptLocationPermissionResult: isGranted=$isGranted")
@@ -85,5 +81,10 @@ class LocationPermissionManager(private val activity: AppCompatActivity) {
 
       Timber.d("Launched use-settings dialog.")
     }
+  }
+
+  companion object {
+
+    fun ComponentActivity.startLocationPermissionManager() = LocationPermissionManager(this)
   }
 }
