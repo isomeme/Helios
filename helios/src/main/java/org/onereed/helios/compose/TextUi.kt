@@ -1,10 +1,11 @@
 package org.onereed.helios.compose
 
+import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.Color
 
 data class TextUi(val menu: List<EventUi>, val selected: EventUi, val rubric: String) {
   data class EventUi(
-    val icon: Int,
+    @param:DrawableRes val iconRes: Int,
     val color: Color,
     val name: String,
     val enabled: Boolean,
@@ -20,7 +21,7 @@ data class TextUi(val menu: List<EventUi>, val selected: EventUi, val rubric: St
       val menu =
         sunResources.eventSets.mapIndexed { ix, eventSet ->
           EventUi(
-            icon = eventSet.icon,
+            iconRes = eventSet.iconRes,
             color = eventSet.fgColor,
             name = eventSet.name,
             enabled = ix != selectedIndex,

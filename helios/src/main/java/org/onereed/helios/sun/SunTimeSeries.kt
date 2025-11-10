@@ -4,7 +4,6 @@ import java.time.Duration
 import java.time.Instant
 import org.onereed.helios.common.PlaceTime
 import org.shredzone.commons.suncalc.SunTimes
-import timber.log.Timber
 
 data class SunTimeSeries(val events: List<Event>, val placeTime: PlaceTime) {
   data class Event(val sunEventType: SunEventType, val instant: Instant) : Comparable<Event> {
@@ -34,8 +33,6 @@ data class SunTimeSeries(val events: List<Event>, val placeTime: PlaceTime) {
     private val PRECEDING_LIMIT = Duration.ofHours(14L)
 
     fun compute(placeTime: PlaceTime): SunTimeSeries {
-      Timber.d("compute placeTime=$placeTime")
-
       val futureSunTimes = placeTime.computeSunTimes(FUTURE_LIMIT)
       val futureEvents = toEvents(futureSunTimes)
       val nextEvent = futureEvents.first()

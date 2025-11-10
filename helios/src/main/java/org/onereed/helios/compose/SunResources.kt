@@ -1,12 +1,13 @@
 package org.onereed.helios.compose
 
 import android.content.Context
+import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.res.use
-import org.onereed.helios.R
 import java.io.IOException
 import java.io.UncheckedIOException
 import java.nio.charset.StandardCharsets.UTF_8
+import org.onereed.helios.R
 import org.onereed.helios.sun.SunEventType
 
 data class SunResources(val eventSets: List<EventSet>) {
@@ -14,7 +15,7 @@ data class SunResources(val eventSets: List<EventSet>) {
     val name: String,
     val fgColor: Color,
     val bgColor: Color,
-    val icon: Int,
+    @param:DrawableRes val iconRes: Int,
     val rubric: String,
   )
 

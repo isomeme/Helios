@@ -34,7 +34,7 @@ class HeliosAppState(val navController: NavHostController) {
       restoreState = true
     }
 
-    navController.navigate(screen, topLevelNavOptions)
+    navController.navigate(screen /* topLevelNavOptions */)
   }
 
   /** Navigates to a non-top-level screen, allowing backstack accumulation.. */

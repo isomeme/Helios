@@ -43,6 +43,9 @@ android {
     isCoreLibraryDesugaringEnabled = true
   }
 
+  // See https://stackoverflow.com/questions/65124097
+  lint.disable += "UseCompatLoadingForDrawables"
+
   kotlin { jvmToolchain(17) }
 
   buildFeatures {

@@ -12,16 +12,18 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.channels.onSuccess
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -33,9 +35,11 @@ class Locator @Inject constructor(@param:ApplicationContext val context: Context
   private val locationProvider: FusedLocationProviderClient =
     LocationServices.getFusedLocationProviderClient(context)
 
+  private val ticker = Ticker(TICKER_INTERVAL)
+
   val flow =
     getLocationUpdates()
-      .map { PlaceTime(it, Instant.now()) }
+      .combine(ticker.flow) { location, _ -> PlaceTime(location, Instant.now()) }
       .onStart { Timber.d("Locator.onStart") }
       .onEach { Timber.d("Locator.onEach $it") }
       .onCompletion { Timber.d("Locator.onCompletion") }
@@ -47,15 +51,20 @@ class Locator @Inject constructor(@param:ApplicationContext val context: Context
       return@callbackFlow
     }
 
+    // Grab the last location to send something down the flow before we start listening for updates.
+
+    locationProvider.lastLocation
+      .addOnSuccessListener { location ->
+        Timber.d("Last location: $location")
+        sendLocation(location)
+      }
+      .addOnFailureListener { e -> Timber.e(e, "Failed to get last location.") }
+
     val locationCallback =
       object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
           Timber.d("Location result received: ${locationResult.lastLocation}")
-          locationResult.lastLocation?.let {
-            trySend(it)
-              .onSuccess { Timber.d("Location sent to flow.") }
-              .onFailure { t -> Timber.e(t, "Failed to send location to flow.") }
-          }
+          locationResult.lastLocation?.let { sendLocation(it) }
         }
       }
 
@@ -75,14 +84,25 @@ class Locator @Inject constructor(@param:ApplicationContext val context: Context
     }
   }
 
+
   companion object {
 
-    private val UPDATE_INTERVAL = Duration.ofSeconds(30L).toMillis()
-    private val MIN_UPDATE_INTERVAL = Duration.ofSeconds(15L).toMillis()
+    private val TICKER_INTERVAL = 15.seconds
+    private val LOCATION_UPDATE_INTERVAL_MILLIS = 2.minutes.inWholeMilliseconds
+    private val MIN_LOCATION_UPDATE_INTERVAL_MILLIS = 30.seconds.inWholeMilliseconds
 
     private val LOCATION_REQUEST =
-      LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, UPDATE_INTERVAL)
-        .setMinUpdateIntervalMillis(MIN_UPDATE_INTERVAL)
+      LocationRequest.Builder(
+          Priority.PRIORITY_BALANCED_POWER_ACCURACY,
+          LOCATION_UPDATE_INTERVAL_MILLIS,
+        )
+        .setMinUpdateIntervalMillis(MIN_LOCATION_UPDATE_INTERVAL_MILLIS)
         .build()
+
+    private fun ProducerScope<Location>.sendLocation(location: Location) {
+      trySend(location)
+        .onSuccess { Timber.d("Location sent to flow.") }
+        .onFailure { t -> Timber.e(t, "Failed to send location to flow.") }
+    }
   }
 }

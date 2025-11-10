@@ -73,7 +73,7 @@ internal fun TextScreen(
       Column(modifier = Modifier.align(Alignment.CenterStart)) {
         OutlinedButton(onClick = { eventMenuExpanded = true }) {
           Icon(
-            painter = painterResource(id = textUi.selected.icon),
+            painter = painterResource(id = textUi.selected.iconRes),
             tint = textUi.selected.color,
             contentDescription = textUi.selected.name,
           )
@@ -99,7 +99,7 @@ internal fun TextScreen(
                 ),
               leadingIcon = {
                 Icon(
-                  painter = painterResource(id = eventUi.icon),
+                  painter = painterResource(eventUi.iconRes),
                   contentDescription = eventUi.name,
                 )
               },
