@@ -37,21 +37,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import org.onereed.helios.ui.theme.HeliosTheme
 
-interface TextScreenActions {
-  fun onTextIndexSelected(index: Int) {
-    // Default: Do nothing.
-  }
-}
-
 @Composable
 internal fun TextScreen(
-  selectedIndexFromNav: Int? = null,
-  actions: TextScreenActions,
   padding: PaddingValues = PaddingValues(),
   textViewModel: TextViewModel = hiltViewModel(),
 ) {
-  selectedIndexFromNav?.let { textViewModel.selectIndex(it) }
-
   val textUi by textViewModel.textUiFlow.collectAsState()
 
   // These state values are internal to TextScreen.
@@ -88,9 +78,9 @@ internal fun TextScreen(
             DropdownMenuItem(
               enabled = eventUi.enabled,
               onClick = {
-                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                actions.onTextIndexSelected(eventUi.index)
                 eventMenuExpanded = false
+                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                textViewModel.selectIndex(eventUi.index)
               },
               colors =
                 MenuDefaults.itemColors(
@@ -98,10 +88,7 @@ internal fun TextScreen(
                   textColor = eventUi.color,
                 ),
               leadingIcon = {
-                Icon(
-                  painter = painterResource(eventUi.iconRes),
-                  contentDescription = eventUi.name,
-                )
+                Icon(painter = painterResource(eventUi.iconRes), contentDescription = eventUi.name)
               },
               text = { Text(text = eventUi.name, style = MaterialTheme.typography.labelLarge) },
             )
@@ -137,5 +124,5 @@ fun TextScreenPreview() {
   stateHolder.selectIndex(2) // Sunset
 
   val textViewModel = TextViewModel(stateHolder, sunResources)
-  HeliosTheme { TextScreen(actions = object : TextScreenActions {}, textViewModel = textViewModel) }
+  HeliosTheme { TextScreen(textViewModel = textViewModel) }
 }

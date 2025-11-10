@@ -12,12 +12,17 @@ import kotlinx.coroutines.flow.shareIn
 import org.onereed.helios.common.Locator
 import org.onereed.helios.sun.SunSchedule
 import org.onereed.helios.sun.SunTimeSeries
+import timber.log.Timber
 
 @HiltViewModel
 class ScheduleViewModel
 @Inject
-constructor(@ApplicationContext context: Context, sunResources: SunResources, locator: Locator) :
-  ViewModel() {
+constructor(
+  @ApplicationContext context: Context,
+  sunResources: SunResources,
+  locator: Locator,
+  private val textStateHolder: TextStateHolder,
+) : ViewModel() {
 
   val scheduleUiFlow =
     locator.flow
@@ -25,4 +30,9 @@ constructor(@ApplicationContext context: Context, sunResources: SunResources, lo
       .map(SunSchedule::compute)
       .map { schedule -> ScheduleUi.create(context, schedule, sunResources) }
       .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), replay = 1)
+
+  fun selectTextIndex(index: Int) {
+    Timber.d("selectTextIndex: $index")
+    textStateHolder.selectIndex(index)
+  }
 }

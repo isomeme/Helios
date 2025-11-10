@@ -16,7 +16,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
 import org.onereed.helios.ui.theme.HeliosTheme
 
 @OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
@@ -33,7 +32,7 @@ fun HeliosApp(appState: HeliosAppState = rememberHeliosAppState()) {
           icon = { Icon(painterResource(screen.iconRes), stringResource(screen.titleRes)) },
           label = { Text(stringResource(screen.titleRes)) },
           selected = currentDestination?.hasRoute(screen::class) ?: false,
-          onClick = { appState.navigateToTopLevelScreen(screen) },
+          onClick = { appState.navigateTo(screen) },
         )
       }
     }
@@ -47,19 +46,14 @@ fun HeliosApp(appState: HeliosAppState = rememberHeliosAppState()) {
         composable<Screen.Schedule> {
           val actions =
             object : ScheduleScreenActions {
-              override fun onTextIndexSelected(index: Int) = appState.navigateToTextIndex(index)
+              override fun navigateToText() {
+                appState.navigateTo(Screen.Text)
+              }
             }
           ScheduleScreen(actions = actions)
         }
 
-        composable<Screen.Text> { backStackEntry ->
-          val screenText: Screen.Text = backStackEntry.toRoute()
-          val actions =
-            object : TextScreenActions {
-              override fun onTextIndexSelected(index: Int) = appState.navigateToTextIndex(index)
-            }
-          TextScreen(selectedIndexFromNav = screenText.selectedIndex, actions = actions)
-        }
+        composable<Screen.Text> { TextScreen() }
 
         composable<Screen.Compass> { Greeting("compass") }
 

@@ -13,7 +13,7 @@ sealed class Screen(@param:StringRes val titleRes: Int, @param:DrawableRes val i
     Screen(R.string.screen_schedule, R.drawable.schedule_24dp_e3e3e3_fill0_wght400_grad0_opsz24)
 
   @Serializable
-  data class Text(val selectedIndex: Int? = null) :
+  data object Text :
     Screen(R.string.screen_text, R.drawable.article_24dp_e3e3e3_fill0_wght400_grad0_opsz24)
 
   @Serializable
@@ -25,12 +25,6 @@ sealed class Screen(@param:StringRes val titleRes: Int, @param:DrawableRes val i
     Screen(R.string.screen_help, R.drawable.help_24dp_e3e3e3_fill0_wght400_grad0_opsz24)
 
   companion object {
-    val TopLevelScreens =
-      listOf(
-        Schedule,
-        Text(), // Provide a default for the route pattern
-        Compass,
-        Help,
-      )
+    val TopLevelScreens = listOf(Schedule, Text, Compass, Help)
   }
 }

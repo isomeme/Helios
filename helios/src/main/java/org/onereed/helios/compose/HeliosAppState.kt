@@ -20,7 +20,7 @@ class HeliosAppState(val navController: NavHostController) {
    * Navigation logic for top-level screens in the navigation suite. This pops up to the start
    * destination to avoid building up a large back stack.
    */
-  fun navigateToTopLevelScreen(screen: Screen) {
+  fun navigateTo(screen: Screen) {
     val topLevelNavOptions = navOptions {
 
       // Pop up to the start destination of the graph to avoid building up a large stack of
@@ -34,17 +34,7 @@ class HeliosAppState(val navController: NavHostController) {
       restoreState = true
     }
 
-    navController.navigate(screen /* topLevelNavOptions */)
-  }
-
-  /** Navigates to a non-top-level screen, allowing backstack accumulation.. */
-  private fun navigateTo(screen: Screen) {
-    navController.navigate(screen)
-  }
-
-  /** Navigates to the Text screen with a particular sun event index selected. */
-  fun navigateToTextIndex(index: Int) {
-    navigateTo(Screen.Text(index))
+    navController.navigate(screen, topLevelNavOptions)
   }
 }
 

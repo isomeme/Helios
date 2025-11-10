@@ -1,6 +1,5 @@
 package org.onereed.helios.compose
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,15 +20,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
-import org.onereed.helios.ui.theme.HeliosTheme
 
 interface ScheduleScreenActions {
-  fun onTextIndexSelected(index: Int) {
+  fun navigateToText() {
     // Default: Do nothing.
   }
 }
@@ -38,9 +33,9 @@ interface ScheduleScreenActions {
 internal fun ScheduleScreen(
   actions: ScheduleScreenActions,
   padding: PaddingValues = PaddingValues(),
-  scheduleUiFlow: Flow<ScheduleUi> = hiltViewModel<ScheduleViewModel>().scheduleUiFlow,
+  scheduleViewModel: ScheduleViewModel = hiltViewModel(),
 ) {
-  val scheduleUi by scheduleUiFlow.collectAsState(ScheduleUi(emptyList()))
+  val scheduleUi by scheduleViewModel.scheduleUiFlow.collectAsState(ScheduleUi(emptyList()))
 
   Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
     Column(
@@ -54,13 +49,19 @@ internal fun ScheduleScreen(
       }
 
       scheduleUi.events.forEach { event ->
-        OutlinedButton(
-          modifier = Modifier.fillMaxWidth().padding(all = 5.dp),
-          onClick = { actions.onTextIndexSelected(event.ordinal) },
+        OutlinedCard(
+          onClick = {
+            scheduleViewModel.selectTextIndex(event.ordinal)
+            actions.navigateToText()
+          },
+          modifier =
+            Modifier.fillMaxWidth()
+              .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
           border = BorderStroke(2.dp, event.color),
+          shape = MaterialTheme.shapes.medium,
         ) {
           Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(all = 10.dp),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
           ) {
@@ -76,13 +77,4 @@ internal fun ScheduleScreen(
       }
     }
   }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF0F1416)
-@Composable
-@SuppressLint("ViewModelConstructorInComposable")
-internal fun ScheduleScreenPreview() {
-  val scheduleUi = ScheduleUi(emptyList())
-  val flow = flowOf(scheduleUi)
-  HeliosTheme { ScheduleScreen(actions = object : ScheduleScreenActions {}, scheduleUiFlow = flow) }
 }
