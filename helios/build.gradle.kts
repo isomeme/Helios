@@ -152,6 +152,10 @@ dependencies {
 
   implementation("com.github.jeziellago:compose-markdown:0.5.7")
 
+  // Accompanist (permission management)
+
+  implementation("com.google.accompanist:accompanist-permissions:0.37.3")
+
   // Logging
 
   implementation("com.jakewharton.timber:timber:5.0.1")

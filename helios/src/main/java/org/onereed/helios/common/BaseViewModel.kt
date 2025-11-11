@@ -3,7 +3,7 @@ package org.onereed.helios.common
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.StateFlow
-import org.onereed.helios.common.FlowUtils.mapState
+import org.onereed.helios.common.FlowUtil.mapState
 
 /** See https://proandroiddev.com/clean-stateflow-transformations-in-kotlin-608f4c7de5ab */
 abstract class BaseViewModel: ViewModel() {

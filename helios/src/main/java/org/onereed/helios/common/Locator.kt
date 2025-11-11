@@ -56,7 +56,7 @@ class Locator @Inject constructor(@param:ApplicationContext val context: Context
     locationProvider.lastLocation
       .addOnSuccessListener { location ->
         Timber.d("Last location: $location")
-        sendLocation(location)
+        location?.let { sendLocation(it) }
       }
       .addOnFailureListener { e -> Timber.e(e, "Failed to get last location.") }
 

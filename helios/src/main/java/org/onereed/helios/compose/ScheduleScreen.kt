@@ -19,12 +19,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import java.time.Instant
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import org.onereed.helios.common.PlaceTime
+import org.onereed.helios.sun.SunSchedule
+import org.onereed.helios.sun.SunTimeSeries
+import org.onereed.helios.ui.theme.HeliosTheme
 
 interface ScheduleScreenActions {
-  fun navigateToText() {
+  fun navigateToTextIndex(index: Int) {
     // Default: Do nothing.
   }
 }
@@ -33,9 +42,9 @@ interface ScheduleScreenActions {
 internal fun ScheduleScreen(
   actions: ScheduleScreenActions,
   padding: PaddingValues = PaddingValues(),
-  scheduleViewModel: ScheduleViewModel = hiltViewModel(),
+  scheduleUiFlow: StateFlow<ScheduleUi> = hiltViewModel<ScheduleViewModel>().scheduleUiFlow,
 ) {
-  val scheduleUi by scheduleViewModel.scheduleUiFlow.collectAsState(ScheduleUi(emptyList()))
+  val scheduleUi by scheduleUiFlow.collectAsState()
 
   Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
     Column(
@@ -50,10 +59,7 @@ internal fun ScheduleScreen(
 
       scheduleUi.events.forEach { event ->
         OutlinedCard(
-          onClick = {
-            scheduleViewModel.selectTextIndex(event.ordinal)
-            actions.navigateToText()
-          },
+          onClick = { actions.navigateToTextIndex(event.ordinal) },
           modifier =
             Modifier.fillMaxWidth()
               .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
@@ -76,5 +82,22 @@ internal fun ScheduleScreen(
         }
       }
     }
+  }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0F1416)
+@Composable
+fun ScheduleScreenPreview() {
+  val sunResources = SunResources.load(LocalContext.current)
+  val hereNow = PlaceTime(lat = 34.0, lon = -118.0, alt = 0.0, instant = Instant.now())
+  val sunTimeSeries = SunTimeSeries.compute(hereNow)
+  val sunSchedule = SunSchedule.compute(sunTimeSeries)
+  val scheduleUi = ScheduleUi.Factory(LocalContext.current, sunResources).create(sunSchedule)
+
+  HeliosTheme {
+    ScheduleScreen(
+      actions = object : ScheduleScreenActions {},
+      scheduleUiFlow = MutableStateFlow(scheduleUi),
+    )
   }
 }

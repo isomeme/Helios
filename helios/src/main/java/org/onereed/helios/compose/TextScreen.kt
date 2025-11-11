@@ -1,6 +1,5 @@
 package org.onereed.helios.compose
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,14 +34,23 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import dev.jeziellago.compose.markdowntext.MarkdownText
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.onereed.helios.ui.theme.HeliosTheme
+
+interface TextScreenActions {
+  fun selectIndex(index: Int) {
+    // Default: Do nothing.
+  }
+}
 
 @Composable
 internal fun TextScreen(
+  actions: TextScreenActions,
   padding: PaddingValues = PaddingValues(),
-  textViewModel: TextViewModel = hiltViewModel(),
+  textUiFlow: StateFlow<TextUi> = hiltViewModel<TextViewModel>().textUiFlow,
 ) {
-  val textUi by textViewModel.textUiFlow.collectAsState()
+  val textUi by textUiFlow.collectAsState()
 
   // These state values are internal to TextScreen.
 
@@ -80,7 +88,7 @@ internal fun TextScreen(
               onClick = {
                 eventMenuExpanded = false
                 haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                textViewModel.selectIndex(eventUi.index)
+                actions.selectIndex(eventUi.index)
               },
               colors =
                 MenuDefaults.itemColors(
@@ -117,12 +125,11 @@ internal fun TextScreen(
 
 @Preview(showBackground = true, backgroundColor = 0xFF0F1416)
 @Composable
-@SuppressLint("ViewModelConstructorInComposable")
 fun TextScreenPreview() {
   val sunResources = SunResources.load(LocalContext.current)
-  val stateHolder = TextStateHolder()
-  stateHolder.selectIndex(2) // Sunset
+  val textUi = TextUi.create(sunResources, 2) // Sunset
 
-  val textViewModel = TextViewModel(stateHolder, sunResources)
-  HeliosTheme { TextScreen(textViewModel = textViewModel) }
+  HeliosTheme {
+    TextScreen(actions = object : TextScreenActions {}, textUiFlow = MutableStateFlow(textUi))
+  }
 }

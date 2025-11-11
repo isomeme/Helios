@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,7 +21,10 @@ import org.onereed.helios.ui.theme.HeliosTheme
 
 @OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
 @Composable
-fun HeliosApp(appState: HeliosAppState = rememberHeliosAppState()) {
+fun HeliosApp(
+  appState: HeliosAppState = rememberHeliosAppState(),
+  heliosAppViewModel: HeliosAppViewModel = hiltViewModel(),
+) {
 
   // Read the @Composable property here, in a @Composable context.
   val currentDestination = appState.currentDestination
@@ -46,14 +50,23 @@ fun HeliosApp(appState: HeliosAppState = rememberHeliosAppState()) {
         composable<Screen.Schedule> {
           val actions =
             object : ScheduleScreenActions {
-              override fun navigateToText() {
+              override fun navigateToTextIndex(index: Int) {
+                heliosAppViewModel.selectTextIndex(index)
                 appState.navigateTo(Screen.Text)
               }
             }
           ScheduleScreen(actions = actions)
         }
 
-        composable<Screen.Text> { TextScreen() }
+        composable<Screen.Text> {
+          val actions =
+            object : TextScreenActions {
+              override fun selectIndex(index: Int) {
+                heliosAppViewModel.selectTextIndex(index)
+              }
+            }
+          TextScreen(actions = actions)
+        }
 
         composable<Screen.Compass> { Greeting("compass") }
 

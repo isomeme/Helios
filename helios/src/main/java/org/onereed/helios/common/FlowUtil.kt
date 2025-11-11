@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
 /** See https://proandroiddev.com/clean-stateflow-transformations-in-kotlin-608f4c7de5ab */
-object FlowUtils {
+object FlowUtil {
 
   private val FLOW_TIMEOUT_MILLIS = 5.seconds.inWholeMilliseconds
 

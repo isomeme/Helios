@@ -10,6 +10,9 @@ import android.text.format.DateUtils.formatDateTime
 import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import org.onereed.helios.sun.SunSchedule
 
 data class ScheduleUi(val events: List<EventUi>) {
@@ -23,9 +26,15 @@ data class ScheduleUi(val events: List<EventUi>) {
     val key: Long,
   )
 
-  companion object {
+  @Singleton
+  class Factory
+  @Inject
+  constructor(
+    @param:ApplicationContext private val context: Context,
+    private val sunResources: SunResources,
+  ) {
 
-    fun create(context: Context, sunSchedule: SunSchedule, sunResources: SunResources): ScheduleUi {
+    fun create(sunSchedule: SunSchedule): ScheduleUi {
       val events =
         sunSchedule.events.map {
           val ordinal = it.sunEventType.ordinal
@@ -45,12 +54,15 @@ data class ScheduleUi(val events: List<EventUi>) {
       return ScheduleUi(events)
     }
 
-    private const val DATE_FORMAT_FLAGS =
-      0 or
-        FORMAT_SHOW_DATE or
-        FORMAT_NUMERIC_DATE or
-        FORMAT_SHOW_WEEKDAY or
-        FORMAT_SHOW_TIME or
-        FORMAT_ABBREV_ALL
+    companion object {
+
+      private const val DATE_FORMAT_FLAGS =
+        0 or
+          FORMAT_SHOW_DATE or
+          FORMAT_NUMERIC_DATE or
+          FORMAT_SHOW_WEEKDAY or
+          FORMAT_SHOW_TIME or
+          FORMAT_ABBREV_ALL
+    }
   }
 }
