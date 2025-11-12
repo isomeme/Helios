@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import dagger.hilt.android.AndroidEntryPoint
-import org.onereed.helios.datasource.LocationPermissionManager.Companion.startLocationPermissionManager
 import org.onereed.helios.ui.theme.HeliosTheme
 import org.onereed.helios.util.LifecycleLogger
 
@@ -18,8 +17,6 @@ class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    startLocationPermissionManager()
 
     enableEdgeToEdge()
     setContent { HeliosTheme { HeliosApp() } }

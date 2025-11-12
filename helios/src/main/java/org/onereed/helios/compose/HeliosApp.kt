@@ -1,5 +1,6 @@
 package org.onereed.helios.compose
 
+import android.Manifest
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,14 +18,26 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import org.onereed.helios.ui.theme.HeliosTheme
+import timber.log.Timber
 
-@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
+@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class, ExperimentalPermissionsApi::class)
 @Composable
 fun HeliosApp(
   appState: HeliosAppState = rememberHeliosAppState(),
   heliosAppViewModel: HeliosAppViewModel = hiltViewModel(),
 ) {
+  Timber.d("HeliosApp start")
+
+  val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+
+  if (!locationPermissionState.status.isGranted) {
+    PermissionScreen(locationPermissionState)
+    return
+  }
 
   // Read the @Composable property here, in a @Composable context.
   val currentDestination = appState.currentDestination

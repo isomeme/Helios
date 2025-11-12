@@ -82,9 +82,4 @@ class LocationPermissionManager(private val activity: ComponentActivity) {
       Timber.d("Launched use-settings dialog.")
     }
   }
-
-  companion object {
-
-    fun ComponentActivity.startLocationPermissionManager() = LocationPermissionManager(this)
-  }
 }
