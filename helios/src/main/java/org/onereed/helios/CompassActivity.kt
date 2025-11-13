@@ -24,8 +24,8 @@ import com.google.android.gms.location.LocationServices
 import java.util.EnumSet
 import java.util.concurrent.Executor
 import kotlinx.coroutines.launch
-import org.onereed.helios.common.DirectionUtil.ang
-import org.onereed.helios.common.DirectionUtil.arc
+import org.onereed.helios.common.ang
+import org.onereed.helios.common.arc
 import org.onereed.helios.databinding.ActivityCompassBinding
 import org.onereed.helios.datasource.PlaceTimeDataSource
 import org.onereed.helios.sun.SunCompass

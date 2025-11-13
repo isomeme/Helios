@@ -1,12 +1,12 @@
 package org.onereed.helios.sun
 
-import org.onereed.helios.common.DirectionUtil.arc
-import org.onereed.helios.common.PlaceTime
-import org.shredzone.commons.suncalc.SunPosition
-import timber.log.Timber
 import java.time.Duration
 import java.time.Instant
 import java.util.EnumMap
+import org.onereed.helios.common.PlaceTime
+import org.onereed.helios.common.arc
+import org.shredzone.commons.suncalc.SunPosition
+import timber.log.Timber
 
 data class SunCompass(
   val sunAzimuth: Double,
@@ -54,6 +54,5 @@ data class SunCompass(
 
     private fun PlaceTime.computeSunAzimuth(): Double =
       SunPosition.compute().at(lat, lon).elevation(alt).on(instant).execute().azimuth
-
   }
 }

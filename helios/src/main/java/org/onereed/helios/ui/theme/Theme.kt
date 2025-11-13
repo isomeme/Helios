@@ -280,5 +280,5 @@ fun HeliosTheme(
 
   Timber.d("Would it be dark theme? %s", colorScheme == darkScheme)
 
-  MaterialTheme(colorScheme = darkScheme, typography = AppTypography, content = content)
+  MaterialTheme(colorScheme = colorScheme, typography = AppTypography, content = content)
 }

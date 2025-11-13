@@ -10,7 +10,6 @@ import android.text.format.DateUtils.FORMAT_SHOW_WEEKDAY
 import android.text.format.DateUtils.formatDateTime
 import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,7 +21,7 @@ data class ScheduleUi(val events: List<EventUi>) {
     @param:DrawableRes val iconRes: Int,
     val name: String,
     val timeText: String,
-    val timeFontWeight: FontWeight,
+    val isClosestEvent: Boolean,
     val ordinal: Int,
     val key: Long,
   )
@@ -46,7 +45,7 @@ data class ScheduleUi(val events: List<EventUi>) {
             iconRes = eventSet.iconRes,
             name = eventSet.name,
             timeText = formatDateTime(context, it.instant.toEpochMilli(), DATE_FORMAT_FLAGS),
-            timeFontWeight = if (it.isClosestEvent) FontWeight.Bold else FontWeight.Normal,
+            isClosestEvent = it.isClosestEvent,
             ordinal = ordinal,
             key = it.weakId,
           )
