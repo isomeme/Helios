@@ -1,6 +1,7 @@
 package org.onereed.helios.compose
 
 import android.Manifest
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -102,6 +103,8 @@ fun GreetingPreview() {
 
 @Preview
 @Composable
+@SuppressLint("ViewModelConstructorInComposable")
 fun HeliosAppPreview() {
-  HeliosTheme { HeliosApp() }
+  val heliosAppViewModel = HeliosAppViewModel(TextStateHolder())
+  HeliosTheme { HeliosApp(heliosAppViewModel = heliosAppViewModel) }
 }

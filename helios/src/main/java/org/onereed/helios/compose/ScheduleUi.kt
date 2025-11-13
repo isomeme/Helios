@@ -2,6 +2,7 @@ package org.onereed.helios.compose
 
 import android.content.Context
 import android.text.format.DateUtils.FORMAT_ABBREV_ALL
+import android.text.format.DateUtils.FORMAT_NO_YEAR
 import android.text.format.DateUtils.FORMAT_NUMERIC_DATE
 import android.text.format.DateUtils.FORMAT_SHOW_DATE
 import android.text.format.DateUtils.FORMAT_SHOW_TIME
@@ -60,6 +61,7 @@ data class ScheduleUi(val events: List<EventUi>) {
         0 or
           FORMAT_SHOW_DATE or
           FORMAT_NUMERIC_DATE or
+          FORMAT_NO_YEAR or
           FORMAT_SHOW_WEEKDAY or
           FORMAT_SHOW_TIME or
           FORMAT_ABBREV_ALL

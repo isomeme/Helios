@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -16,7 +17,6 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Instant
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -46,7 +47,7 @@ internal fun ScheduleScreen(
   padding: PaddingValues = PaddingValues(),
   scheduleUiFlow: StateFlow<ScheduleUi> = hiltViewModel<ScheduleViewModel>().scheduleUiFlow,
 ) {
-  val scheduleUi by scheduleUiFlow.collectAsState()
+  val scheduleUi by scheduleUiFlow.collectAsStateWithLifecycle()
 
   Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
     Column(
@@ -65,7 +66,12 @@ internal fun ScheduleScreen(
           modifier =
             Modifier.fillMaxWidth()
               .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
-          border = BorderStroke(2.dp, event.color),
+          border = BorderStroke(1.dp, event.color),
+          colors =
+            CardDefaults.outlinedCardColors(
+              containerColor = event.color.copy(alpha = 0.1f),
+              contentColor = MaterialTheme.colorScheme.onSurface,
+            ),
           shape = MaterialTheme.shapes.medium,
         ) {
           Row(
@@ -77,7 +83,7 @@ internal fun ScheduleScreen(
               painter = painterResource(event.iconRes),
               contentDescription = event.name,
               tint = event.color,
-              modifier = Modifier.padding(end = 20.dp),
+              modifier = Modifier.padding(start = 5.dp, end = 20.dp),
             )
             Text(text = event.timeText, fontWeight = event.timeFontWeight)
           }
