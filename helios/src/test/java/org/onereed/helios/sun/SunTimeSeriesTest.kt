@@ -24,7 +24,7 @@ class SunTimeSeriesTest {
   fun testEventOverlap() {
     val instant = Instant.parse("2020-05-09T02:30:15Z")
     val placeTime = PlaceTime(34.0, -118.5, 0.0, instant)
-    val events = SunTimeSeries.compute(placeTime).events
+    val events = SunTimeSeries(placeTime).events
 
     assertThat(events).hasSize(5)
 
@@ -43,7 +43,7 @@ class SunTimeSeriesTest {
   fun testEventGap() {
     val instant = Instant.parse("2020-05-18T02:50:50Z")
     val placeTime = PlaceTime(34.0, -118.5, 0.0, instant)
-    val events = SunTimeSeries.compute(placeTime).events
+    val events = SunTimeSeries(placeTime).events
 
     assertThat(events).hasSize(5)
 

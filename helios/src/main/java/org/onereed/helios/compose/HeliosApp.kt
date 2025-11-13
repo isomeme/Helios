@@ -84,7 +84,7 @@ fun HeliosApp(
 
         composable<Screen.Compass> { Greeting("compass") }
 
-        composable<Screen.Help> { Greeting("help") }
+        composable<Screen.Settings> { Greeting("settings") }
       }
     }
   }
