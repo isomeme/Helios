@@ -101,10 +101,10 @@ internal fun ScheduleScreen(
 @Preview(showBackground = true, backgroundColor = 0xFFDDDDDD)
 @Composable
 fun ScheduleScreenPreview() {
-  val sunResources = SunResources.load(LocalContext.current)
+  val sunResources = SunResources(LocalContext.current)
   val hereNow = PlaceTime(lat = 34.0, lon = -118.0, alt = 0.0, instant = Instant.now())
-  val sunTimeSeries = SunTimeSeries.compute(hereNow)
-  val sunSchedule = SunSchedule.compute(sunTimeSeries)
+  val sunTimeSeries = SunTimeSeries(hereNow)
+  val sunSchedule = SunSchedule(sunTimeSeries)
   val scheduleUi = ScheduleUi.Factory(LocalContext.current, sunResources).create(sunSchedule)
 
   HeliosTheme {

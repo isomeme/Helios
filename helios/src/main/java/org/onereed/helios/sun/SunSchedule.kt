@@ -3,7 +3,7 @@ package org.onereed.helios.sun
 import java.time.Duration
 import java.time.Instant
 
-data class SunSchedule(val events: List<Event>) {
+class SunSchedule(sunTimeSeries: SunTimeSeries) {
   data class Event(
     val sunEventType: SunEventType,
     val instant: Instant,
@@ -11,25 +11,25 @@ data class SunSchedule(val events: List<Event>) {
     val weakId: Long,
   )
 
+  val events: List<Event>
+
+  init {
+    val closestEventIndex =
+      getClosestEventIndex(
+        sunTimeSeries.placeTime.instant,
+        sunTimeSeries.events[0].instant,
+        sunTimeSeries.events[1].instant,
+      )
+
+    this.events =
+      sunTimeSeries.events.mapIndexed { index, event ->
+        val isClosestEvent = index == closestEventIndex
+        val weakId = weakIdOf(event)
+        Event(event.sunEventType, event.instant, isClosestEvent, weakId)
+      }
+  }
+
   companion object {
-
-    fun compute(sunTimeSeries: SunTimeSeries): SunSchedule {
-      val closestEventIndex =
-        getClosestEventIndex(
-          sunTimeSeries.placeTime.instant,
-          sunTimeSeries.events[0].instant,
-          sunTimeSeries.events[1].instant,
-        )
-
-      val events =
-        sunTimeSeries.events.mapIndexed { index, event ->
-          val isClosestEvent = index == closestEventIndex
-          val weakId = weakIdOf(event)
-          Event(event.sunEventType, event.instant, isClosestEvent, weakId)
-        }
-
-      return SunSchedule(events)
-    }
 
     private fun getClosestEventIndex(now: Instant, t0: Instant, t1: Instant): Int =
       if (Duration.between(t0, now) < Duration.between(now, t1)) 0 else 1

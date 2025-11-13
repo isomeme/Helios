@@ -4,49 +4,50 @@ import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.res.use
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.IOException
 import java.io.UncheckedIOException
 import java.nio.charset.StandardCharsets.UTF_8
+import javax.inject.Inject
+import javax.inject.Singleton
 import org.onereed.helios.R
 import org.onereed.helios.sun.SunEventType
 
-data class SunResources(val eventSets: List<EventSet>) {
+@Singleton
+class SunResources @Inject constructor(@ApplicationContext context: Context) {
   data class EventSet(
     val name: String,
     val fgColor: Color,
-    val bgColor: Color,
     @param:DrawableRes val iconRes: Int,
     val rubric: String,
   )
 
+  val eventSets: List<EventSet>
+
+  init {
+    val resources = context.resources
+    val names = resources.getStringArray(R.array.sun_event_names).toList()
+    val fgColors = resources.getIntArray(R.array.sun_event_fg_colors).map(::Color)
+
+    val icons =
+      resources.obtainTypedArray(R.array.sun_event_icons).use { typedArray ->
+        sunEventOrdinals.map { typedArray.getResourceId(it, 0) }
+      }
+
+    val rubricTemplate = readRubricTemplate(context)
+    val slotLists = rubricMadLib.map { resources.getStringArray(it) }
+
+    val rubrics =
+      sunEventOrdinals.map { event ->
+        val subs = slotLists.map { it[event] }.toTypedArray()
+        rubricTemplate.format(*subs)
+      }
+
+    this.eventSets =
+      sunEventOrdinals.map { EventSet(names[it], fgColors[it], icons[it], rubrics[it]) }
+  }
+
   companion object {
-
-    fun load(context: Context): SunResources {
-      val resources = context.resources
-      val names = resources.getStringArray(R.array.sun_event_names).toList()
-      val fgColors = resources.getIntArray(R.array.sun_event_fg_colors).map(::Color)
-      val bgColors = resources.getIntArray(R.array.sun_event_bg_colors).map(::Color)
-      val icons =
-        resources.obtainTypedArray(R.array.sun_event_icons).use { typedArray ->
-          sunEventOrdinals.map { typedArray.getResourceId(it, 0) }
-        }
-
-      val rubricTemplate = readRubricTemplate(context)
-      val slotLists = rubricMadLib.map { resources.getStringArray(it) }
-
-      val rubrics =
-        sunEventOrdinals.map { event ->
-          val subs = slotLists.map { it[event] }.toTypedArray()
-          rubricTemplate.format(*subs)
-        }
-
-      val eventSets =
-        sunEventOrdinals.map {
-          EventSet(names[it], fgColors[it], bgColors[it], icons[it], rubrics[it])
-        }
-
-      return SunResources(eventSets)
-    }
 
     private fun readRubricTemplate(context: Context): String {
       try {

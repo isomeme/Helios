@@ -7,7 +7,7 @@ import org.onereed.helios.common.BaseViewModel
 @HiltViewModel
 class TextViewModel
 @Inject
-constructor(textStateHolder: TextStateHolder, sunResources: SunResources) : BaseViewModel() {
+constructor(textStateHolder: TextStateHolder, uiFactory: TextUi.Factory) : BaseViewModel() {
 
-  val textUiFlow = textStateHolder.selectedIndexFlow.mapState { TextUi.create(sunResources, it) }
+  val textUiFlow = textStateHolder.selectedIndexFlow.mapState { uiFactory.create(it) }
 }

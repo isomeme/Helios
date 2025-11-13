@@ -2,6 +2,8 @@ package org.onereed.helios.compose
 
 import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.Color
+import javax.inject.Inject
+import javax.inject.Singleton
 
 data class TextUi(val menu: List<EventUi>, val selected: EventUi, val rubric: String) {
   data class EventUi(
@@ -12,12 +14,10 @@ data class TextUi(val menu: List<EventUi>, val selected: EventUi, val rubric: St
     val index: Int,
   )
 
-  companion object {
+  @Singleton
+  class Factory @Inject constructor(private val sunResources: SunResources) {
 
-    fun create(
-      sunResources: SunResources,
-      selectedIndex: Int,
-    ): TextUi {
+    fun create(selectedIndex: Int): TextUi {
       val menu =
         sunResources.eventSets.mapIndexed { ix, eventSet ->
           EventUi(

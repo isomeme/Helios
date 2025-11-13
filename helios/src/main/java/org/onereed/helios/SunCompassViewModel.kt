@@ -22,7 +22,7 @@ class SunCompassViewModel : ViewModel() {
     Timber.d("placeTime=$placeTime")
 
     viewModelScope.launch(Dispatchers.Default) {
-      val sunTimeSeries = SunTimeSeries.compute(placeTime)
+      val sunTimeSeries = SunTimeSeries(placeTime)
       val sunCompass = SunCompass.compute(sunTimeSeries)
       _sunCompassFlow.emit(sunCompass)
     }

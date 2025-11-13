@@ -13,14 +13,14 @@ import org.onereed.helios.sun.SunSchedule
 import org.onereed.helios.sun.SunTimeSeries
 
 @HiltViewModel
-class ScheduleViewModel @Inject constructor(locator: Locator, factory: ScheduleUi.Factory) :
+class ScheduleViewModel @Inject constructor(locator: Locator, uiFactory: ScheduleUi.Factory) :
   ViewModel() {
 
   val scheduleUiFlow =
     locator.flow
-      .map(SunTimeSeries::compute)
-      .map(SunSchedule::compute)
-      .map(factory::create)
+      .map(::SunTimeSeries)
+      .map(::SunSchedule)
+      .map(uiFactory::create)
       .stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(FLOW_TIMEOUT_MILLIS),

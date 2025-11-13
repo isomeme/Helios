@@ -5,11 +5,28 @@ import java.time.Instant
 import org.onereed.helios.common.PlaceTime
 import org.shredzone.commons.suncalc.SunTimes
 
-data class SunTimeSeries(val events: List<Event>, val placeTime: PlaceTime) {
+class SunTimeSeries(val placeTime: PlaceTime) {
   data class Event(val sunEventType: SunEventType, val instant: Instant) : Comparable<Event> {
-
     override fun compareTo(other: Event) =
       compareValuesBy(this, other, { it.instant }, { it.sunEventType })
+  }
+
+  val events: List<Event>
+
+  init {
+    val futureSunTimes = placeTime.computeSunTimes(FUTURE_LIMIT)
+    val futureEvents = toEvents(futureSunTimes)
+    val nextEvent = futureEvents.first()
+
+    val earlierPlaceTime = placeTime.minusDuration(PRECEDING_OFFSET)
+    val pastSunTimes = earlierPlaceTime.computeSunTimes(PRECEDING_LIMIT)
+    val pastEvents = toEvents(pastSunTimes)
+    val lastEvent =
+      pastEvents
+        .filter { it.sunEventType != nextEvent.sunEventType }
+        .last { it.instant.isBefore(placeTime.instant) }
+
+    this.events = listOf(lastEvent) + futureEvents
   }
 
   companion object {
@@ -31,23 +48,6 @@ data class SunTimeSeries(val events: List<Event>, val placeTime: PlaceTime) {
 
     /** See [PRECEDING_OFFSET]. */
     private val PRECEDING_LIMIT = Duration.ofHours(14L)
-
-    fun compute(placeTime: PlaceTime): SunTimeSeries {
-      val futureSunTimes = placeTime.computeSunTimes(FUTURE_LIMIT)
-      val futureEvents = toEvents(futureSunTimes)
-      val nextEvent = futureEvents.first()
-
-      val earlierPlaceTime = placeTime.minusDuration(PRECEDING_OFFSET)
-      val pastSunTimes = earlierPlaceTime.computeSunTimes(PRECEDING_LIMIT)
-      val pastEvents = toEvents(pastSunTimes)
-      val lastEvent =
-        pastEvents
-          .filter { it.sunEventType != nextEvent.sunEventType }
-          .last { it.instant.isBefore(placeTime.instant) }
-
-      val events = listOf(lastEvent) + futureEvents
-      return SunTimeSeries(events, placeTime)
-    }
 
     private fun PlaceTime.computeSunTimes(limit: Duration): SunTimes =
       SunTimes.compute().at(lat, lon).elevation(alt).on(instant).limit(limit).execute()

@@ -22,8 +22,8 @@ class SunScheduleViewModel : ViewModel() {
     Timber.d("placeTime=$placeTime")
 
     viewModelScope.launch(Dispatchers.Default) {
-      val sunTimeSeries = SunTimeSeries.compute(placeTime)
-      val sunSchedule = SunSchedule.compute(sunTimeSeries)
+      val sunTimeSeries = SunTimeSeries(placeTime)
+      val sunSchedule = SunSchedule(sunTimeSeries)
       _sunScheduleFlow.emit(sunSchedule)
     }
   }

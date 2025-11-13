@@ -128,8 +128,8 @@ internal fun TextScreen(
 @Preview(showBackground = true, backgroundColor = 0xFF0F1416)
 @Composable
 fun TextScreenPreview() {
-  val sunResources = SunResources.load(LocalContext.current)
-  val textUi = TextUi.create(sunResources, 2) // Sunset
+  val sunResources = SunResources(LocalContext.current)
+  val textUi = TextUi.Factory(sunResources).create(2) // Sunset
 
   HeliosTheme {
     TextScreen(actions = object : TextScreenActions {}, textUiFlow = MutableStateFlow(textUi))
