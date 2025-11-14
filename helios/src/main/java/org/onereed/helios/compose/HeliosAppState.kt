@@ -11,10 +11,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 
 @Stable // Important for Compose performance
-class HeliosAppState(val navController: NavHostController) {
+class HeliosAppState(val navHostController: NavHostController) {
 
   val currentDestination: NavDestination?
-    @Composable get() = navController.currentBackStackEntryAsState().value?.destination
+    @Composable get() = navHostController.currentBackStackEntryAsState().value?.destination
 
   /**
    * Navigation logic for top-level screens in the navigation suite. This pops up to the start
@@ -25,7 +25,7 @@ class HeliosAppState(val navController: NavHostController) {
 
       // Pop up to the start destination of the graph to avoid building up a large stack of
       // destinations on the back stack as users select items.
-      popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+      popUpTo(navHostController.graph.findStartDestination().id) { saveState = true }
 
       // Avoid multiple copies of the same destination when re-selecting the same item.
       launchSingleTop = true
@@ -34,7 +34,7 @@ class HeliosAppState(val navController: NavHostController) {
       restoreState = true
     }
 
-    navController.navigate(screen, topLevelNavOptions)
+    navHostController.navigate(screen, topLevelNavOptions)
   }
 }
 

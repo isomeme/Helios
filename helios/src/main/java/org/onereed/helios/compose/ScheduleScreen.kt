@@ -17,7 +17,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,20 +32,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.onereed.helios.common.PlaceTime
 import org.onereed.helios.common.blend
+import org.onereed.helios.compose.NavActions.Companion.NavActionsStub
 import org.onereed.helios.sun.SunSchedule
 import org.onereed.helios.sun.SunTimeSeries
 import org.onereed.helios.ui.theme.HeliosTheme
 
-@Stable
-interface ScheduleScreenActions {
-  fun navigateToTextIndex(index: Int) {
-    // Default: Do nothing.
-  }
-}
-
 @Composable
 internal fun ScheduleScreen(
-  actions: ScheduleScreenActions,
+  navActions: NavActions,
   padding: PaddingValues = PaddingValues(),
   scheduleUiFlow: StateFlow<ScheduleUi> = hiltViewModel<ScheduleViewModel>().scheduleUiFlow,
 ) {
@@ -67,7 +60,7 @@ internal fun ScheduleScreen(
         ElevatedCard(
           elevation =
             CardDefaults.cardElevation(defaultElevation = if (event.isClosestEvent) 6.dp else 3.dp),
-          onClick = { actions.navigateToTextIndex(event.ordinal) },
+          onClick = { navActions.navigateToTextIndex(event.ordinal) },
           modifier = Modifier.fillMaxWidth().wrapContentHeight(),
           colors =
             CardDefaults.elevatedCardColors(
@@ -109,7 +102,7 @@ fun ScheduleScreenPreview() {
 
   HeliosTheme {
     ScheduleScreen(
-      actions = object : ScheduleScreenActions {},
+      navActions = NavActionsStub,
       scheduleUiFlow = MutableStateFlow(scheduleUi),
     )
   }

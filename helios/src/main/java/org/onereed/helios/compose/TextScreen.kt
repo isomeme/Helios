@@ -18,7 +18,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,18 +36,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.onereed.helios.compose.NavActions.Companion.NavActionsStub
 import org.onereed.helios.ui.theme.HeliosTheme
-
-@Stable
-interface TextScreenActions {
-  fun selectIndex(index: Int) {
-    // Default: Do nothing.
-  }
-}
 
 @Composable
 internal fun TextScreen(
-  actions: TextScreenActions,
+  navActions: NavActions,
   padding: PaddingValues = PaddingValues(),
   textUiFlow: StateFlow<TextUi> = hiltViewModel<TextViewModel>().textUiFlow,
 ) {
@@ -90,7 +83,7 @@ internal fun TextScreen(
               onClick = {
                 eventMenuExpanded = false
                 haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                actions.selectIndex(eventUi.index)
+                navActions.selectTextIndex(eventUi.index)
               },
               colors =
                 MenuDefaults.itemColors(
@@ -132,6 +125,6 @@ fun TextScreenPreview() {
   val textUi = TextUi.Factory(sunResources).create(2) // Sunset
 
   HeliosTheme {
-    TextScreen(actions = object : TextScreenActions {}, textUiFlow = MutableStateFlow(textUi))
+    TextScreen(navActions = NavActionsStub, textUiFlow = MutableStateFlow(textUi))
   }
 }
