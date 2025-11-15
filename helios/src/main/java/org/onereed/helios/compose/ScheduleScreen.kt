@@ -28,8 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Instant
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import org.onereed.helios.common.PlaceTime
 import org.onereed.helios.common.blend
 import org.onereed.helios.compose.NavActions.Companion.NavActionsStub
@@ -39,13 +37,17 @@ import org.onereed.helios.ui.theme.HeliosTheme
 
 @Composable
 internal fun ScheduleScreen(
-  navActions: NavActions,
-  padding: PaddingValues = PaddingValues(),
-  scheduleUiFlow: StateFlow<ScheduleUi> = hiltViewModel<ScheduleViewModel>().scheduleUiFlow,
+  actions: NavActions,
+  scheduleViewModel: ScheduleViewModel = hiltViewModel(),
 ) {
-  val scheduleUi by scheduleUiFlow.collectAsStateWithLifecycle()
+  val scheduleUi by scheduleViewModel.scheduleUiFlow.collectAsStateWithLifecycle()
 
-  Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+  StatelessScheduleScreen(actions = actions, scheduleUi = scheduleUi)
+}
+
+@Composable
+fun StatelessScheduleScreen(actions: NavActions, scheduleUi: ScheduleUi) {
+  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
     if (scheduleUi.events.isEmpty()) {
       CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
       return@Box
@@ -60,7 +62,7 @@ internal fun ScheduleScreen(
         ElevatedCard(
           elevation =
             CardDefaults.cardElevation(defaultElevation = if (event.isClosestEvent) 6.dp else 3.dp),
-          onClick = { navActions.navigateToTextIndex(event.ordinal) },
+          onClick = { actions.navigateToTextIndex(event.ordinal) },
           modifier = Modifier.fillMaxWidth().wrapContentHeight(),
           colors =
             CardDefaults.elevatedCardColors(
@@ -91,7 +93,7 @@ internal fun ScheduleScreen(
 }
 
 // 0xFF0F1416
-@Preview(showBackground = true, backgroundColor = 0xFFDDDDDD)
+@Preview(showBackground = true, backgroundColor = 0xFF808080)
 @Composable
 fun ScheduleScreenPreview() {
   val sunResources = SunResources(LocalContext.current)
@@ -100,10 +102,5 @@ fun ScheduleScreenPreview() {
   val sunSchedule = SunSchedule(sunTimeSeries)
   val scheduleUi = ScheduleUi.Factory(LocalContext.current, sunResources).create(sunSchedule)
 
-  HeliosTheme {
-    ScheduleScreen(
-      navActions = NavActionsStub,
-      scheduleUiFlow = MutableStateFlow(scheduleUi),
-    )
-  }
+  HeliosTheme { StatelessScheduleScreen(actions = NavActionsStub, scheduleUi = scheduleUi) }
 }

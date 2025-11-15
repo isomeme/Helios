@@ -1,8 +1,8 @@
 package org.onereed.helios.compose
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -34,29 +34,38 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jeziellago.compose.markdowntext.MarkdownText
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import org.onereed.helios.compose.NavActions.Companion.NavActionsStub
 import org.onereed.helios.ui.theme.HeliosTheme
 
 @Composable
-internal fun TextScreen(
-  navActions: NavActions,
-  padding: PaddingValues = PaddingValues(),
-  textUiFlow: StateFlow<TextUi> = hiltViewModel<TextViewModel>().textUiFlow,
-) {
-  val textUi by textUiFlow.collectAsStateWithLifecycle()
-
-  // These state values are internal to TextScreen.
-
-  var eventMenuExpanded by remember { mutableStateOf(false) }
+internal fun TextScreen(actions: NavActions, textViewModel: TextViewModel = hiltViewModel()) {
+  val textUi by textViewModel.textUiFlow.collectAsStateWithLifecycle()
   val scrollState = rememberScrollState()
-
-  val haptics = LocalHapticFeedback.current
+  var eventMenuExpanded by remember { mutableStateOf(false) }
 
   LaunchedEffect(textUi) { scrollState.scrollTo(0) }
 
-  Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+  StatelessTextScreen(
+    actions = actions,
+    textUi = textUi,
+    scrollState = scrollState,
+    eventMenuExpanded = eventMenuExpanded,
+  ) {
+    eventMenuExpanded = it
+  }
+}
+
+@Composable
+fun StatelessTextScreen(
+  actions: NavActions,
+  textUi: TextUi,
+  scrollState: ScrollState,
+  eventMenuExpanded: Boolean,
+  setEventMenuExpanded: (Boolean) -> Unit,
+) {
+  val haptics = LocalHapticFeedback.current
+
+  Column(modifier = Modifier.fillMaxSize()) {
     // Top of screen: select button on the left, title centered.
 
     Box(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(all = 10.dp)) {
@@ -64,7 +73,7 @@ internal fun TextScreen(
       // below the button.
 
       Column(modifier = Modifier.align(Alignment.CenterStart)) {
-        OutlinedButton(onClick = { eventMenuExpanded = true }) {
+        OutlinedButton(onClick = { setEventMenuExpanded(true) }) {
           Icon(
             painter = painterResource(id = textUi.selected.iconRes),
             tint = textUi.selected.color,
@@ -74,16 +83,16 @@ internal fun TextScreen(
 
         DropdownMenu(
           expanded = eventMenuExpanded,
-          onDismissRequest = { eventMenuExpanded = false },
+          onDismissRequest = { setEventMenuExpanded(false) },
           offset = DpOffset(0.dp, 10.dp),
         ) {
           textUi.menu.forEach { eventUi ->
             DropdownMenuItem(
               enabled = eventUi.enabled,
               onClick = {
-                eventMenuExpanded = false
+                setEventMenuExpanded(false)
                 haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                navActions.selectTextIndex(eventUi.index)
+                actions.selectTextIndex(eventUi.index)
               },
               colors =
                 MenuDefaults.itemColors(
@@ -118,13 +127,19 @@ internal fun TextScreen(
   }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0F1416)
+@Preview(showBackground = true, backgroundColor = 0xFF808080)
 @Composable
 fun TextScreenPreview() {
   val sunResources = SunResources(LocalContext.current)
   val textUi = TextUi.Factory(sunResources).create(2) // Sunset
 
   HeliosTheme {
-    TextScreen(navActions = NavActionsStub, textUiFlow = MutableStateFlow(textUi))
+    StatelessTextScreen(
+      actions = NavActionsStub,
+      textUi = textUi,
+      eventMenuExpanded = false,
+      scrollState = ScrollState(0),
+      setEventMenuExpanded = {},
+    )
   }
 }

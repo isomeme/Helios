@@ -1,6 +1,7 @@
 package org.onereed.helios.compose
 
 import android.Manifest
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -19,49 +21,51 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import timber.log.Timber
 
-@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class, ExperimentalPermissionsApi::class)
 @Composable
+@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class, ExperimentalPermissionsApi::class)
 fun HeliosApp(
   heliosAppState: HeliosAppState = rememberHeliosAppState(),
   heliosAppViewModel: HeliosAppViewModel = hiltViewModel(),
 ) {
   Timber.d("HeliosApp start")
 
+  // Marked as nullable, but expected to be non-null in runtime app.
+  val activity = LocalActivity.current
   val currentDestination = heliosAppState.currentDestination
+  val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
   val navActions =
-    object : NavActions() {
-      override fun navigateTo(screen: Screen) = heliosAppState.navigateTo(screen)
-
-      override fun selectTextIndex(index: Int) = heliosAppViewModel.selectTextIndex(index)
+    remember(heliosAppState, heliosAppViewModel) {
+      NavActions.create(heliosAppState, heliosAppViewModel)
     }
 
-  StatelessHeliosApp(
-    locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION),
-    navHostController = heliosAppState.navHostController,
-    isSelected = { currentDestination?.hasRoute(it::class) ?: false },
-    navActions = navActions,
-  )
+  val permissionActions =
+    remember(locationPermissionState, activity) {
+      PermissionActions.create(locationPermissionState, activity)
+    }
+
+  if (locationPermissionState.status.isGranted) {
+    StatelessHeliosApp(
+      navHostController = heliosAppState.navHostController,
+      isSelected = { currentDestination?.hasRoute(it::class) ?: false },
+      actions = navActions,
+    )
+  } else {
+    PermissionScreen(locationPermissionState = locationPermissionState, actions = permissionActions)
+  }
 }
 
-@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class, ExperimentalPermissionsApi::class)
 @Composable
+@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class, ExperimentalPermissionsApi::class)
 fun StatelessHeliosApp(
-  locationPermissionState: PermissionState,
   navHostController: NavHostController,
   isSelected: (Screen) -> Boolean,
-  navActions: NavActions,
+  actions: NavActions,
 ) {
-  if (!locationPermissionState.status.isGranted) {
-    PermissionScreen(locationPermissionState)
-    return
-  }
-
   NavigationSuiteScaffold(
     navigationSuiteItems = {
       Screen.TopLevelScreens.forEach { screen ->
@@ -69,7 +73,7 @@ fun StatelessHeliosApp(
           icon = { Icon(painterResource(screen.iconRes), stringResource(screen.titleRes)) },
           label = { Text(stringResource(screen.titleRes)) },
           selected = isSelected(screen),
-          onClick = { navActions.navigateTo(screen) },
+          onClick = { actions.navigateTo(screen) },
         )
       }
     }
@@ -80,9 +84,9 @@ fun StatelessHeliosApp(
         startDestination = Screen.Schedule,
         modifier = Modifier.padding(innerPadding),
       ) {
-        composable<Screen.Schedule> { ScheduleScreen(navActions = navActions) }
+        composable<Screen.Schedule> { ScheduleScreen(actions = actions) }
 
-        composable<Screen.Text> { TextScreen(navActions = navActions) }
+        composable<Screen.Text> { TextScreen(actions = actions) }
 
         composable<Screen.Compass> { Greeting("compass") }
 
