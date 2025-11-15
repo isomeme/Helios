@@ -54,21 +54,21 @@ fun StatelessScheduleScreen(actions: NavActions, scheduleUi: ScheduleUi) {
     }
 
     LazyColumn(
-      modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-      verticalArrangement = Arrangement.spacedBy(15.dp),
+      modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(horizontal = 30.dp),
+      verticalArrangement = Arrangement.spacedBy(25.dp),
       contentPadding = PaddingValues(20.dp),
     ) {
       items(items = scheduleUi.events, key = { it.key }) { event ->
         ElevatedCard(
+          onClick = { actions.navigateToTextIndex(event.ordinal) },
           elevation =
             CardDefaults.cardElevation(defaultElevation = if (event.isClosestEvent) 6.dp else 3.dp),
-          onClick = { actions.navigateToTextIndex(event.ordinal) },
-          modifier = Modifier.fillMaxWidth().wrapContentHeight(),
           colors =
             CardDefaults.elevatedCardColors(
-              containerColor = MaterialTheme.colorScheme.surface.blend(event.color, 0.15f),
-              contentColor = MaterialTheme.colorScheme.onSurface,
+              containerColor = MaterialTheme.colorScheme.surface.blend(event.color, 0.2f),
+              contentColor = MaterialTheme.colorScheme.onSurface.blend(event.color, 0.4f),
             ),
+          modifier = Modifier.fillMaxWidth().wrapContentHeight().animateItem(),
         ) {
           Row(
             modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(all = 10.dp),
@@ -93,7 +93,7 @@ fun StatelessScheduleScreen(actions: NavActions, scheduleUi: ScheduleUi) {
 }
 
 // 0xFF0F1416
-@Preview(showBackground = true, backgroundColor = 0xFF808080)
+@Preview(showBackground = true, backgroundColor = 0xFF0F1416)
 @Composable
 fun ScheduleScreenPreview() {
   val sunResources = SunResources(LocalContext.current)

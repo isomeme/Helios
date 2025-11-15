@@ -17,7 +17,7 @@ import org.onereed.helios.sun.SunEventType
 class SunResources @Inject constructor(@ApplicationContext context: Context) {
   data class EventSet(
     val name: String,
-    val fgColor: Color,
+    val color: Color,
     @param:DrawableRes val iconRes: Int,
     val rubric: String,
   )
@@ -27,7 +27,7 @@ class SunResources @Inject constructor(@ApplicationContext context: Context) {
   init {
     val resources = context.resources
     val names = resources.getStringArray(R.array.sun_event_names).toList()
-    val fgColors = resources.getIntArray(R.array.sun_event_fg_colors).map(::Color)
+    val colors = resources.getIntArray(R.array.sun_event_colors).map(::Color)
 
     val icons =
       resources.obtainTypedArray(R.array.sun_event_icons).use { typedArray ->
@@ -44,7 +44,7 @@ class SunResources @Inject constructor(@ApplicationContext context: Context) {
       }
 
     this.eventSets =
-      sunEventOrdinals.map { EventSet(names[it], fgColors[it], icons[it], rubrics[it]) }
+      sunEventOrdinals.map { EventSet(names[it], colors[it], icons[it], rubrics[it]) }
   }
 
   companion object {

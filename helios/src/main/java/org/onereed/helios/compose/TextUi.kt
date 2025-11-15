@@ -22,7 +22,7 @@ data class TextUi(val menu: List<EventUi>, val selected: EventUi, val rubric: St
         sunResources.eventSets.mapIndexed { ix, eventSet ->
           EventUi(
             iconRes = eventSet.iconRes,
-            color = eventSet.fgColor,
+            color = eventSet.color,
             name = eventSet.name,
             enabled = ix != selectedIndex,
             index = ix,

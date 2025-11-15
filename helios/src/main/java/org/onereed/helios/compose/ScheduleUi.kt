@@ -41,7 +41,7 @@ data class ScheduleUi(val events: List<EventUi>) {
           val eventSet = sunResources.eventSets[ordinal]
 
           EventUi(
-            color = eventSet.fgColor,
+            color = eventSet.color,
             iconRes = eventSet.iconRes,
             name = eventSet.name,
             timeText = formatDateTime(context, it.instant.toEpochMilli(), DATE_FORMAT_FLAGS),

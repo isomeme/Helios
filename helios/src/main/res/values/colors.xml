@@ -19,4 +19,10 @@
     <color name="helios_logo_bg">#82C9DC</color>
     <color name="toolbar_bg">#1A237E</color>
     <color name="screen_bg">#181828</color>
+
+    <color name="nadir">#30873B</color>
+    <color name="noon">#D2413F</color>
+    <color name="rise">#957100</color>
+    <color name="set">#0083C0</color>
+    <color name="sun">#7B7B00</color>
 </resources>
