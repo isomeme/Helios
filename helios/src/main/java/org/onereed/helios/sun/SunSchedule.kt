@@ -1,8 +1,9 @@
 package org.onereed.helios.sun
 
-import java.time.Duration
-import java.time.Instant
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+@OptIn(ExperimentalTime::class)
 class SunSchedule(sunTimeSeries: SunTimeSeries) {
   data class Event(
     val sunEventType: SunEventType,
@@ -32,7 +33,7 @@ class SunSchedule(sunTimeSeries: SunTimeSeries) {
   companion object {
 
     private fun getClosestEventIndex(now: Instant, t0: Instant, t1: Instant): Int =
-      if (Duration.between(t0, now) < Duration.between(now, t1)) 0 else 1
+      if ((now - t0) < (t1 - now)) 0 else 1
 
     /**
      * When applied with bitwise `and` to the sun event epoch second, yields a time bucket within
@@ -48,6 +49,6 @@ class SunSchedule(sunTimeSeries: SunTimeSeries) {
      * update.
      */
     private fun weakIdOf(event: SunTimeSeries.Event) =
-      (event.instant.epochSecond and EVENT_TIME_BUCKET_MASK) + event.sunEventType.ordinal
+      (event.instant.epochSeconds and EVENT_TIME_BUCKET_MASK) + event.sunEventType.ordinal
   }
 }

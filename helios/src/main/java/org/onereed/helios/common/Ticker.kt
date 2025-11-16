@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import timber.log.Timber
 
+@OptIn(ExperimentalTime::class)
 class Ticker(
   private val interval: Duration,
 ) {
 
-  @OptIn(ExperimentalTime::class)
   val flow =
     flow {
         var count = 0

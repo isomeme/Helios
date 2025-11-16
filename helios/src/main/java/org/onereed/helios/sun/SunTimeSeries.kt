@@ -1,10 +1,15 @@
 package org.onereed.helios.sun
 
-import java.time.Duration
-import java.time.Instant
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import kotlin.time.toJavaDuration
+import kotlin.time.toJavaInstant
 import org.onereed.helios.common.PlaceTime
 import org.shredzone.commons.suncalc.SunTimes
 
+@OptIn(ExperimentalTime::class)
 class SunTimeSeries(val placeTime: PlaceTime) {
   data class Event(val sunEventType: SunEventType, val instant: Instant) : Comparable<Event> {
     override fun compareTo(other: Event) =
@@ -18,13 +23,13 @@ class SunTimeSeries(val placeTime: PlaceTime) {
     val futureEvents = toEvents(futureSunTimes)
     val nextEvent = futureEvents.first()
 
-    val earlierPlaceTime = placeTime.minusDuration(PRECEDING_OFFSET)
+    val earlierPlaceTime = placeTime.copy(instant = placeTime.instant - PRECEDING_OFFSET)
     val pastSunTimes = earlierPlaceTime.computeSunTimes(PRECEDING_LIMIT)
     val pastEvents = toEvents(pastSunTimes)
     val lastEvent =
       pastEvents
         .filter { it.sunEventType != nextEvent.sunEventType }
-        .last { it.instant.isBefore(placeTime.instant) }
+        .last { it.instant < placeTime.instant }
 
     this.events = listOf(lastEvent) + futureEvents
   }
@@ -36,7 +41,7 @@ class SunTimeSeries(val placeTime: PlaceTime) {
      * sunsets are more than 24 hours apart, so if we're right on top of one of them, a short window
      * could miss the next one.
      */
-    private val FUTURE_LIMIT = Duration.ofHours(36L)
+    private val FUTURE_LIMIT = 36.hours
 
     /**
      * We use this value combined with [PRECEDING_LIMIT] to include "preceding" events up to and
@@ -44,13 +49,18 @@ class SunTimeSeries(val placeTime: PlaceTime) {
      * checking falls out of both the preceding and upcoming events lists. We then remove duplicates
      * in the preceding events.
      */
-    private val PRECEDING_OFFSET = Duration.ofHours(13L)
+    private val PRECEDING_OFFSET = 13.hours
 
     /** See [PRECEDING_OFFSET]. */
-    private val PRECEDING_LIMIT = Duration.ofHours(14L)
+    private val PRECEDING_LIMIT = 14.hours
 
     private fun PlaceTime.computeSunTimes(limit: Duration): SunTimes =
-      SunTimes.compute().at(lat, lon).elevation(alt).on(instant).limit(limit).execute()
+      SunTimes.compute()
+        .at(lat, lon)
+        .elevation(alt)
+        .on(instant.toJavaInstant())
+        .limit(limit.toJavaDuration())
+        .execute()
 
     private fun toEvents(sunTimes: SunTimes): List<Event> {
       return SunEventType.entries

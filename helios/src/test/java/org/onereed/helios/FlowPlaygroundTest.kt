@@ -28,6 +28,7 @@ import org.junit.Test
 import org.onereed.helios.util.TimberRule
 import timber.log.Timber
 
+@OptIn(ExperimentalTime::class)
 class FlowPlaygroundTest {
 
   @get:Rule val timberRule = TimberRule()
@@ -49,7 +50,6 @@ class FlowPlaygroundTest {
     Timber.d("Program finished")
   }
 
-  @OptIn(ExperimentalTime::class)
   @Test
   fun callbackFlowLifecycle(): Unit = runBlocking {
     val flow: Flow<Int> = callbackFlow {
@@ -70,7 +70,6 @@ class FlowPlaygroundTest {
     flow.onEach { Timber.d("Received $it") }.collect { Timber.d("Collected $it") }
   }
 
-  @OptIn(ExperimentalTime::class)
   @Test
   fun flowReuse(): Unit = runBlocking {
     Timber.d("Creating flow")

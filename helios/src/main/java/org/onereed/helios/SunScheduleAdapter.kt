@@ -18,6 +18,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
+import kotlin.time.ExperimentalTime
 import org.onereed.helios.SunScheduleAdapter.EventViewHolder
 import org.onereed.helios.sun.SunSchedule
 
@@ -47,6 +48,7 @@ internal class SunScheduleAdapter(private val activity: Activity) :
     return EventViewHolder(cardView)
   }
 
+  @OptIn(ExperimentalTime::class)
   override fun onBindViewHolder(sunEventViewHolder: EventViewHolder, position: Int) {
     val event = sunSchedule!!.events[position]
     val typeOrdinal = event.sunEventType.ordinal
@@ -63,7 +65,7 @@ internal class SunScheduleAdapter(private val activity: Activity) :
       }
     }
 
-    val eventTimeMillis = event.instant.toEpochMilli()
+    val eventTimeMillis = event.instant.toEpochMilliseconds()
     val timeText = formatDateTime(activity, eventTimeMillis, DATE_FORMAT_FLAGS)
     val timeStyle = if (event.isClosestEvent) Typeface.BOLD else Typeface.NORMAL
 
@@ -72,9 +74,7 @@ internal class SunScheduleAdapter(private val activity: Activity) :
       setTypeface(/* tf= */ null, timeStyle)
     }
 
-    sunEventViewHolder.cardView.setOnClickListener { view ->
-      sendToTextActivity(view, typeOrdinal)
-    }
+    sunEventViewHolder.cardView.setOnClickListener { view -> sendToTextActivity(view, typeOrdinal) }
   }
 
   private fun sendToTextActivity(view: View, typeOrdinal: Int) {

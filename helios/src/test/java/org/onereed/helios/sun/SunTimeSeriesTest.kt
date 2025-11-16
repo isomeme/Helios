@@ -1,14 +1,16 @@
 package org.onereed.helios.sun
 
 import com.google.common.truth.Truth.assertThat
-import java.time.Instant
 import org.junit.Before
 import org.junit.Test
 import org.onereed.helios.common.PlaceTime
 import timber.log.Timber
 import timber.log.Timber.DebugTree
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /** Tests for [SunTimeSeries]. */
+@OptIn(ExperimentalTime::class)
 class SunTimeSeriesTest {
 
   @Before

@@ -14,7 +14,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import org.onereed.helios.sun.SunSchedule
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 data class ScheduleUi(val events: List<EventUi>) {
   data class EventUi(
     val color: Color,
@@ -44,7 +46,7 @@ data class ScheduleUi(val events: List<EventUi>) {
             color = eventSet.color,
             iconRes = eventSet.iconRes,
             name = eventSet.name,
-            timeText = formatDateTime(context, it.instant.toEpochMilli(), DATE_FORMAT_FLAGS),
+            timeText = formatDateTime(context, it.instant.toEpochMilliseconds(), DATE_FORMAT_FLAGS),
             isClosestEvent = it.isClosestEvent,
             ordinal = ordinal,
             key = it.weakId,

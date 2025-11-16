@@ -14,8 +14,9 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import java.time.Duration
-import java.time.Instant
+import kotlin.time.Clock.System.now
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
@@ -26,6 +27,7 @@ import kotlinx.coroutines.launch
 import org.onereed.helios.common.PlaceTime
 import timber.log.Timber
 
+@OptIn(ExperimentalTime::class)
 class PlaceTimeDataSource(private val activity: AppCompatActivity) {
 
   private val locationProvider: FusedLocationProviderClient =
@@ -38,7 +40,7 @@ class PlaceTimeDataSource(private val activity: AppCompatActivity) {
   init {
     activity.lifecycleScope.launch {
       activity.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-        getLocationUpdates().collect { _placeTimeFlow.emit(PlaceTime(it, Instant.now())) }
+        getLocationUpdates().collect { _placeTimeFlow.emit(PlaceTime(it, now())) }
       }
     }
   }
@@ -77,8 +79,8 @@ class PlaceTimeDataSource(private val activity: AppCompatActivity) {
 
   companion object {
 
-    private val UPDATE_INTERVAL = Duration.ofSeconds(30L).toMillis()
-    private val MIN_UPDATE_INTERVAL = Duration.ofSeconds(15L).toMillis()
+    private val UPDATE_INTERVAL = 30.seconds.inWholeMilliseconds
+    private val MIN_UPDATE_INTERVAL = 15.seconds.inWholeMilliseconds
 
     private val LOCATION_REQUEST =
       LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, UPDATE_INTERVAL)

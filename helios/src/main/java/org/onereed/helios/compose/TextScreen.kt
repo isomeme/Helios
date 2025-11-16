@@ -127,7 +127,7 @@ fun StatelessTextScreen(
   }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF808080)
+@Preview(showBackground = true, backgroundColor = 0xFF0F1416)
 @Composable
 fun TextScreenPreview() {
   val sunResources = SunResources(LocalContext.current)

@@ -1,13 +1,16 @@
 package org.onereed.helios.sun
 
-import java.time.Duration
-import java.time.Instant
 import java.util.EnumMap
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import kotlin.time.toJavaInstant
 import org.onereed.helios.common.PlaceTime
 import org.onereed.helios.common.arc
 import org.shredzone.commons.suncalc.SunPosition
 import timber.log.Timber
 
+@OptIn(ExperimentalTime::class)
 data class SunCompass(
   val sunAzimuth: Double,
   val isSunClockwise: Boolean,
@@ -22,7 +25,7 @@ data class SunCompass(
   companion object {
 
     /** The (short) time interval over which sun movement direction is determined. */
-    private val DELTA_TIME: Duration = Duration.ofMinutes(1L)
+    private val DELTA_TIME = 1.minutes
 
     fun compute(sunTimeSeries: SunTimeSeries): SunCompass {
       Timber.d("compute start")
@@ -32,7 +35,8 @@ data class SunCompass(
       // Calculate current sun azimuth and movement direction.
 
       val sunAzimuth = placeTime.computeSunAzimuth()
-      val sunAzimuthSoon = placeTime.plusDuration(DELTA_TIME).computeSunAzimuth()
+      val sunAzimuthSoon =
+        placeTime.copy(instant = placeTime.instant + DELTA_TIME).computeSunAzimuth()
       val deltaAzimuth = arc(sunAzimuth, sunAzimuthSoon)
       val isSunClockwise = deltaAzimuth >= 0
 
@@ -46,13 +50,19 @@ data class SunCompass(
 
       val events =
         sunTimeSeries.events.reversed().associate {
-          it.sunEventType to Event(it.instant, placeTime.atInstant(it.instant).computeSunAzimuth())
+          it.sunEventType to
+            Event(it.instant, placeTime.copy(instant = it.instant).computeSunAzimuth())
         }
 
       return SunCompass(sunAzimuth, isSunClockwise, EnumMap(events))
     }
 
     private fun PlaceTime.computeSunAzimuth(): Double =
-      SunPosition.compute().at(lat, lon).elevation(alt).on(instant).execute().azimuth
+      SunPosition.compute()
+        .at(lat, lon)
+        .elevation(alt)
+        .on(instant.toJavaInstant())
+        .execute()
+        .azimuth
   }
 }

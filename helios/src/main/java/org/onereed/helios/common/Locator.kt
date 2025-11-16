@@ -12,11 +12,12 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Clock.System.now
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.onStart
 import timber.log.Timber
 
 @Singleton
+@OptIn(ExperimentalTime::class)
 class Locator @Inject constructor(@param:ApplicationContext val context: Context) {
 
   private val locationProvider: FusedLocationProviderClient =
@@ -39,7 +41,7 @@ class Locator @Inject constructor(@param:ApplicationContext val context: Context
 
   val flow =
     getLocationUpdates()
-      .combine(ticker.flow) { location, _ -> PlaceTime(location, Instant.now()) }
+      .combine(ticker.flow) { location, _ -> PlaceTime(location, now()) }
       .onStart { Timber.d("Locator.onStart") }
       .onEach { Timber.d("Locator.onEach $it") }
       .onCompletion { Timber.d("Locator.onCompletion") }
@@ -83,7 +85,6 @@ class Locator @Inject constructor(@param:ApplicationContext val context: Context
         .addOnFailureListener { e -> Timber.e(e, "Location updates stop failed.") }
     }
   }
-
 
   companion object {
 
