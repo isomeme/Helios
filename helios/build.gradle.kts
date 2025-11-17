@@ -112,7 +112,7 @@ dependencies {
   implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
   implementation("androidx.work:work-runtime:2.11.0")
 
-  val composeBom = platform("androidx.compose:compose-bom:2025.10.01")
+  val composeBom = platform("androidx.compose:compose-bom:2025.11.00")
   implementation(composeBom)
   testImplementation(composeBom)
   androidTestImplementation(composeBom)
@@ -142,11 +142,6 @@ dependencies {
   // SunCalc
 
   implementation("org.shredzone.commons:commons-suncalc:3.11")
-
-  // Guava
-
-  implementation("com.google.guava:guava:33.5.0-android")
-  implementation("com.google.auto.value:auto-value-annotations:1.11.0")
 
   // Markdown support
 
