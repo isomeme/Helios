@@ -2,16 +2,21 @@ package org.onereed.helios.compose
 
 import android.Manifest
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults.navigationSuiteType
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -67,16 +72,17 @@ fun StatelessHeliosApp(
   actions: NavActions,
 ) {
   NavigationSuiteScaffold(
-    navigationSuiteItems = {
+    navigationSuiteType = navSuiteType(),
+    navigationItems = {
       Screen.TopLevelScreens.forEach { screen ->
-        item(
+        NavigationSuiteItem(
           icon = { Icon(painterResource(screen.iconRes), stringResource(screen.titleRes)) },
           label = { Text(stringResource(screen.titleRes)) },
           selected = isSelected(screen),
           onClick = { actions.navigateTo(screen) },
         )
       }
-    }
+    },
   ) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
       NavHost(
@@ -96,7 +102,14 @@ fun StatelessHeliosApp(
   }
 }
 
+// See https://issuetracker.google.com/issues/378726489#comment5
 @Composable
-fun Greeting(name: String, padding: PaddingValues = PaddingValues()) {
-  Text(text = "Hello $name!", Modifier.padding(padding))
+private fun navSuiteType(): NavigationSuiteType =
+  navigationSuiteType(currentWindowAdaptiveInfo())
+
+@Composable
+fun Greeting(name: String) {
+  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Text(text = "Hello $name!")
+  }
 }
