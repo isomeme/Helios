@@ -13,6 +13,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 
 /** A text element which scales down its contents until they can be fully displayed on one line. */
+@Suppress("unused")
 @Composable
 fun AutoResizingText(
   modifier: Modifier = Modifier,

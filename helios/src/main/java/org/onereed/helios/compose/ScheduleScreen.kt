@@ -16,6 +16,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -23,13 +24,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlin.time.Clock.System.now
 import kotlin.time.ExperimentalTime
-import org.onereed.helios.common.AutoResizingText
 import org.onereed.helios.common.PlaceTime
 import org.onereed.helios.sun.SunSchedule
 import org.onereed.helios.sun.SunTimeSeries
@@ -81,9 +82,11 @@ fun StatelessScheduleScreen(scheduleUi: ScheduleUi, onSelectEvent: (Int) -> Unit
               tint = event.color,
               modifier = Modifier.padding(end = 20.dp),
             )
-            AutoResizingText(
+            Text(
               text = event.timeText,
               fontWeight = if (event.isClosestEvent) FontWeight.Bold else FontWeight.Normal,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
             )
           }
         }

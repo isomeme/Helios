@@ -13,8 +13,9 @@ import androidx.compose.ui.graphics.Color
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import org.onereed.helios.sun.SunSchedule
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import org.onereed.helios.sun.SunSchedule
 
 @OptIn(ExperimentalTime::class)
 data class ScheduleUi(val events: List<EventUi>) {
@@ -46,7 +47,7 @@ data class ScheduleUi(val events: List<EventUi>) {
             color = eventSet.color,
             iconRes = eventSet.iconRes,
             name = eventSet.name,
-            timeText = formatDateTime(context, it.instant.toEpochMilliseconds(), DATE_FORMAT_FLAGS),
+            timeText = formatInstant(context, it.instant),
             isClosestEvent = it.isClosestEvent,
             ordinal = ordinal,
             key = it.weakId,
@@ -58,14 +59,27 @@ data class ScheduleUi(val events: List<EventUi>) {
 
     companion object {
 
+      /**
+       * Because the time is the most important part of the schedule date-time display, we place it
+       * first in the string. This both makes it more prominent and protects it from truncation if
+       * the text overflows the available space.
+       */
+      fun formatInstant(context: Context, instant: Instant): String {
+        val millis = instant.toEpochMilliseconds()
+        val timePart = formatDateTime(context, millis, TIME_FORMAT_FLAGS)
+        val datePart = formatDateTime(context, millis, DATE_FORMAT_FLAGS)
+        return "$timePart $datePart"
+      }
+
       private const val DATE_FORMAT_FLAGS =
         0 or
           FORMAT_SHOW_DATE or
           FORMAT_NUMERIC_DATE or
           FORMAT_NO_YEAR or
           FORMAT_SHOW_WEEKDAY or
-          FORMAT_SHOW_TIME or
           FORMAT_ABBREV_ALL
+
+      private const val TIME_FORMAT_FLAGS = 0 or FORMAT_SHOW_TIME or FORMAT_ABBREV_ALL
     }
   }
 }
