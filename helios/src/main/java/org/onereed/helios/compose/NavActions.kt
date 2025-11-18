@@ -16,22 +16,11 @@ interface NavActions {
 
   companion object {
 
-    fun create(
-      heliosAppState: HeliosAppState,
-      heliosAppViewModel: HeliosAppViewModel,
-    ): NavActions =
+    fun create(heliosAppState: HeliosAppState, heliosAppViewModel: HeliosAppViewModel): NavActions =
       object : NavActions {
         override fun navigateTo(screen: Screen) = heliosAppState.navigateTo(screen)
 
         override fun selectTextIndex(index: Int) = heliosAppViewModel.selectTextIndex(index)
-      }
-
-    /** A do-nothing stub implementation for use in previews and tests. */
-    val NavActionsStub =
-      object : NavActions {
-        override fun navigateTo(screen: Screen) {}
-
-        override fun selectTextIndex(index: Int) {}
       }
   }
 }

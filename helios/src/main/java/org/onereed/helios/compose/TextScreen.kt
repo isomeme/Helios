@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jeziellago.compose.markdowntext.MarkdownText
-import org.onereed.helios.compose.NavActions.Companion.NavActionsStub
 import org.onereed.helios.ui.theme.HeliosTheme
 
 @Composable
@@ -46,22 +45,26 @@ internal fun TextScreen(actions: NavActions, textViewModel: TextViewModel = hilt
   LaunchedEffect(textUi) { scrollState.scrollTo(0) }
 
   StatelessTextScreen(
-    actions = actions,
     textUi = textUi,
     scrollState = scrollState,
     eventMenuExpanded = eventMenuExpanded,
-  ) {
-    eventMenuExpanded = it
-  }
+    onEventMenuExpanded = { eventMenuExpanded = true },
+    onEventMenuDismissed = { eventMenuExpanded = false },
+    onSelectIndex = { index ->
+      actions.selectTextIndex(index)
+      eventMenuExpanded = false
+    },
+  )
 }
 
 @Composable
 fun StatelessTextScreen(
-  actions: NavActions,
   textUi: TextUi,
   scrollState: ScrollState,
   eventMenuExpanded: Boolean,
-  setEventMenuExpanded: (Boolean) -> Unit,
+  onEventMenuExpanded: () -> Unit,
+  onEventMenuDismissed: () -> Unit,
+  onSelectIndex: (Int) -> Unit,
 ) {
   val haptics = LocalHapticFeedback.current
 
@@ -73,7 +76,7 @@ fun StatelessTextScreen(
       // below the button.
 
       Column(modifier = Modifier.align(Alignment.CenterStart)) {
-        OutlinedButton(onClick = { setEventMenuExpanded(true) }) {
+        OutlinedButton(onClick = onEventMenuExpanded) {
           Icon(
             painter = painterResource(id = textUi.selected.iconRes),
             tint = textUi.selected.color,
@@ -83,16 +86,15 @@ fun StatelessTextScreen(
 
         DropdownMenu(
           expanded = eventMenuExpanded,
-          onDismissRequest = { setEventMenuExpanded(false) },
+          onDismissRequest = onEventMenuDismissed,
           offset = DpOffset(0.dp, 10.dp),
         ) {
           textUi.menu.forEach { eventUi ->
             DropdownMenuItem(
               enabled = eventUi.enabled,
               onClick = {
-                setEventMenuExpanded(false)
                 haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                actions.selectTextIndex(eventUi.index)
+                onSelectIndex(eventUi.index)
               },
               colors =
                 MenuDefaults.itemColors(
@@ -135,11 +137,12 @@ fun TextScreenPreview() {
 
   HeliosTheme {
     StatelessTextScreen(
-      actions = NavActionsStub,
       textUi = textUi,
       eventMenuExpanded = false,
       scrollState = ScrollState(0),
-      setEventMenuExpanded = {},
+      onEventMenuExpanded = {},
+      onEventMenuDismissed = {},
+      onSelectIndex = {},
     )
   }
 }
