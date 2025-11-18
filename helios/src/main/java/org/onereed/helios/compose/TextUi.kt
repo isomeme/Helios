@@ -1,11 +1,14 @@
 package org.onereed.helios.compose
 
 import androidx.annotation.DrawableRes
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Stable
 data class TextUi(val menu: List<EventUi>, val selected: EventUi, val rubric: String) {
+  @Stable
   data class EventUi(
     @param:DrawableRes val iconRes: Int,
     val color: Color,

@@ -9,6 +9,7 @@ import android.text.format.DateUtils.FORMAT_SHOW_TIME
 import android.text.format.DateUtils.FORMAT_SHOW_WEEKDAY
 import android.text.format.DateUtils.formatDateTime
 import androidx.annotation.DrawableRes
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -18,7 +19,9 @@ import kotlin.time.Instant
 import org.onereed.helios.sun.SunSchedule
 
 @OptIn(ExperimentalTime::class)
+@Stable
 data class ScheduleUi(val events: List<EventUi>) {
+  @Stable
   data class EventUi(
     val color: Color,
     @param:DrawableRes val iconRes: Int,

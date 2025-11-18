@@ -1,5 +1,8 @@
 package org.onereed.helios.compose
 
+import androidx.compose.runtime.Stable
+
+@Stable
 interface NavActions {
 
   fun navigateTo(screen: Screen)

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CardDefaults
@@ -70,9 +71,7 @@ fun StatelessScheduleScreen(scheduleUi: ScheduleUi, onSelectEvent: (Int) -> Unit
           modifier = Modifier.fillMaxWidth().wrapContentHeight().animateItem(),
         ) {
           Row(
-            modifier =
-              Modifier.fillMaxWidth()
-                .padding(start = 15.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
+            modifier = Modifier.wrapContentSize().padding(horizontal = 15.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
           ) {
@@ -113,4 +112,4 @@ fun ScheduleScreenPreview() {
  * This width has been determined empirically to be enough to render an event with room for
  * date-time text, but without excess wasted space between that and the end of the display.
  */
-private val COLUMN_WIDTH = 350.dp
+private val COLUMN_WIDTH = 400.dp
