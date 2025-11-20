@@ -82,11 +82,11 @@ dependencies {
   implementation("androidx.core:core-ktx:1.17.0")
 
   // Activity & Fragment KTX
-  implementation("androidx.activity:activity-ktx:1.11.0")
+  implementation("androidx.activity:activity-ktx:1.12.0")
   implementation("androidx.fragment:fragment-ktx:1.8.9")
 
   // Lifecycle & ViewModel KTX (use a single version variable)
-  val lifecycleVersion = "2.9.4"
+  val lifecycleVersion = "2.10.0"
   implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
@@ -108,12 +108,13 @@ dependencies {
 
   // Compose
 
-  implementation("androidx.activity:activity-compose:1.11.0")
+  implementation("androidx.activity:activity-compose:1.12.0")
   implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
   implementation("androidx.work:work-runtime:2.11.0")
 
-  val composeBom = platform("androidx.compose:compose-bom:2025.11.00")
+  val composeBom = platform("androidx.compose:compose-bom:2025.11.01")
   implementation(composeBom)
+  debugImplementation(composeBom)
   testImplementation(composeBom)
   androidTestImplementation(composeBom)
 
