@@ -1,0 +1,44 @@
+package org.onereed.helios.compose
+
+import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+
+@Singleton
+class StoreRepository @Inject constructor(@param:ApplicationContext val context: Context) {
+
+  private val Context.dataStore by preferencesDataStore("app_preferences")
+
+  val isDynamicThemeFlow: Flow<Boolean> =
+    context.dataStore.data.map { preferences -> preferences[isDynamicThemeKey] ?: false }
+
+  val themeTypeFlow: Flow<ThemeType> =
+    context.dataStore.data.map { preferences -> ThemeType.entries[preferences[themeTypeKey] ?: 0] }
+
+  fun setDynamicTheme(value: Boolean, scope: CoroutineScope) {
+    scope.launch {
+      context.dataStore.edit { preferences -> preferences[isDynamicThemeKey] = value }
+    }
+  }
+
+  fun setThemeType(value: ThemeType, scope: CoroutineScope) {
+    scope.launch {
+      context.dataStore.edit { preferences -> preferences[themeTypeKey] = value.ordinal }
+    }
+  }
+
+  private companion object {
+
+    val isDynamicThemeKey = booleanPreferencesKey("is_dynamic_theme")
+    val themeTypeKey = intPreferencesKey("theme_type")
+  }
+}
