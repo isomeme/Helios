@@ -29,7 +29,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import org.onereed.helios.R
-import org.onereed.helios.ui.theme.HeliosTheme
+import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -97,7 +97,7 @@ fun StatelessPermissionScreen(
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
 fun PermissionScreenPreview() {
-  HeliosTheme {
+  DarkHeliosTheme {
     StatelessPermissionScreen(
       explanationRes = R.string.location_permission_rationale,
       okButtonAction = {},

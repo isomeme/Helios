@@ -35,7 +35,7 @@ import kotlin.time.ExperimentalTime
 import org.onereed.helios.common.PlaceTime
 import org.onereed.helios.sun.SunSchedule
 import org.onereed.helios.sun.SunTimeSeries
-import org.onereed.helios.ui.theme.HeliosTheme
+import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @Composable
 internal fun ScheduleScreen(
@@ -105,7 +105,7 @@ fun ScheduleScreenPreview() {
   val sunSchedule = SunSchedule(sunTimeSeries)
   val scheduleUi = ScheduleUi.Factory(LocalContext.current, sunResources).create(sunSchedule)
 
-  HeliosTheme { StatelessScheduleScreen(scheduleUi = scheduleUi, onSelectEvent = {}) }
+  DarkHeliosTheme { StatelessScheduleScreen(scheduleUi = scheduleUi, onSelectEvent = {}) }
 }
 
 /**

@@ -53,7 +53,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.launch
 import org.onereed.helios.R
-import org.onereed.helios.ui.theme.HeliosTheme
+import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @Composable
 internal fun TextScreen(actions: NavActions, textViewModel: TextViewModel = hiltViewModel()) {
@@ -221,7 +221,7 @@ fun TextScreenPreview() {
   val sunResources = SunResources(LocalContext.current)
   val textUi = TextUi.Factory(sunResources).create(2) // Sunset
 
-  HeliosTheme {
+  DarkHeliosTheme {
     StatelessTextScreen(
       textUi = textUi,
       eventMenuExpanded = false,

@@ -4,6 +4,7 @@ package org.onereed.helios.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -11,9 +12,13 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import timber.log.Timber
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.onereed.helios.compose.ThemeType
+import org.onereed.helios.compose.ThemeViewModel
 
 private val lightScheme =
   lightColorScheme(
@@ -261,24 +266,38 @@ val unspecified_scheme =
   ColorFamily(Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified)
 
 @Composable
-fun HeliosTheme(
-  darkTheme: Boolean = isSystemInDarkTheme(),
-  // Dynamic color is available on Android 12+
-  dynamicColor: Boolean = true,
-  content: @Composable() () -> Unit,
-) {
+fun HeliosTheme(themeViewModel: ThemeViewModel = hiltViewModel(), content: @Composable () -> Unit) {
+  val isDynamicTheme by themeViewModel.isDynamicThemeFlow.collectAsStateWithLifecycle(false)
+  val themeType by themeViewModel.themeTypeFlow.collectAsStateWithLifecycle(ThemeType.SYSTEM)
+
+  val isDarkTheme =
+    when (themeType) {
+      ThemeType.SYSTEM -> isSystemInDarkTheme()
+      ThemeType.LIGHT -> false
+      ThemeType.DARK -> true
+    }
+
   val colorScheme =
     when {
-      dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+      isDynamicTheme && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
         val context = LocalContext.current
-        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        if (isDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
       }
 
-      darkTheme -> darkScheme
+      isDarkTheme -> darkScheme
       else -> lightScheme
     }
 
-  Timber.d("Would it be dark theme? %s", colorScheme == darkScheme)
+  StatelessHeliosTheme(colorScheme = colorScheme, content = content)
+}
 
-  MaterialTheme(colorScheme = darkScheme, typography = AppTypography, content = content)
+@Composable
+fun StatelessHeliosTheme(colorScheme: ColorScheme, content: @Composable () -> Unit) {
+  MaterialTheme(colorScheme = colorScheme, typography = AppTypography, content = content)
+}
+
+/** For use in previews. */
+@Composable
+fun DarkHeliosTheme(content: @Composable () -> Unit) {
+  StatelessHeliosTheme(colorScheme = darkScheme, content = content)
 }

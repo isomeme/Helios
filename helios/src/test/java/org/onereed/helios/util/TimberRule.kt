@@ -15,7 +15,7 @@ class TimberRule : TestRule {
   override fun apply(base: Statement, description: Description): Statement {
     return object : Statement() {
       override fun evaluate() {
-        Timber.Forest.plant(
+        Timber.plant(
           object : Timber.DebugTree() {
             override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
               val time = timeFormatter.format(Date())
@@ -28,7 +28,7 @@ class TimberRule : TestRule {
         try {
           base.evaluate()
         } finally {
-          Timber.Forest.uprootAll()
+          Timber.uprootAll()
         }
       }
     }
