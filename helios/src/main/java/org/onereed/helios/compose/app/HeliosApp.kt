@@ -32,6 +32,7 @@ import org.onereed.helios.compose.schedule.ScheduleScreen
 import org.onereed.helios.compose.text.TextScreen
 import org.onereed.helios.compose.permission.PermissionActions
 import org.onereed.helios.compose.permission.PermissionScreen
+import org.onereed.helios.compose.settings.SettingsScreen
 import timber.log.Timber
 
 @Composable
@@ -100,7 +101,7 @@ fun StatelessHeliosApp(
 
         composable<Screen.Compass> { Greeting("compass") }
 
-        composable<Screen.Settings> { Greeting("settings") }
+        composable<Screen.Settings> { SettingsScreen() }
       }
     }
   }

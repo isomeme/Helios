@@ -40,7 +40,7 @@ import org.onereed.helios.sun.SunTimeSeries
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @Composable
-internal fun ScheduleScreen(
+fun ScheduleScreen(
     actions: NavActions,
     scheduleViewModel: ScheduleViewModel = hiltViewModel(),
 ) {

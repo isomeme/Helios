@@ -1,8 +1,7 @@
-@file:Suppress("unused", "unused", "unused", "unused")
+@file:Suppress("unused")
 
 package org.onereed.helios.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -17,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.onereed.helios.common.dynamicThemeSupported
 import org.onereed.helios.compose.theme.ThemeType
 import org.onereed.helios.compose.theme.ThemeViewModel
 
@@ -279,7 +279,7 @@ fun HeliosTheme(themeViewModel: ThemeViewModel = hiltViewModel(), content: @Comp
 
   val colorScheme =
     when {
-      isDynamicTheme && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+      isDynamicTheme && dynamicThemeSupported -> {
         val context = LocalContext.current
         if (isDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
       }

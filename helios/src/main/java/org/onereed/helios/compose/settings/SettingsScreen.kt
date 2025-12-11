@@ -1,0 +1,115 @@
+package org.onereed.helios.compose.settings
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.onereed.helios.R
+import org.onereed.helios.common.dynamicThemeSupported
+import org.onereed.helios.compose.theme.ThemeType
+import org.onereed.helios.compose.theme.ThemeViewModel
+import org.onereed.helios.ui.theme.DarkHeliosTheme
+
+@Composable
+fun SettingsScreen(themeViewModel: ThemeViewModel = hiltViewModel()) {
+  val isDynamicTheme by themeViewModel.isDynamicThemeFlow.collectAsStateWithLifecycle(false)
+  val themeType by themeViewModel.themeTypeFlow.collectAsStateWithLifecycle(ThemeType.SYSTEM)
+
+  StatelessSettingsScreen(
+    isDynamicTheme,
+    themeType,
+    onDynamicThemeSelected = themeViewModel::setDynamicTheme,
+    onThemeTypeSelected = themeViewModel::setThemeType,
+  )
+}
+
+@Composable
+fun StatelessSettingsScreen(
+  isDynamicTheme: Boolean,
+  themeType: ThemeType,
+  onDynamicThemeSelected: (Boolean) -> Unit,
+  onThemeTypeSelected: (ThemeType) -> Unit,
+) {
+  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Column(modifier = Modifier.wrapContentSize(), horizontalAlignment = Alignment.Start) {
+      Column(modifier = Modifier.selectableGroup(), horizontalAlignment = Alignment.Start) {
+        Text(
+          text = "Theme type",
+          color = MaterialTheme.colorScheme.onSurface,
+          style = MaterialTheme.typography.labelLarge,
+          modifier = Modifier.padding(all = 10.dp),
+        )
+        ThemeType.entries.forEach { type ->
+          Row(
+            modifier =
+              Modifier.wrapContentSize()
+                .selectable(
+                  selected = (type == themeType),
+                  onClick = { onThemeTypeSelected(type) },
+                  role = Role.RadioButton,
+                ),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            RadioButton(
+              selected = themeType == type,
+              onClick = null,
+              modifier = Modifier.padding(start = 30.dp, end = 10.dp, top = 5.dp, bottom = 5.dp),
+            )
+            Text(
+              text = stringResource(type.labelRes),
+              color = MaterialTheme.colorScheme.onSurface,
+              style = MaterialTheme.typography.labelMedium,
+            )
+          }
+        }
+      }
+      if (dynamicThemeSupported) {
+        Row(
+          modifier = Modifier.wrapContentSize(),
+          horizontalArrangement = Arrangement.Start,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Checkbox(checked = isDynamicTheme, onCheckedChange = { onDynamicThemeSelected(it) })
+          Text(
+            text = stringResource(R.string.use_dynamic_theme_colors),
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.labelMedium,
+          )
+        }
+      }
+    }
+  }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0F1416)
+@Composable
+fun SettingsScreenPreview() {
+  DarkHeliosTheme {
+    StatelessSettingsScreen(
+      isDynamicTheme = true,
+      themeType = ThemeType.SYSTEM,
+      onDynamicThemeSelected = {},
+      onThemeTypeSelected = {},
+    )
+  }
+}

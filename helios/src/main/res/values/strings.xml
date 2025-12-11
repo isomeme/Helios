@@ -45,4 +45,9 @@
     </string>
 
     <string name="toast_activity_not_found">Target is not available.</string>
+    <string name="use_dynamic_theme_colors">Use dynamic theme colors</string>
+
+    <string name="system_theme">System</string>
+    <string name="light_theme">Light</string>
+    <string name="dark_theme">Dark</string>
 </resources>
