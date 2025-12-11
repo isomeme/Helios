@@ -1,4 +1,4 @@
-package org.onereed.helios.compose
+package org.onereed.helios.datasource
 
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -6,12 +6,13 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.onereed.helios.compose.theme.ThemeType
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class StoreRepository @Inject constructor(@param:ApplicationContext val context: Context) {

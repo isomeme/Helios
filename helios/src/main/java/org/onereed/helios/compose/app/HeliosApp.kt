@@ -1,4 +1,4 @@
-package org.onereed.helios.compose
+package org.onereed.helios.compose.app
 
 import android.Manifest
 import androidx.activity.compose.LocalActivity
@@ -28,6 +28,10 @@ import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import org.onereed.helios.compose.schedule.ScheduleScreen
+import org.onereed.helios.compose.text.TextScreen
+import org.onereed.helios.compose.permission.PermissionActions
+import org.onereed.helios.compose.permission.PermissionScreen
 import timber.log.Timber
 
 @Composable
@@ -104,8 +108,7 @@ fun StatelessHeliosApp(
 
 // See https://issuetracker.google.com/issues/378726489#comment5
 @Composable
-private fun navSuiteType(): NavigationSuiteType =
-  navigationSuiteType(currentWindowAdaptiveInfo())
+private fun navSuiteType(): NavigationSuiteType = navigationSuiteType(currentWindowAdaptiveInfo())
 
 @Composable
 fun Greeting(name: String) {

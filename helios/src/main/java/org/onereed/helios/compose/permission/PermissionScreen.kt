@@ -1,4 +1,4 @@
-package org.onereed.helios.compose
+package org.onereed.helios.compose.permission
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background

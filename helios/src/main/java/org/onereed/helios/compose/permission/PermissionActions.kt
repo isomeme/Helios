@@ -1,4 +1,4 @@
-package org.onereed.helios.compose
+package org.onereed.helios.compose.permission
 
 import android.app.Activity
 import android.content.Intent

@@ -1,7 +1,8 @@
-package org.onereed.helios.compose
+package org.onereed.helios.compose.app
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import org.onereed.helios.compose.text.TextStateHolder
 import javax.inject.Inject
 import timber.log.Timber
 

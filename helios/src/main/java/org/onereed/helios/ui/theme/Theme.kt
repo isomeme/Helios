@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.onereed.helios.compose.ThemeType
-import org.onereed.helios.compose.ThemeViewModel
+import org.onereed.helios.compose.theme.ThemeType
+import org.onereed.helios.compose.theme.ThemeViewModel
 
 private val lightScheme =
   lightColorScheme(

@@ -1,25 +1,25 @@
-package org.onereed.helios.compose
+package org.onereed.helios.datasource
 
 import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.res.use
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.io.IOException
-import java.io.UncheckedIOException
-import java.nio.charset.StandardCharsets.UTF_8
-import javax.inject.Inject
-import javax.inject.Singleton
 import org.onereed.helios.R
 import org.onereed.helios.sun.SunEventType
+import java.io.IOException
+import java.io.UncheckedIOException
+import java.nio.charset.StandardCharsets
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class SunResources @Inject constructor(@ApplicationContext context: Context) {
   data class EventSet(
-    val name: String,
-    val color: Color,
-    @param:DrawableRes val iconRes: Int,
-    val rubric: String,
+      val name: String,
+      val color: Color,
+      @param:DrawableRes val iconRes: Int,
+      val rubric: String,
   )
 
   val eventSets: List<EventSet>
@@ -51,7 +51,7 @@ class SunResources @Inject constructor(@ApplicationContext context: Context) {
 
     private fun readRubricTemplate(context: Context): String {
       try {
-        return context.assets.open("rubric_template.md").bufferedReader(UTF_8).use { it.readText() }
+        return context.assets.open("rubric_template.md").bufferedReader(StandardCharsets.UTF_8).use { it.readText() }
       } catch (e: IOException) {
         throw UncheckedIOException(e)
       }

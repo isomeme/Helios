@@ -1,8 +1,9 @@
-package org.onereed.helios.compose
+package org.onereed.helios.compose.text
 
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
+import org.onereed.helios.datasource.SunResources
 import javax.inject.Inject
 import javax.inject.Singleton
 

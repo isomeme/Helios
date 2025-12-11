@@ -1,4 +1,4 @@
-package org.onereed.helios.compose
+package org.onereed.helios.compose.text
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -53,6 +53,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.launch
 import org.onereed.helios.R
+import org.onereed.helios.compose.app.NavActions
+import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @Composable

@@ -1,4 +1,4 @@
-package org.onereed.helios.compose
+package org.onereed.helios.compose.text
 
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow

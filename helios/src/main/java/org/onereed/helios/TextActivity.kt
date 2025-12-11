@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.annotation.IdRes
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import org.onereed.helios.compose.TextStateHolder
+import org.onereed.helios.compose.text.TextStateHolder
 import org.onereed.helios.databinding.ActivityTextBinding
 import org.onereed.helios.sun.SunEventType
 

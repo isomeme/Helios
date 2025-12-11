@@ -1,4 +1,4 @@
-package org.onereed.helios.compose
+package org.onereed.helios.compose.schedule
 
 import android.content.Context
 import android.text.format.DateUtils.FORMAT_ABBREV_ALL
@@ -12,6 +12,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import dagger.hilt.android.qualifiers.ApplicationContext
+import org.onereed.helios.datasource.SunResources
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.ExperimentalTime
@@ -36,8 +37,8 @@ data class ScheduleUi(val events: List<EventUi>) {
   class Factory
   @Inject
   constructor(
-    @param:ApplicationContext private val context: Context,
-    private val sunResources: SunResources,
+      @param:ApplicationContext private val context: Context,
+      private val sunResources: SunResources,
   ) {
 
     fun create(sunSchedule: SunSchedule): ScheduleUi {

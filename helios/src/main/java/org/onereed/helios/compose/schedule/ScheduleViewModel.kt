@@ -1,4 +1,4 @@
-package org.onereed.helios.compose
+package org.onereed.helios.compose.schedule
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

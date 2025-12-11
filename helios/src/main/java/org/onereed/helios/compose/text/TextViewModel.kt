@@ -1,4 +1,4 @@
-package org.onereed.helios.compose
+package org.onereed.helios.compose.text
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

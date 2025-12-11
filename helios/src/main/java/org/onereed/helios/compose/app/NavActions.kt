@@ -1,4 +1,4 @@
-package org.onereed.helios.compose
+package org.onereed.helios.compose.app
 
 import androidx.compose.runtime.Stable
 

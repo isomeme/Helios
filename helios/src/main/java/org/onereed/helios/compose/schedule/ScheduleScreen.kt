@@ -1,4 +1,4 @@
-package org.onereed.helios.compose
+package org.onereed.helios.compose.schedule
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -33,14 +33,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlin.time.Clock.System.now
 import kotlin.time.ExperimentalTime
 import org.onereed.helios.common.PlaceTime
+import org.onereed.helios.datasource.SunResources
+import org.onereed.helios.compose.app.NavActions
 import org.onereed.helios.sun.SunSchedule
 import org.onereed.helios.sun.SunTimeSeries
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @Composable
 internal fun ScheduleScreen(
-  actions: NavActions,
-  scheduleViewModel: ScheduleViewModel = hiltViewModel(),
+    actions: NavActions,
+    scheduleViewModel: ScheduleViewModel = hiltViewModel(),
 ) {
   val scheduleUi by scheduleViewModel.scheduleUiFlow.collectAsStateWithLifecycle()
 

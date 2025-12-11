@@ -164,7 +164,7 @@ dependencies {
   testImplementation("org.jetbrains.kotlin:kotlin-test:2.2.21")
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
   testImplementation("org.junit.jupiter:junit-jupiter:6.0.1")
-  testImplementation("org.mockito:mockito-core:5.20.0")
+  testImplementation("org.mockito:mockito-core:5.21.0")
 
   androidTestImplementation("androidx.compose.ui:ui-test-junit4")
   androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
