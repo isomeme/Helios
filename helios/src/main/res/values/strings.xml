@@ -32,6 +32,14 @@
     <string name="scroll_to_top">Scroll to top</string>
     <string name="scroll_to_bottom">Scroll to bottom</string>
 
+    <string name="label_use_dynamic_theme_colors">Use dynamic theme colors</string>
+    <string name="label_system_theme">System</string>
+    <string name="label_light_theme">Light</string>
+    <string name="label_dark_theme">Dark</string>
+
+    <string name="toast_activity_not_found">Target is not available.</string>
+    <string name="heading_theme_type">Theme type</string>
+
     <string name="location_permission_rationale">
         Helios uses your precise location to calculate the times and directions of sunrise, noon,
         sunset, and midnight. Please touch the \'OK\' button below, then grant Helios permission to
@@ -43,11 +51,4 @@
         location. This permission must be granted in the \'Permissions\' section of the app
         settings. Touch the \'OK\' button below to open the app settings.
     </string>
-
-    <string name="toast_activity_not_found">Target is not available.</string>
-    <string name="use_dynamic_theme_colors">Use dynamic theme colors</string>
-
-    <string name="system_theme">System</string>
-    <string name="light_theme">Light</string>
-    <string name="dark_theme">Dark</string>
 </resources>

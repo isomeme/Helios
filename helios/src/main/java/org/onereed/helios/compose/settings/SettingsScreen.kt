@@ -53,7 +53,7 @@ fun StatelessSettingsScreen(
     Column(modifier = Modifier.wrapContentSize(), horizontalAlignment = Alignment.Start) {
       Column(modifier = Modifier.selectableGroup(), horizontalAlignment = Alignment.Start) {
         Text(
-          text = "Theme type",
+          text = stringResource(R.string.heading_theme_type),
           color = MaterialTheme.colorScheme.onSurface,
           style = MaterialTheme.typography.labelLarge,
           modifier = Modifier.padding(all = 10.dp),
@@ -61,7 +61,8 @@ fun StatelessSettingsScreen(
         ThemeType.entries.forEach { type ->
           Row(
             modifier =
-              Modifier.wrapContentSize()
+              Modifier
+                .wrapContentSize()
                 .selectable(
                   selected = (type == themeType),
                   onClick = { onThemeTypeSelected(type) },
@@ -73,7 +74,7 @@ fun StatelessSettingsScreen(
             RadioButton(
               selected = themeType == type,
               onClick = null,
-              modifier = Modifier.padding(start = 30.dp, end = 10.dp, top = 5.dp, bottom = 5.dp),
+              modifier = Modifier.padding(start = 30.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
             )
             Text(
               text = stringResource(type.labelRes),
@@ -91,7 +92,7 @@ fun StatelessSettingsScreen(
         ) {
           Checkbox(checked = isDynamicTheme, onCheckedChange = { onDynamicThemeSelected(it) })
           Text(
-            text = stringResource(R.string.use_dynamic_theme_colors),
+            text = stringResource(R.string.label_use_dynamic_theme_colors),
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.labelMedium,
           )

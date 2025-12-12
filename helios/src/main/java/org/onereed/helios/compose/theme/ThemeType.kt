@@ -4,9 +4,9 @@ import androidx.annotation.StringRes
 import org.onereed.helios.R
 
 enum class ThemeType {
-  SYSTEM(R.string.system_theme),
-  LIGHT(R.string.light_theme),
-  DARK(R.string.dark_theme);
+  SYSTEM(R.string.label_system_theme),
+  LIGHT(R.string.label_light_theme),
+  DARK(R.string.label_dark_theme);
 
   val labelRes: Int
 

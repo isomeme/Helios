@@ -265,6 +265,11 @@ data class ColorFamily(
 val unspecified_scheme =
   ColorFamily(Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified)
 
+// Above is from Material Design theme generation tool. Customized code below.
+
+val usedDarkScheme = highContrastDarkColorScheme
+val usedLightScheme = highContrastLightColorScheme
+
 @Composable
 fun HeliosTheme(themeViewModel: ThemeViewModel = hiltViewModel(), content: @Composable () -> Unit) {
   val isDynamicTheme by themeViewModel.isDynamicThemeFlow.collectAsStateWithLifecycle(false)
@@ -284,8 +289,9 @@ fun HeliosTheme(themeViewModel: ThemeViewModel = hiltViewModel(), content: @Comp
         if (isDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
       }
 
-      isDarkTheme -> darkScheme
-      else -> lightScheme
+      isDarkTheme -> usedDarkScheme
+
+      else -> usedLightScheme
     }
 
   StatelessHeliosTheme(colorScheme = colorScheme, content = content)
@@ -299,5 +305,5 @@ fun StatelessHeliosTheme(colorScheme: ColorScheme, content: @Composable () -> Un
 /** For use in previews. */
 @Composable
 fun DarkHeliosTheme(content: @Composable () -> Unit) {
-  StatelessHeliosTheme(colorScheme = darkScheme, content = content)
+  StatelessHeliosTheme(colorScheme = usedDarkScheme, content = content)
 }

@@ -5,9 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,17 +32,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlin.time.Clock.System.now
 import kotlin.time.ExperimentalTime
 import org.onereed.helios.common.PlaceTime
-import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.compose.app.NavActions
+import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunSchedule
 import org.onereed.helios.sun.SunTimeSeries
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @Composable
-fun ScheduleScreen(
-    actions: NavActions,
-    scheduleViewModel: ScheduleViewModel = hiltViewModel(),
-) {
+fun ScheduleScreen(actions: NavActions, scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
   val scheduleUi by scheduleViewModel.scheduleUiFlow.collectAsStateWithLifecycle()
 
   StatelessScheduleScreen(scheduleUi = scheduleUi, onSelectEvent = actions::navigateToTextIndex)
@@ -58,7 +54,7 @@ fun StatelessScheduleScreen(scheduleUi: ScheduleUi, onSelectEvent: (Int) -> Unit
     }
 
     LazyColumn(
-      modifier = Modifier.width(COLUMN_WIDTH).wrapContentHeight().padding(horizontal = 40.dp),
+      modifier = Modifier.wrapContentSize(),
       verticalArrangement = Arrangement.spacedBy(25.dp),
     ) {
       items(items = scheduleUi.events, key = { it.key }) { event ->
@@ -70,7 +66,7 @@ fun StatelessScheduleScreen(scheduleUi: ScheduleUi, onSelectEvent: (Int) -> Unit
               contentColor = MaterialTheme.colorScheme.onSurface,
             ),
           border = BorderStroke(width = 1.dp, color = event.color),
-          modifier = Modifier.fillMaxWidth().wrapContentHeight().animateItem(),
+          modifier = Modifier.requiredWidth(CARD_WIDTH).wrapContentHeight().animateItem(),
         ) {
           Row(
             modifier = Modifier.wrapContentSize().padding(horizontal = 15.dp, vertical = 10.dp),
@@ -114,4 +110,4 @@ fun ScheduleScreenPreview() {
  * This width has been determined empirically to be enough to render an event with room for
  * date-time text, but without excess wasted space between that and the end of the display.
  */
-private val COLUMN_WIDTH = 400.dp
+private val CARD_WIDTH = 320.dp
