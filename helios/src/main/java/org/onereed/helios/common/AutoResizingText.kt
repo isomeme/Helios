@@ -24,6 +24,7 @@ fun AutoResizingText(
   var scaledTextStyle by remember { mutableStateOf(style) }
   var readyToDraw by remember { mutableStateOf(false) }
 
+  @Suppress("AssignedValueIsNeverRead") // False positives on scaledTextStyle
   Text(
     text,
     modifier =

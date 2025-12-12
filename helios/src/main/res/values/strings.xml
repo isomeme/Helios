@@ -39,6 +39,7 @@
 
     <string name="toast_activity_not_found">Target is not available.</string>
     <string name="heading_theme_type">Theme type</string>
+    <string name="view_online_documentation">View online documentation</string>
 
     <string name="location_permission_rationale">
         Helios uses your precise location to calculate the times and directions of sunrise, noon,

@@ -28,11 +28,11 @@ import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import org.onereed.helios.compose.schedule.ScheduleScreen
-import org.onereed.helios.compose.text.TextScreen
 import org.onereed.helios.compose.permission.PermissionActions
 import org.onereed.helios.compose.permission.PermissionScreen
+import org.onereed.helios.compose.schedule.ScheduleScreen
 import org.onereed.helios.compose.settings.SettingsScreen
+import org.onereed.helios.compose.text.TextScreen
 import timber.log.Timber
 
 @Composable
