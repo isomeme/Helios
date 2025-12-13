@@ -65,7 +65,7 @@ fun StatelessScheduleScreen(scheduleUi: ScheduleUi, onSelectEvent: (Int) -> Unit
               containerColor = MaterialTheme.colorScheme.surfaceContainer,
               contentColor = MaterialTheme.colorScheme.onSurface,
             ),
-          border = BorderStroke(width = 1.dp, color = event.color),
+          border = BorderStroke(width = 2.dp, color = event.color),
           modifier = Modifier.requiredWidth(CARD_WIDTH).wrapContentHeight().animateItem(),
         ) {
           Row(

@@ -1,13 +1,13 @@
 package org.onereed.helios.compose.text
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
@@ -19,6 +19,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,23 +40,46 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.launch
 import org.onereed.helios.compose.app.NavActions
-import org.onereed.helios.compose.shared.ScrollControl
-import org.onereed.helios.compose.shared.Scroller
+import org.onereed.helios.compose.shared.ScrollbarParams
+import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 
+@Stable
+private data class EventMenuParams(
+  val expanded: Boolean,
+  val onExpanded: () -> Unit,
+  val onDismissed: () -> Unit,
+  val onSelectIndex: (Int) -> Unit,
+)
+
 @Composable
-internal fun TextScreen(actions: NavActions, textViewModel: TextViewModel = hiltViewModel()) {
+fun TextScreen(actions: NavActions, textViewModel: TextViewModel = hiltViewModel()) {
   val coroutineScope = rememberCoroutineScope()
   val textUi by textViewModel.textUiFlow.collectAsStateWithLifecycle()
+
   var eventMenuExpanded by remember { mutableStateOf(false) }
 
   val scrollState = rememberScrollState()
   val scrollToTopEnabled by remember { derivedStateOf { scrollState.canScrollBackward } }
   val scrollToBottomEnabled by remember { derivedStateOf { scrollState.canScrollForward } }
 
-  val scrollControl =
-    ScrollControl(
+  LaunchedEffect(textUi) { scrollState.scrollTo(0) }
+
+  @Suppress("AssignedValueIsNeverRead") // False positives on eventMenuExpanded
+  val eventMenuParams =
+    EventMenuParams(
+      expanded = eventMenuExpanded,
+      onExpanded = { eventMenuExpanded = true },
+      onDismissed = { eventMenuExpanded = false },
+      onSelectIndex = { index ->
+        actions.selectTextIndex(index)
+        eventMenuExpanded = false
+      },
+    )
+
+  val scrollbarParams =
+    ScrollbarParams(
       scrollToTopEnabled = scrollToTopEnabled,
       scrollToBottomEnabled = scrollToBottomEnabled,
       onScrollToTop = { coroutineScope.launch { scrollState.animateScrollTo(0) } },
@@ -64,44 +88,32 @@ internal fun TextScreen(actions: NavActions, textViewModel: TextViewModel = hilt
       },
     )
 
-  LaunchedEffect(textUi) { scrollState.scrollTo(0) }
-
-  @Suppress("AssignedValueIsNeverRead") // False positives on eventMenuExpanded
-  StatelessTextScreen(
-    textUi = textUi,
-    eventMenuExpanded = eventMenuExpanded,
-    onEventMenuExpanded = { eventMenuExpanded = true },
-    onEventMenuDismissed = { eventMenuExpanded = false },
-    onSelectIndex = { index ->
-      actions.selectTextIndex(index)
-      eventMenuExpanded = false
-    },
-    scrollState = scrollState,
-    scrollControl = scrollControl,
-  )
+  StatelessTextScreen(textUi, eventMenuParams, scrollbarParams, scrollState)
 }
 
 @Composable
-fun StatelessTextScreen(
+private fun StatelessTextScreen(
   textUi: TextUi,
-  eventMenuExpanded: Boolean,
-  onEventMenuExpanded: () -> Unit,
-  onEventMenuDismissed: () -> Unit,
-  onSelectIndex: (Int) -> Unit,
+  eventMenuParams: EventMenuParams,
+  scrollbarParams: ScrollbarParams,
   scrollState: ScrollState,
-  scrollControl: ScrollControl,
 ) {
   val haptics = LocalHapticFeedback.current
 
   Column(modifier = Modifier.fillMaxSize()) {
 
     // Top of screen: select button on the left, title centered.
-    Box(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(all = 10.dp)) {
+    Box(
+      modifier =
+        Modifier.fillMaxWidth()
+          .background(MaterialTheme.colorScheme.surfaceContainer)
+          .padding(all = 10.dp)
+    ) {
 
       // Enclosing the select button with its dropdown menu in a column makes the menu pop up just
       // below the button.
       Column(modifier = Modifier.align(Alignment.CenterStart)) {
-        OutlinedButton(onClick = onEventMenuExpanded) {
+        OutlinedButton(onClick = eventMenuParams.onExpanded) {
           Icon(
             painter = painterResource(id = textUi.selected.iconRes),
             tint = textUi.selected.color,
@@ -110,8 +122,8 @@ fun StatelessTextScreen(
         }
 
         DropdownMenu(
-          expanded = eventMenuExpanded,
-          onDismissRequest = onEventMenuDismissed,
+          expanded = eventMenuParams.expanded,
+          onDismissRequest = eventMenuParams.onDismissed,
           offset = DpOffset(0.dp, 10.dp),
         ) {
           textUi.menu.forEach { eventUi ->
@@ -119,7 +131,7 @@ fun StatelessTextScreen(
               enabled = eventUi.enabled,
               onClick = {
                 haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                onSelectIndex(eventUi.index)
+                eventMenuParams.onSelectIndex(eventUi.index)
               },
               colors =
                 MenuDefaults.itemColors(
@@ -144,14 +156,18 @@ fun StatelessTextScreen(
     }
 
     // Rubric text with scroll controls
-    Scroller(scrollControl) {
+    Row(
+      modifier =
+        Modifier.fillMaxSize().padding(start = 30.dp, end = 0.dp, top = 20.dp, bottom = 20.dp)
+    ) {
       MarkdownText(
-        modifier = Modifier.fillMaxHeight().weight(1f).verticalScroll(scrollState),
+        modifier = Modifier.weight(1f).verticalScroll(scrollState),
         markdown = textUi.rubric,
-        isTextSelectable = true,
         style =
           MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
       )
+
+      SimpleVerticalScrollbar(scrollbarParams)
     }
   }
 }
@@ -161,23 +177,17 @@ fun StatelessTextScreen(
 fun TextScreenPreview() {
   val sunResources = SunResources(LocalContext.current)
   val textUi = TextUi.Factory(sunResources).create(2) // Sunset
+
+  val eventMenuControl =
+    EventMenuParams(expanded = false, onExpanded = {}, onDismissed = {}, onSelectIndex = {})
+
   val scrollControl =
-    ScrollControl(
+    ScrollbarParams(
       scrollToTopEnabled = false,
       scrollToBottomEnabled = true,
       onScrollToTop = {},
       onScrollToBottom = {},
     )
 
-  DarkHeliosTheme {
-    StatelessTextScreen(
-      textUi = textUi,
-      eventMenuExpanded = false,
-      onEventMenuExpanded = {},
-      onEventMenuDismissed = {},
-      onSelectIndex = {},
-      scrollState = ScrollState(0),
-      scrollControl = scrollControl,
-    )
-  }
+  DarkHeliosTheme { StatelessTextScreen(textUi, eventMenuControl, scrollControl, ScrollState(0)) }
 }

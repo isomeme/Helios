@@ -267,8 +267,8 @@ val unspecified_scheme =
 
 // Above is from Material Design theme generation tool. Customized code below.
 
-val usedDarkScheme = highContrastDarkColorScheme
-val usedLightScheme = highContrastLightColorScheme
+val usedDarkScheme = darkScheme
+val usedLightScheme = lightScheme
 
 @Composable
 fun HeliosTheme(themeViewModel: ThemeViewModel = hiltViewModel(), content: @Composable () -> Unit) {

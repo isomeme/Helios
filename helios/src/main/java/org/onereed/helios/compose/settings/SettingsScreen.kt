@@ -132,7 +132,9 @@ fun StatelessSettingsScreen(
         }
       }
     }
+    
     Spacer(modifier = Modifier.height(20.dp))
+    
     Box(
       modifier =
         Modifier.fillMaxWidth()
