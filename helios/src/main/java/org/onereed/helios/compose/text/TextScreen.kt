@@ -39,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.launch
 import org.onereed.helios.compose.app.NavActions
+import org.onereed.helios.compose.shared.ScrollControl
 import org.onereed.helios.compose.shared.Scroller
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.ui.theme.DarkHeliosTheme
@@ -53,6 +54,16 @@ internal fun TextScreen(actions: NavActions, textViewModel: TextViewModel = hilt
   val scrollToTopEnabled by remember { derivedStateOf { scrollState.canScrollBackward } }
   val scrollToBottomEnabled by remember { derivedStateOf { scrollState.canScrollForward } }
 
+  val scrollControl =
+    ScrollControl(
+      scrollToTopEnabled = scrollToTopEnabled,
+      scrollToBottomEnabled = scrollToBottomEnabled,
+      onScrollToTop = { coroutineScope.launch { scrollState.animateScrollTo(0) } },
+      onScrollToBottom = {
+        coroutineScope.launch { scrollState.animateScrollTo(scrollState.maxValue) }
+      },
+    )
+
   LaunchedEffect(textUi) { scrollState.scrollTo(0) }
 
   @Suppress("AssignedValueIsNeverRead") // False positives on eventMenuExpanded
@@ -66,12 +77,7 @@ internal fun TextScreen(actions: NavActions, textViewModel: TextViewModel = hilt
       eventMenuExpanded = false
     },
     scrollState = scrollState,
-    scrollToTopEnabled = scrollToTopEnabled,
-    scrollToBottomEnabled = scrollToBottomEnabled,
-    onScrollToTop = { coroutineScope.launch { scrollState.animateScrollTo(0) } },
-    onScrollToBottom = {
-      coroutineScope.launch { scrollState.animateScrollTo(scrollState.maxValue) }
-    },
+    scrollControl = scrollControl,
   )
 }
 
@@ -83,20 +89,17 @@ fun StatelessTextScreen(
   onEventMenuDismissed: () -> Unit,
   onSelectIndex: (Int) -> Unit,
   scrollState: ScrollState,
-  scrollToTopEnabled: Boolean,
-  scrollToBottomEnabled: Boolean,
-  onScrollToTop: () -> Unit,
-  onScrollToBottom: () -> Unit,
+  scrollControl: ScrollControl,
 ) {
   val haptics = LocalHapticFeedback.current
 
   Column(modifier = Modifier.fillMaxSize()) {
-    // Top of screen: select button on the left, title centered.
 
+    // Top of screen: select button on the left, title centered.
     Box(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(all = 10.dp)) {
+
       // Enclosing the select button with its dropdown menu in a column makes the menu pop up just
       // below the button.
-
       Column(modifier = Modifier.align(Alignment.CenterStart)) {
         OutlinedButton(onClick = onEventMenuExpanded) {
           Icon(
@@ -141,8 +144,7 @@ fun StatelessTextScreen(
     }
 
     // Rubric text with scroll controls
-
-    Scroller(scrollToTopEnabled, scrollToBottomEnabled, onScrollToTop, onScrollToBottom) {
+    Scroller(scrollControl) {
       MarkdownText(
         modifier = Modifier.fillMaxHeight().weight(1f).verticalScroll(scrollState),
         markdown = textUi.rubric,
@@ -159,19 +161,23 @@ fun StatelessTextScreen(
 fun TextScreenPreview() {
   val sunResources = SunResources(LocalContext.current)
   val textUi = TextUi.Factory(sunResources).create(2) // Sunset
+  val scrollControl =
+    ScrollControl(
+      scrollToTopEnabled = false,
+      scrollToBottomEnabled = true,
+      onScrollToTop = {},
+      onScrollToBottom = {},
+    )
 
   DarkHeliosTheme {
     StatelessTextScreen(
       textUi = textUi,
       eventMenuExpanded = false,
-      scrollState = ScrollState(0),
       onEventMenuExpanded = {},
       onEventMenuDismissed = {},
       onSelectIndex = {},
-      scrollToTopEnabled = false,
-      scrollToBottomEnabled = true,
-      onScrollToTop = {},
-      onScrollToBottom = {},
+      scrollState = ScrollState(0),
+      scrollControl = scrollControl,
     )
   }
 }

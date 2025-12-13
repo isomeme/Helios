@@ -113,7 +113,7 @@ dependencies {
   implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
   implementation("androidx.work:work-runtime:2.11.0")
 
-  val composeBom = platform("androidx.compose:compose-bom:2025.11.01")
+  val composeBom = platform("androidx.compose:compose-bom:2025.12.00")
   implementation(composeBom)
   debugImplementation(composeBom)
   testImplementation(composeBom)
@@ -123,11 +123,14 @@ dependencies {
   implementation("androidx.compose.material3:material3-adaptive-navigation-suite")
   implementation("androidx.compose.ui:ui")
   implementation("androidx.compose.ui:ui-graphics")
-  implementation("androidx.compose.ui:ui-text-google-fonts")
   implementation("androidx.compose.ui:ui-tooling-preview")
 
-  debugImplementation("androidx.compose.ui:ui-test-manifest")
   debugImplementation("androidx.compose.ui:ui-tooling")
+
+  // Not in bom
+
+  implementation("androidx.compose.ui:ui-text-google-fonts:1.10.0")
+  debugImplementation("androidx.compose.ui:ui-test-manifest:1.10.0")
 
   // Hilt
 
