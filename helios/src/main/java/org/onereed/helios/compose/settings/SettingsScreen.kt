@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -64,7 +65,7 @@ fun StatelessSettingsScreen(
 ) {
   Column(
     modifier = Modifier.fillMaxSize().padding(all = 20.dp),
-    verticalArrangement = Arrangement.spacedBy(20.dp),
+    verticalArrangement = Arrangement.Center,
   ) {
     Box(
       modifier =
@@ -131,6 +132,7 @@ fun StatelessSettingsScreen(
         }
       }
     }
+    Spacer(modifier = Modifier.height(20.dp))
     Box(
       modifier =
         Modifier.fillMaxWidth()
