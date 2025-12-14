@@ -4,7 +4,6 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -55,8 +54,8 @@ private data class EventMenuParams(
 
 @Composable
 fun TextScreen(actions: NavActions, textViewModel: TextViewModel = hiltViewModel()) {
-  val coroutineScope = rememberCoroutineScope()
   val textUi by textViewModel.textUiFlow.collectAsStateWithLifecycle()
+  val coroutineScope = rememberCoroutineScope()
 
   var eventMenuExpanded by remember { mutableStateOf(false) }
 
@@ -156,18 +155,18 @@ private fun StatelessTextScreen(
     }
 
     // Rubric text with scroll controls
-    Row(
-      modifier =
-        Modifier.fillMaxSize().padding(start = 30.dp, end = 0.dp, top = 20.dp, bottom = 20.dp)
-    ) {
+    Box(modifier = Modifier.fillMaxSize().padding(vertical = 20.dp)) {
       MarkdownText(
-        modifier = Modifier.weight(1f).verticalScroll(scrollState),
+        modifier = Modifier.verticalScroll(scrollState).fillMaxWidth().padding(horizontal = 40.dp),
         markdown = textUi.rubric,
         style =
           MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
       )
 
-      SimpleVerticalScrollbar(scrollbarParams)
+      SimpleVerticalScrollbar(
+        modifier = Modifier.align(Alignment.CenterEnd),
+        scrollbarParams = scrollbarParams,
+      )
     }
   }
 }

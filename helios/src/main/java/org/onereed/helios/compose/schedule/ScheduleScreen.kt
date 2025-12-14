@@ -2,15 +2,18 @@ package org.onereed.helios.compose.schedule
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -18,7 +21,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -27,12 +33,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlin.time.Clock.System.now
 import kotlin.time.ExperimentalTime
+import kotlinx.coroutines.launch
 import org.onereed.helios.common.PlaceTime
 import org.onereed.helios.compose.app.NavActions
+import org.onereed.helios.compose.shared.ScrollbarParams
+import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunSchedule
 import org.onereed.helios.sun.SunTimeSeries
@@ -41,53 +51,93 @@ import org.onereed.helios.ui.theme.DarkHeliosTheme
 @Composable
 fun ScheduleScreen(actions: NavActions, scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
   val scheduleUi by scheduleViewModel.scheduleUiFlow.collectAsStateWithLifecycle()
+  val coroutineScope = rememberCoroutineScope()
+  val lazyListState = rememberLazyListState()
+  val scrollToTopEnabled by remember { derivedStateOf { lazyListState.canScrollBackward } }
+  val scrollToBottomEnabled by remember { derivedStateOf { lazyListState.canScrollForward } }
 
-  StatelessScheduleScreen(scheduleUi = scheduleUi, onSelectEvent = actions::navigateToTextIndex)
+  val scrollbarParams =
+    ScrollbarParams(
+      scrollToTopEnabled = scrollToTopEnabled,
+      scrollToBottomEnabled = scrollToBottomEnabled,
+      onScrollToTop = { coroutineScope.launch { lazyListState.animateScrollToItem(0) } },
+      onScrollToBottom = {
+        coroutineScope.launch {
+          lazyListState.animateScrollToItem(lazyListState.layoutInfo.totalItemsCount - 1)
+        }
+      },
+    )
+
+  StatelessScheduleScreen(
+    scheduleUi = scheduleUi,
+    lazyListState = lazyListState,
+    scrollbarParams = scrollbarParams,
+    onSelectEvent = actions::navigateToTextIndex,
+  )
 }
 
 @Composable
-fun StatelessScheduleScreen(scheduleUi: ScheduleUi, onSelectEvent: (Int) -> Unit) {
-  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+fun StatelessScheduleScreen(
+  scheduleUi: ScheduleUi,
+  lazyListState: LazyListState,
+  scrollbarParams: ScrollbarParams,
+  onSelectEvent: (Int) -> Unit,
+) {
+  ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+    val (progress, events, scrollbar) = createRefs()
+
     if (scheduleUi.events.isEmpty()) {
-      CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-      return@Box
+      CircularProgressIndicator(modifier = Modifier.constrainAs(progress) { centerTo(parent) })
+      return@ConstraintLayout
     }
 
     LazyColumn(
-      modifier = Modifier.wrapContentSize(),
+      modifier = Modifier.wrapContentSize().constrainAs(events) { centerTo(parent) },
       verticalArrangement = Arrangement.spacedBy(25.dp),
+      state = lazyListState,
     ) {
       items(items = scheduleUi.events, key = { it.key }) { event ->
-        OutlinedCard(
-          onClick = { onSelectEvent(event.ordinal) },
-          colors =
-            CardDefaults.outlinedCardColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainer,
-              contentColor = MaterialTheme.colorScheme.onSurface,
-            ),
-          border = BorderStroke(width = 2.dp, color = event.color),
-          modifier = Modifier.requiredWidth(CARD_WIDTH).wrapContentHeight().animateItem(),
-        ) {
-          Row(
-            modifier = Modifier.wrapContentSize().padding(horizontal = 15.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            Icon(
-              painter = painterResource(event.iconRes),
-              contentDescription = event.name,
-              tint = event.color,
-              modifier = Modifier.padding(end = 20.dp),
-            )
-            Text(
-              text = event.timeText,
-              fontWeight = if (event.isClosestEvent) FontWeight.Bold else FontWeight.Normal,
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-            )
-          }
-        }
+        EventCard(event, onSelectEvent)
       }
+    }
+
+    SimpleVerticalScrollbar(
+      modifier =
+        Modifier.constrainAs(scrollbar) { start.linkTo(anchor = events.end, margin = 10.dp) },
+      scrollbarParams = scrollbarParams,
+    )
+  }
+}
+
+@Composable
+private fun LazyItemScope.EventCard(event: ScheduleUi.EventUi, onSelectEvent: (Int) -> Unit) {
+  OutlinedCard(
+    modifier = Modifier.requiredWidth(CARD_WIDTH).animateItem(),
+    onClick = { onSelectEvent(event.ordinal) },
+    colors =
+      CardDefaults.outlinedCardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+      ),
+    border = BorderStroke(width = 2.dp, color = event.color),
+  ) {
+    Row(
+      modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp),
+      horizontalArrangement = Arrangement.Start,
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Icon(
+        painter = painterResource(event.iconRes),
+        contentDescription = event.name,
+        tint = event.color,
+      )
+      Spacer(modifier = Modifier.width(20.dp))
+      Text(
+        text = event.timeText,
+        fontWeight = if (event.isClosestEvent) FontWeight.Bold else FontWeight.Normal,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+      )
     }
   }
 }
@@ -102,8 +152,22 @@ fun ScheduleScreenPreview() {
   val sunTimeSeries = SunTimeSeries(hereNow)
   val sunSchedule = SunSchedule(sunTimeSeries)
   val scheduleUi = ScheduleUi.Factory(LocalContext.current, sunResources).create(sunSchedule)
+  val scrollbarParams =
+    ScrollbarParams(
+      scrollToTopEnabled = false,
+      scrollToBottomEnabled = true,
+      onScrollToTop = {},
+      onScrollToBottom = {},
+    )
 
-  DarkHeliosTheme { StatelessScheduleScreen(scheduleUi = scheduleUi, onSelectEvent = {}) }
+  DarkHeliosTheme {
+    StatelessScheduleScreen(
+      scheduleUi = scheduleUi,
+      lazyListState = LazyListState(),
+      scrollbarParams = scrollbarParams,
+      onSelectEvent = {},
+    )
+  }
 }
 
 /**
