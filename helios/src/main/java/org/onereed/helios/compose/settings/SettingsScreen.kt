@@ -2,8 +2,8 @@ package org.onereed.helios.compose.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
@@ -32,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.onereed.helios.R
@@ -63,18 +63,20 @@ fun StatelessSettingsScreen(
   onThemeTypeSelected: (ThemeType) -> Unit,
   onViewDoc: () -> Unit,
 ) {
-  Column(
-    modifier = Modifier.fillMaxSize().padding(all = 20.dp),
-    verticalArrangement = Arrangement.Center,
-  ) {
-    Box(
+  ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+    val (settings) = createRefs()
+
+    Column(
       modifier =
-        Modifier.fillMaxWidth()
-          .wrapContentHeight()
-          .background(MaterialTheme.colorScheme.surfaceContainer)
+        Modifier.width(IntrinsicSize.Max).padding(all = 20.dp).constrainAs(settings) {
+          centerTo(parent)
+        }
     ) {
       Column(
-        modifier = Modifier.padding(all = 10.dp),
+        modifier =
+          Modifier.fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .padding(all = 15.dp),
         verticalArrangement = Arrangement.spacedBy(15.dp),
         horizontalAlignment = Alignment.Start,
       ) {
@@ -83,6 +85,7 @@ fun StatelessSettingsScreen(
           color = MaterialTheme.colorScheme.onSurface,
           style = MaterialTheme.typography.labelLarge,
         )
+
         Column(
           modifier = Modifier.selectableGroup(),
           horizontalAlignment = Alignment.Start,
@@ -100,8 +103,11 @@ fun StatelessSettingsScreen(
               verticalAlignment = Alignment.CenterVertically,
             ) {
               Spacer(modifier = Modifier.width(30.dp))
+
               RadioButton(selected = themeType == type, onClick = null)
+
               Spacer(modifier = Modifier.width(10.dp))
+
               Text(
                 text = stringResource(type.labelRes),
                 color = MaterialTheme.colorScheme.onSurface,
@@ -110,6 +116,7 @@ fun StatelessSettingsScreen(
             }
           }
         }
+
         if (dynamicThemeSupported) {
           Row(
             modifier =
@@ -122,7 +129,9 @@ fun StatelessSettingsScreen(
             verticalAlignment = Alignment.CenterVertically,
           ) {
             Checkbox(checked = isDynamicTheme, onCheckedChange = null)
+
             Spacer(modifier = Modifier.width(10.dp))
+
             Text(
               text = stringResource(R.string.label_use_dynamic_theme_colors),
               color = MaterialTheme.colorScheme.onSurface,
@@ -131,24 +140,24 @@ fun StatelessSettingsScreen(
           }
         }
       }
-    }
-    
-    Spacer(modifier = Modifier.height(20.dp))
-    
-    Box(
-      modifier =
-        Modifier.fillMaxWidth()
-          .wrapContentHeight()
-          .background(MaterialTheme.colorScheme.surfaceContainer)
-    ) {
-      Column(modifier = Modifier.padding(start = 10.dp)) {
+
+      Spacer(modifier = Modifier.height(20.dp))
+
+      Column(
+        modifier =
+          Modifier.fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .padding(start = 10.dp)
+      ) {
         TextButton(onClick = onViewDoc, contentPadding = PaddingValues(all = 0.dp)) {
           Icon(
             painter = painterResource(R.drawable.help_24px),
             contentDescription = stringResource(R.string.view_online_documentation),
             tint = MaterialTheme.colorScheme.primary,
           )
+
           Spacer(modifier = Modifier.width(10.dp))
+
           Text(
             text = stringResource(R.string.view_online_documentation),
             color = MaterialTheme.colorScheme.onSurface,
