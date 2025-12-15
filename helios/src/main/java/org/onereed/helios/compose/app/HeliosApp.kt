@@ -62,7 +62,7 @@ fun HeliosApp(
     StatelessHeliosApp(
       navHostController = heliosAppState.navHostController,
       isSelected = { currentDestination?.hasRoute(it::class) ?: false },
-      actions = navActions,
+      navActions = navActions,
     )
   } else {
     PermissionScreen(locationPermissionState = locationPermissionState, actions = permissionActions)
@@ -74,7 +74,7 @@ fun HeliosApp(
 fun StatelessHeliosApp(
   navHostController: NavHostController,
   isSelected: (Screen) -> Boolean,
-  actions: NavActions,
+  navActions: NavActions,
 ) {
   NavigationSuiteScaffold(
     navigationSuiteType = navSuiteType(),
@@ -84,7 +84,7 @@ fun StatelessHeliosApp(
           icon = { Icon(painterResource(screen.iconRes), stringResource(screen.titleRes)) },
           label = { Text(stringResource(screen.titleRes)) },
           selected = isSelected(screen),
-          onClick = { actions.navigateTo(screen) },
+          onClick = { navActions.navigateTo(screen) },
         )
       }
     },
@@ -95,9 +95,9 @@ fun StatelessHeliosApp(
         startDestination = Screen.Schedule,
         modifier = Modifier.padding(innerPadding),
       ) {
-        composable<Screen.Schedule> { ScheduleScreen(actions = actions) }
+        composable<Screen.Schedule> { ScheduleScreen(navActions = navActions) }
 
-        composable<Screen.Text> { TextScreen(actions = actions) }
+        composable<Screen.Text> { TextScreen(navActions = navActions) }
 
         composable<Screen.Compass> { Greeting("compass") }
 

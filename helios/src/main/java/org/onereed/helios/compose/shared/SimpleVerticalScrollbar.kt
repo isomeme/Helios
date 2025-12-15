@@ -7,63 +7,64 @@ import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.onereed.helios.R
 
-@Stable
-data class ScrollbarParams(
-  val scrollToTopEnabled: Boolean,
-  val scrollToBottomEnabled: Boolean,
-  val onScrollToTop: () -> Unit,
-  val onScrollToBottom: () -> Unit,
-)
-
 @Composable
-fun SimpleVerticalScrollbar(scrollbarParams: ScrollbarParams, modifier: Modifier = Modifier) {
+fun SimpleVerticalScrollbar(
+  canScrollUp: Boolean,
+  canScrollDown: Boolean,
+  scrollbarActions: ScrollbarActions,
+  modifier: Modifier = Modifier,
+) {
   Column(
     modifier = modifier.wrapContentWidth().fillMaxHeight(),
     verticalArrangement = Arrangement.SpaceBetween,
   ) {
     AnimatedContent(
-      targetState = scrollbarParams.scrollToTopEnabled,
+      targetState = canScrollUp,
       transitionSpec = { fadeIn(animationSpec).togetherWith(fadeOut(animationSpec)) },
     ) { enabled ->
       ScrollButton(
-        scrollbarParams.onScrollToTop,
-        enabled,
-        R.drawable.arrow_upward_24px,
-        R.string.scroll_to_top,
+        onScrollTo = scrollbarActions::onScrollToTop,
+        enabled = enabled,
+        icon = R.drawable.arrow_upward_24px,
+        contentDescription = R.string.scroll_to_top,
       )
     }
     AnimatedContent(
-      targetState = scrollbarParams.scrollToBottomEnabled,
+      targetState = canScrollDown,
       transitionSpec = { fadeIn(animationSpec).togetherWith(fadeOut(animationSpec)) },
     ) { enabled ->
       ScrollButton(
-        scrollbarParams.onScrollToBottom,
-        enabled,
-        R.drawable.arrow_downward_24px,
-        R.string.scroll_to_bottom,
+        onScrollTo = scrollbarActions::onScrollToBottom,
+        enabled = enabled,
+        icon = R.drawable.arrow_downward_24px,
+        contentDescription = R.string.scroll_to_bottom,
       )
     }
   }
 }
 
 @Composable
-fun ScrollButton(
+private fun ScrollButton(
   onScrollTo: () -> Unit,
   enabled: Boolean,
   @DrawableRes icon: Int,
@@ -82,6 +83,46 @@ fun ScrollButton(
       painter = painterResource(id = icon),
       contentDescription = stringResource(id = contentDescription),
     )
+  }
+}
+
+@Immutable
+interface ScrollbarActions {
+  fun onScrollToTop()
+
+  fun onScrollToBottom()
+
+  companion object {
+
+    fun forScrollState(
+      scrollState: ScrollState,
+      coroutineScope: CoroutineScope,
+    ): ScrollbarActions =
+      object : ScrollbarActions {
+        override fun onScrollToTop() {
+          coroutineScope.launch { scrollState.animateScrollTo(0) }
+        }
+
+        override fun onScrollToBottom() {
+          coroutineScope.launch { scrollState.animateScrollTo(scrollState.maxValue) }
+        }
+      }
+
+    fun forLazyListState(
+      lazyListState: LazyListState,
+      coroutineScope: CoroutineScope,
+    ): ScrollbarActions =
+      object : ScrollbarActions {
+        override fun onScrollToTop() {
+          coroutineScope.launch { lazyListState.animateScrollToItem(0) }
+        }
+
+        override fun onScrollToBottom() {
+          coroutineScope.launch {
+            lazyListState.animateScrollToItem(lazyListState.layoutInfo.totalItemsCount - 1)
+          }
+        }
+      }
   }
 }
 

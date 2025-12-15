@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -38,10 +39,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlin.time.Clock.System.now
 import kotlin.time.ExperimentalTime
-import kotlinx.coroutines.launch
 import org.onereed.helios.common.PlaceTime
 import org.onereed.helios.compose.app.NavActions
-import org.onereed.helios.compose.shared.ScrollbarParams
+import org.onereed.helios.compose.schedule.ScheduleUi.EventUi
+import org.onereed.helios.compose.shared.ScrollbarActions
 import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunSchedule
@@ -49,30 +50,25 @@ import org.onereed.helios.sun.SunTimeSeries
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @Composable
-fun ScheduleScreen(actions: NavActions, scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
+fun ScheduleScreen(navActions: NavActions, scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
   val scheduleUi by scheduleViewModel.scheduleUiFlow.collectAsStateWithLifecycle()
   val coroutineScope = rememberCoroutineScope()
-  val lazyListState = rememberLazyListState()
-  val scrollToTopEnabled by remember { derivedStateOf { lazyListState.canScrollBackward } }
-  val scrollToBottomEnabled by remember { derivedStateOf { lazyListState.canScrollForward } }
 
-  val scrollbarParams =
-    ScrollbarParams(
-      scrollToTopEnabled = scrollToTopEnabled,
-      scrollToBottomEnabled = scrollToBottomEnabled,
-      onScrollToTop = { coroutineScope.launch { lazyListState.animateScrollToItem(0) } },
-      onScrollToBottom = {
-        coroutineScope.launch {
-          lazyListState.animateScrollToItem(lazyListState.layoutInfo.totalItemsCount - 1)
-        }
-      },
-    )
+  val lazyListState = rememberLazyListState()
+  val canScrollUp by remember { derivedStateOf { lazyListState.canScrollBackward } }
+  val canScrollDown by remember { derivedStateOf { lazyListState.canScrollForward } }
+
+  LaunchedEffect(scheduleUi) { lazyListState.scrollToItem(0) }
+
+  val scrollbarActions = ScrollbarActions.forLazyListState(lazyListState, coroutineScope)
 
   StatelessScheduleScreen(
     scheduleUi = scheduleUi,
     lazyListState = lazyListState,
-    scrollbarParams = scrollbarParams,
-    onSelectEvent = actions::navigateToTextIndex,
+    canScrollUp = canScrollUp,
+    canScrollDown = canScrollDown,
+    scrollbarActions = scrollbarActions,
+    onSelectEvent = navActions::navigateToTextIndex,
   )
 }
 
@@ -80,7 +76,9 @@ fun ScheduleScreen(actions: NavActions, scheduleViewModel: ScheduleViewModel = h
 fun StatelessScheduleScreen(
   scheduleUi: ScheduleUi,
   lazyListState: LazyListState,
-  scrollbarParams: ScrollbarParams,
+  canScrollUp: Boolean,
+  canScrollDown: Boolean,
+  scrollbarActions: ScrollbarActions,
   onSelectEvent: (Int) -> Unit,
 ) {
   ConstraintLayout(modifier = Modifier.fillMaxSize()) {
@@ -102,15 +100,17 @@ fun StatelessScheduleScreen(
     }
 
     SimpleVerticalScrollbar(
+      canScrollUp = canScrollUp,
+      canScrollDown = canScrollDown,
+      scrollbarActions = scrollbarActions,
       modifier =
         Modifier.constrainAs(scrollbar) { start.linkTo(anchor = events.end, margin = 10.dp) },
-      scrollbarParams = scrollbarParams,
     )
   }
 }
 
 @Composable
-private fun LazyItemScope.EventCard(event: ScheduleUi.EventUi, onSelectEvent: (Int) -> Unit) {
+private fun LazyItemScope.EventCard(event: EventUi, onSelectEvent: (Int) -> Unit) {
   OutlinedCard(
     modifier = Modifier.requiredWidth(CARD_WIDTH).animateItem(),
     onClick = { onSelectEvent(event.ordinal) },
@@ -152,19 +152,20 @@ fun ScheduleScreenPreview() {
   val sunTimeSeries = SunTimeSeries(hereNow)
   val sunSchedule = SunSchedule(sunTimeSeries)
   val scheduleUi = ScheduleUi.Factory(LocalContext.current, sunResources).create(sunSchedule)
-  val scrollbarParams =
-    ScrollbarParams(
-      scrollToTopEnabled = false,
-      scrollToBottomEnabled = true,
-      onScrollToTop = {},
-      onScrollToBottom = {},
-    )
+  val scrollbarActions =
+    object : ScrollbarActions {
+      override fun onScrollToTop() {}
+
+      override fun onScrollToBottom() {}
+    }
 
   DarkHeliosTheme {
     StatelessScheduleScreen(
       scheduleUi = scheduleUi,
       lazyListState = LazyListState(),
-      scrollbarParams = scrollbarParams,
+      canScrollUp = false,
+      canScrollDown = true,
+      scrollbarActions = scrollbarActions,
       onSelectEvent = {},
     )
   }
