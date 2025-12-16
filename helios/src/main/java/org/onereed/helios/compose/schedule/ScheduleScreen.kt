@@ -28,9 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,6 +41,7 @@ import kotlin.time.Clock.System.now
 import kotlin.time.ExperimentalTime
 import org.onereed.helios.common.PlaceTime
 import org.onereed.helios.compose.app.NavActions
+import org.onereed.helios.compose.app.Screen
 import org.onereed.helios.compose.schedule.ScheduleUi.EventUi
 import org.onereed.helios.compose.shared.ScrollbarActions
 import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
@@ -69,7 +68,10 @@ fun ScheduleScreen(navActions: NavActions, scheduleViewModel: ScheduleViewModel 
     canScrollUp = canScrollUp,
     canScrollDown = canScrollDown,
     scrollbarActions = scrollbarActions,
-    onSelectEvent = navActions::navigateToTextIndex,
+    onSelectEvent = { index ->
+      scheduleViewModel.selectTextIndex(index)
+      navActions.navigateTo(Screen.Text)
+    },
   )
 }
 
@@ -112,14 +114,9 @@ fun StatelessScheduleScreen(
 
 @Composable
 private fun LazyItemScope.EventCard(event: EventUi, onSelectEvent: (Int) -> Unit) {
-  val haptics = LocalHapticFeedback.current
-
   OutlinedCard(
     modifier = Modifier.requiredWidth(CARD_WIDTH).animateItem(),
-    onClick = {
-      haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-      onSelectEvent(event.ordinal)
-    },
+    onClick = { onSelectEvent(event.ordinal) },
     colors =
       CardDefaults.outlinedCardColors(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,

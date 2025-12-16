@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -37,14 +38,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jeziellago.compose.markdowntext.MarkdownText
-import org.onereed.helios.compose.app.NavActions
 import org.onereed.helios.compose.shared.ScrollbarActions
 import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @Composable
-fun TextScreen(navActions: NavActions, textViewModel: TextViewModel = hiltViewModel()) {
+fun TextScreen(textViewModel: TextViewModel = hiltViewModel()) {
   val textUi by textViewModel.textUiFlow.collectAsStateWithLifecycle()
   val coroutineScope = rememberCoroutineScope()
 
@@ -55,9 +55,10 @@ fun TextScreen(navActions: NavActions, textViewModel: TextViewModel = hiltViewMo
     remember(scrollState, coroutineScope) { ScrollbarActions(scrollState, coroutineScope) }
 
   val eventMenuExpandedState = remember { mutableStateOf(false) }
+  val haptics = LocalHapticFeedback.current
   val eventMenuActions =
-    remember(eventMenuExpandedState, navActions) {
-      EventMenuActions(eventMenuExpandedState, navActions)
+    remember(eventMenuExpandedState, textViewModel, haptics) {
+      EventMenuActions(eventMenuExpandedState, textViewModel, haptics)
     }
 
   LaunchedEffect(textUi) { scrollState.scrollTo(0) }
@@ -167,12 +168,17 @@ private data class EventMenuActions(
 ) {
   constructor(
     eventMenuExpandedState: MutableState<Boolean>,
-    navActions: NavActions,
+    textViewModel: TextViewModel,
+    haptics: HapticFeedback,
   ) : this(
-    onExpanded = { eventMenuExpandedState.value = true },
+    onExpanded = {
+      haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+      eventMenuExpandedState.value = true
+    },
     onDismissed = { eventMenuExpandedState.value = false },
-    onSelectIndex = { ix ->
-      navActions.selectTextIndex(ix)
+    onSelectIndex = { index ->
+      haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+      textViewModel.selectTextIndex(index)
       eventMenuExpandedState.value = false
     },
   )

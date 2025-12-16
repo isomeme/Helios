@@ -3,6 +3,8 @@ package org.onereed.helios.compose.shared
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -40,7 +42,7 @@ fun SimpleVerticalScrollbar(
   ) {
     AnimatedContent(
       targetState = canScrollUp,
-      transitionSpec = { fadeIn(animationSpec).togetherWith(fadeOut(animationSpec)) },
+      transitionSpec = transitionSpec(),
     ) { enabled ->
       ScrollButton(
         onScrollTo = scrollbarActions.onScrollToTop,
@@ -49,9 +51,10 @@ fun SimpleVerticalScrollbar(
         contentDescription = R.string.scroll_to_top,
       )
     }
+
     AnimatedContent(
       targetState = canScrollDown,
-      transitionSpec = { fadeIn(animationSpec).togetherWith(fadeOut(animationSpec)) },
+      transitionSpec = transitionSpec(),
     ) { enabled ->
       ScrollButton(
         onScrollTo = scrollbarActions.onScrollToBottom,
@@ -62,6 +65,10 @@ fun SimpleVerticalScrollbar(
     }
   }
 }
+
+@Composable
+private fun transitionSpec(): AnimatedContentTransitionScope<Boolean>.() -> ContentTransform =
+  { fadeIn(animationSpec).togetherWith(fadeOut(animationSpec)) }
 
 @Composable
 private fun ScrollButton(

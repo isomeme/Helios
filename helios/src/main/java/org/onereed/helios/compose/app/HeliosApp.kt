@@ -18,9 +18,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -37,35 +37,33 @@ import timber.log.Timber
 
 @Composable
 @OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class, ExperimentalPermissionsApi::class)
-fun HeliosApp(
-  heliosAppState: HeliosAppState = rememberHeliosAppState(),
-  heliosAppViewModel: HeliosAppViewModel = hiltViewModel(),
-) {
+fun HeliosApp(heliosAppState: HeliosAppState = rememberHeliosAppState()) {
   Timber.d("HeliosApp start")
 
+  val haptics = LocalHapticFeedback.current
+  val navActions = remember(heliosAppState, haptics) { NavActions(heliosAppState, haptics) }
+
   // Marked as nullable, but expected to be non-null in runtime app.
-  val activity = LocalActivity.current
-  val currentDestination = heliosAppState.currentDestination
   val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
-
-  val navActions =
-    remember(heliosAppState, heliosAppViewModel) {
-      NavActions.create(heliosAppState, heliosAppViewModel)
-    }
-
+  val activity = LocalActivity.current
   val permissionActions =
     remember(locationPermissionState, activity) {
-      PermissionActions.create(locationPermissionState, activity)
+      PermissionActions(locationPermissionState, activity)
     }
 
   if (locationPermissionState.status.isGranted) {
+    val currentDestination = heliosAppState.currentDestination
+
     StatelessHeliosApp(
       navHostController = heliosAppState.navHostController,
       isSelected = { currentDestination?.hasRoute(it::class) ?: false },
       navActions = navActions,
     )
   } else {
-    PermissionScreen(locationPermissionState = locationPermissionState, actions = permissionActions)
+    PermissionScreen(
+      locationPermissionState = locationPermissionState,
+      permissionActions = permissionActions,
+    )
   }
 }
 
@@ -97,7 +95,7 @@ fun StatelessHeliosApp(
       ) {
         composable<Screen.Schedule> { ScheduleScreen(navActions = navActions) }
 
-        composable<Screen.Text> { TextScreen(navActions = navActions) }
+        composable<Screen.Text> { TextScreen() }
 
         composable<Screen.Compass> { Greeting("compass") }
 

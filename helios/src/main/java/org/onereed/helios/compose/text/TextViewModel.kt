@@ -7,7 +7,12 @@ import org.onereed.helios.common.BaseViewModel
 @HiltViewModel
 class TextViewModel
 @Inject
-constructor(textStateHolder: TextStateHolder, uiFactory: TextUi.Factory) : BaseViewModel() {
+constructor(uiFactory: TextUi.Factory, private val textStateHolder: TextStateHolder) :
+  BaseViewModel() {
 
   val textUiFlow = textStateHolder.selectedIndexFlow.mapState { uiFactory.create(it) }
+
+  fun selectTextIndex(index: Int) {
+    textStateHolder.selectIndex(index)
+  }
 }

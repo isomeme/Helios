@@ -33,8 +33,10 @@ import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun PermissionScreen(locationPermissionState: PermissionState, actions: PermissionActions) {
-
+fun PermissionScreen(
+  locationPermissionState: PermissionState,
+  permissionActions: PermissionActions,
+) {
   // Track if the permission request has been processed after user interaction
   var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
   var permissionRequestCompleted by rememberSaveable { mutableStateOf(false) }
@@ -50,19 +52,19 @@ fun PermissionScreen(locationPermissionState: PermissionState, actions: Permissi
     if (locationPermissionState.status.shouldShowRationale) {
       StatelessPermissionScreen(
         explanationRes = R.string.location_permission_rationale,
-        okButtonAction = actions::requestPermission,
-        exitButtonAction = actions::exitApp,
+        okButtonAction = permissionActions.requestPermission,
+        exitButtonAction = permissionActions.exitApp,
       )
     } else {
       StatelessPermissionScreen(
         explanationRes = R.string.location_permission_use_settings,
-        okButtonAction = actions::openSettings,
-        exitButtonAction = actions::exitApp,
+        okButtonAction = permissionActions.openSettings,
+        exitButtonAction = permissionActions.exitApp,
       )
     }
   } else {
     SideEffect {
-      actions.requestPermission()
+      permissionActions.requestPermission()
       hasRequestedPermission = true
     }
   }

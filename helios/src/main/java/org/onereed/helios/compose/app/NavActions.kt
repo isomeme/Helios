@@ -1,26 +1,18 @@
 package org.onereed.helios.compose.app
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 @Immutable
-interface NavActions {
-
-  fun navigateTo(screen: Screen)
-
-  fun selectTextIndex(index: Int)
-
-  fun navigateToTextIndex(index: Int) {
-    selectTextIndex(index)
-    navigateTo(Screen.Text)
-  }
-
-  companion object {
-
-    fun create(heliosAppState: HeliosAppState, heliosAppViewModel: HeliosAppViewModel): NavActions =
-      object : NavActions {
-        override fun navigateTo(screen: Screen) = heliosAppState.navigateTo(screen)
-
-        override fun selectTextIndex(index: Int) = heliosAppViewModel.selectTextIndex(index)
-      }
-  }
+data class NavActions(val navigateTo: (Screen) -> Unit) {
+  constructor(
+    heliosAppState: HeliosAppState,
+    haptics: HapticFeedback,
+  ) : this(
+    navigateTo = { screen ->
+      haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+      heliosAppState.navigateTo(screen)
+    },
+  )
 }
