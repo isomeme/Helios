@@ -28,7 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,14 +55,13 @@ import org.onereed.helios.ui.theme.DarkHeliosTheme
 fun ScheduleScreen(navActions: NavActions, scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
   val scheduleUi by scheduleViewModel.scheduleUiFlow.collectAsStateWithLifecycle()
   val coroutineScope = rememberCoroutineScope()
-
   val lazyListState = rememberLazyListState()
   val canScrollUp by remember { derivedStateOf { lazyListState.canScrollBackward } }
   val canScrollDown by remember { derivedStateOf { lazyListState.canScrollForward } }
+  val scrollbarActions =
+    remember(lazyListState, coroutineScope) { ScrollbarActions(lazyListState, coroutineScope) }
 
   LaunchedEffect(scheduleUi) { lazyListState.scrollToItem(0) }
-
-  val scrollbarActions = ScrollbarActions.forLazyListState(lazyListState, coroutineScope)
 
   StatelessScheduleScreen(
     scheduleUi = scheduleUi,
@@ -111,9 +112,14 @@ fun StatelessScheduleScreen(
 
 @Composable
 private fun LazyItemScope.EventCard(event: EventUi, onSelectEvent: (Int) -> Unit) {
+  val haptics = LocalHapticFeedback.current
+
   OutlinedCard(
     modifier = Modifier.requiredWidth(CARD_WIDTH).animateItem(),
-    onClick = { onSelectEvent(event.ordinal) },
+    onClick = {
+      haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+      onSelectEvent(event.ordinal)
+    },
     colors =
       CardDefaults.outlinedCardColors(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -152,12 +158,7 @@ fun ScheduleScreenPreview() {
   val sunTimeSeries = SunTimeSeries(hereNow)
   val sunSchedule = SunSchedule(sunTimeSeries)
   val scheduleUi = ScheduleUi.Factory(LocalContext.current, sunResources).create(sunSchedule)
-  val scrollbarActions =
-    object : ScrollbarActions {
-      override fun onScrollToTop() {}
-
-      override fun onScrollToBottom() {}
-    }
+  val scrollbarActions = ScrollbarActions(onScrollToTop = {}, onScrollToBottom = {})
 
   DarkHeliosTheme {
     StatelessScheduleScreen(

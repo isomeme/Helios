@@ -43,7 +43,7 @@ fun SimpleVerticalScrollbar(
       transitionSpec = { fadeIn(animationSpec).togetherWith(fadeOut(animationSpec)) },
     ) { enabled ->
       ScrollButton(
-        onScrollTo = scrollbarActions::onScrollToTop,
+        onScrollTo = scrollbarActions.onScrollToTop,
         enabled = enabled,
         icon = R.drawable.arrow_upward_24px,
         contentDescription = R.string.scroll_to_top,
@@ -54,7 +54,7 @@ fun SimpleVerticalScrollbar(
       transitionSpec = { fadeIn(animationSpec).togetherWith(fadeOut(animationSpec)) },
     ) { enabled ->
       ScrollButton(
-        onScrollTo = scrollbarActions::onScrollToBottom,
+        onScrollTo = scrollbarActions.onScrollToBottom,
         enabled = enabled,
         icon = R.drawable.arrow_downward_24px,
         contentDescription = R.string.scroll_to_bottom,
@@ -87,43 +87,28 @@ private fun ScrollButton(
 }
 
 @Immutable
-interface ScrollbarActions {
-  fun onScrollToTop()
+data class ScrollbarActions(val onScrollToTop: () -> Unit, val onScrollToBottom: () -> Unit) {
+  constructor(
+    scrollState: ScrollState,
+    coroutineScope: CoroutineScope,
+  ) : this(
+    onScrollToTop = { coroutineScope.launch { scrollState.animateScrollTo(0) } },
+    onScrollToBottom = {
+      coroutineScope.launch { scrollState.animateScrollTo(scrollState.maxValue) }
+    },
+  )
 
-  fun onScrollToBottom()
-
-  companion object {
-
-    fun forScrollState(
-      scrollState: ScrollState,
-      coroutineScope: CoroutineScope,
-    ): ScrollbarActions =
-      object : ScrollbarActions {
-        override fun onScrollToTop() {
-          coroutineScope.launch { scrollState.animateScrollTo(0) }
-        }
-
-        override fun onScrollToBottom() {
-          coroutineScope.launch { scrollState.animateScrollTo(scrollState.maxValue) }
-        }
+  constructor(
+    lazyListState: LazyListState,
+    coroutineScope: CoroutineScope,
+  ) : this(
+    onScrollToTop = { coroutineScope.launch { lazyListState.animateScrollToItem(0) } },
+    onScrollToBottom = {
+      coroutineScope.launch {
+        lazyListState.animateScrollToItem(lazyListState.layoutInfo.totalItemsCount - 1)
       }
-
-    fun forLazyListState(
-      lazyListState: LazyListState,
-      coroutineScope: CoroutineScope,
-    ): ScrollbarActions =
-      object : ScrollbarActions {
-        override fun onScrollToTop() {
-          coroutineScope.launch { lazyListState.animateScrollToItem(0) }
-        }
-
-        override fun onScrollToBottom() {
-          coroutineScope.launch {
-            lazyListState.animateScrollToItem(lazyListState.layoutInfo.totalItemsCount - 1)
-          }
-        }
-      }
-  }
+    },
+  )
 }
 
 private const val SCROLL_BUTTON_ANIM_MILLIS = 500

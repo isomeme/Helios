@@ -19,12 +19,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -51,32 +51,20 @@ fun TextScreen(navActions: NavActions, textViewModel: TextViewModel = hiltViewMo
   val scrollState = rememberScrollState()
   val canScrollUp by remember { derivedStateOf { scrollState.canScrollBackward } }
   val canScrollDown by remember { derivedStateOf { scrollState.canScrollForward } }
+  val scrollbarActions =
+    remember(scrollState, coroutineScope) { ScrollbarActions(scrollState, coroutineScope) }
 
-  var eventMenuExpanded by remember { mutableStateOf(false) }
+  val eventMenuExpandedState = remember { mutableStateOf(false) }
+  val eventMenuActions =
+    remember(eventMenuExpandedState, navActions) {
+      EventMenuActions(eventMenuExpandedState, navActions)
+    }
 
   LaunchedEffect(textUi) { scrollState.scrollTo(0) }
 
-  val eventMenuActions =
-    object : EventMenuActions {
-      override fun onExpanded() {
-        eventMenuExpanded = true
-      }
-
-      override fun onDismissed() {
-        eventMenuExpanded = false
-      }
-
-      override fun onSelectIndex(ix: Int) {
-        navActions.selectTextIndex(ix)
-        eventMenuExpanded = false
-      }
-    }
-
-  val scrollbarActions = ScrollbarActions.forScrollState(scrollState, coroutineScope)
-
   StatelessTextScreen(
     textUi,
-    eventMenuExpanded,
+    eventMenuExpandedState.value,
     canScrollUp,
     canScrollDown,
     eventMenuActions,
@@ -110,7 +98,7 @@ private fun StatelessTextScreen(
       // Enclosing the select button with its dropdown menu in a column makes the menu pop up just
       // below the button.
       Column(modifier = Modifier.align(Alignment.CenterStart)) {
-        OutlinedButton(onClick = eventMenuActions::onExpanded) {
+        OutlinedButton(onClick = eventMenuActions.onExpanded) {
           Icon(
             painter = painterResource(id = textUi.selected.iconRes),
             tint = textUi.selected.color,
@@ -120,7 +108,7 @@ private fun StatelessTextScreen(
 
         DropdownMenu(
           expanded = eventMenuExpanded,
-          onDismissRequest = eventMenuActions::onDismissed,
+          onDismissRequest = eventMenuActions.onDismissed,
           offset = DpOffset(0.dp, 10.dp),
         ) {
           textUi.menu.forEach { eventUi ->
@@ -172,12 +160,22 @@ private fun StatelessTextScreen(
 }
 
 @Immutable
-private interface EventMenuActions {
-  fun onExpanded()
-
-  fun onDismissed()
-
-  fun onSelectIndex(ix: Int)
+private data class EventMenuActions(
+  val onExpanded: () -> Unit,
+  val onDismissed: () -> Unit,
+  val onSelectIndex: (Int) -> Unit,
+) {
+  constructor(
+    eventMenuExpandedState: MutableState<Boolean>,
+    navActions: NavActions,
+  ) : this(
+    onExpanded = { eventMenuExpandedState.value = true },
+    onDismissed = { eventMenuExpandedState.value = false },
+    onSelectIndex = { ix ->
+      navActions.selectTextIndex(ix)
+      eventMenuExpandedState.value = false
+    },
+  )
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0F1416)
@@ -185,22 +183,8 @@ private interface EventMenuActions {
 fun TextScreenPreview() {
   val sunResources = SunResources(LocalContext.current)
   val textUi = TextUi.Factory(sunResources).create(2) // Sunset
-
-  val eventMenuActions =
-    object : EventMenuActions {
-      override fun onExpanded() {}
-
-      override fun onDismissed() {}
-
-      override fun onSelectIndex(ix: Int) {}
-    }
-
-  val scrollbarActions =
-    object : ScrollbarActions {
-      override fun onScrollToTop() {}
-
-      override fun onScrollToBottom() {}
-    }
+  val eventMenuActions = EventMenuActions(onExpanded = {}, onDismissed = {}, onSelectIndex = {})
+  val scrollbarActions = ScrollbarActions(onScrollToTop = {}, onScrollToBottom = {})
 
   DarkHeliosTheme {
     StatelessTextScreen(
