@@ -19,6 +19,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,6 +61,14 @@ fun ScheduleScreen(navActions: NavActions, scheduleViewModel: ScheduleViewModel 
   val scrollbarActions =
     remember(lazyListState, coroutineScope) { ScrollbarActions(lazyListState, coroutineScope) }
 
+  val onSelectEvent =
+    remember(scheduleViewModel, navActions) {
+      { index: Int ->
+        scheduleViewModel.selectTextIndex(index)
+        navActions.navigateTo(Screen.Text)
+      }
+    }
+
   LaunchedEffect(scheduleUi) { lazyListState.scrollToItem(0) }
 
   StatelessScheduleScreen(
@@ -68,10 +77,7 @@ fun ScheduleScreen(navActions: NavActions, scheduleViewModel: ScheduleViewModel 
     canScrollUp = canScrollUp,
     canScrollDown = canScrollDown,
     scrollbarActions = scrollbarActions,
-    onSelectEvent = { index ->
-      scheduleViewModel.selectTextIndex(index)
-      navActions.navigateTo(Screen.Text)
-    },
+    onSelectEvent = onSelectEvent,
   )
 }
 
@@ -84,31 +90,33 @@ fun StatelessScheduleScreen(
   scrollbarActions: ScrollbarActions,
   onSelectEvent: (Int) -> Unit,
 ) {
-  ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-    val (progress, events, scrollbar) = createRefs()
+  Surface(modifier = Modifier.fillMaxSize()) {
+    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+      val (progress, events, scrollbar) = createRefs()
 
-    if (scheduleUi.events.isEmpty()) {
-      CircularProgressIndicator(modifier = Modifier.constrainAs(progress) { centerTo(parent) })
-      return@ConstraintLayout
-    }
-
-    LazyColumn(
-      modifier = Modifier.wrapContentSize().constrainAs(events) { centerTo(parent) },
-      verticalArrangement = Arrangement.spacedBy(25.dp),
-      state = lazyListState,
-    ) {
-      items(items = scheduleUi.events, key = { it.key }) { event ->
-        EventCard(event, onSelectEvent)
+      if (scheduleUi.events.isEmpty()) {
+        CircularProgressIndicator(modifier = Modifier.constrainAs(progress) { centerTo(parent) })
+        return@ConstraintLayout
       }
-    }
 
-    SimpleVerticalScrollbar(
-      canScrollUp = canScrollUp,
-      canScrollDown = canScrollDown,
-      scrollbarActions = scrollbarActions,
-      modifier =
-        Modifier.constrainAs(scrollbar) { start.linkTo(anchor = events.end, margin = 10.dp) },
-    )
+      LazyColumn(
+        modifier = Modifier.wrapContentSize().constrainAs(events) { centerTo(parent) },
+        verticalArrangement = Arrangement.spacedBy(25.dp),
+        state = lazyListState,
+      ) {
+        items(items = scheduleUi.events, key = { it.key }) { event ->
+          EventCard(event, onSelectEvent)
+        }
+      }
+
+      SimpleVerticalScrollbar(
+        canScrollUp = canScrollUp,
+        canScrollDown = canScrollDown,
+        scrollbarActions = scrollbarActions,
+        modifier =
+          Modifier.constrainAs(scrollbar) { start.linkTo(anchor = events.end, margin = 10.dp) },
+      )
+    }
   }
 }
 
@@ -126,7 +134,6 @@ private fun LazyItemScope.EventCard(event: EventUi, onSelectEvent: (Int) -> Unit
   ) {
     Row(
       modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp),
-      horizontalArrangement = Arrangement.Start,
       verticalAlignment = Alignment.CenterVertically,
     ) {
       Icon(
@@ -147,7 +154,7 @@ private fun LazyItemScope.EventCard(event: EventUi, onSelectEvent: (Int) -> Unit
 
 // 0xFF0F1416
 @OptIn(ExperimentalTime::class)
-@Preview(showBackground = true, backgroundColor = 0xFF0F1416)
+@Preview
 @Composable
 fun ScheduleScreenPreview() {
   val sunResources = SunResources(LocalContext.current)

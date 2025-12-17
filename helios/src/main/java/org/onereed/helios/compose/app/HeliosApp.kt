@@ -1,7 +1,6 @@
 package org.onereed.helios.compose.app
 
 import android.Manifest
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,7 +27,6 @@ import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import org.onereed.helios.compose.permission.PermissionActions
 import org.onereed.helios.compose.permission.PermissionScreen
 import org.onereed.helios.compose.schedule.ScheduleScreen
 import org.onereed.helios.compose.settings.SettingsScreen
@@ -43,13 +41,7 @@ fun HeliosApp(heliosAppState: HeliosAppState = rememberHeliosAppState()) {
   val haptics = LocalHapticFeedback.current
   val navActions = remember(heliosAppState, haptics) { NavActions(heliosAppState, haptics) }
 
-  // Marked as nullable, but expected to be non-null in runtime app.
   val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
-  val activity = LocalActivity.current
-  val permissionActions =
-    remember(locationPermissionState, activity) {
-      PermissionActions(locationPermissionState, activity)
-    }
 
   if (locationPermissionState.status.isGranted) {
     val currentDestination = heliosAppState.currentDestination
@@ -60,15 +52,12 @@ fun HeliosApp(heliosAppState: HeliosAppState = rememberHeliosAppState()) {
       navActions = navActions,
     )
   } else {
-    PermissionScreen(
-      locationPermissionState = locationPermissionState,
-      permissionActions = permissionActions,
-    )
+    PermissionScreen(locationPermissionState = locationPermissionState)
   }
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
 fun StatelessHeliosApp(
   navHostController: NavHostController,
   isSelected: (Screen) -> Boolean,

@@ -150,7 +150,8 @@ dependencies {
 
   // Markdown support
 
-  implementation("com.github.jeziellago:compose-markdown:0.5.7")
+  implementation("com.halilibo.compose-richtext:richtext-ui-material3:1.0.0-alpha03")
+  implementation("com.halilibo.compose-richtext:richtext-commonmark:1.0.0-alpha03")
 
   // Accompanist (permission management)
 

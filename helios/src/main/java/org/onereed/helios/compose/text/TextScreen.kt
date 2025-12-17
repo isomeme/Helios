@@ -4,8 +4,10 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -15,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -34,13 +37,18 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.jeziellago.compose.markdowntext.MarkdownText
+import com.halilibo.richtext.commonmark.Markdown
+import com.halilibo.richtext.ui.RichTextStyle
+import com.halilibo.richtext.ui.material3.RichText
 import org.onereed.helios.compose.shared.ScrollbarActions
 import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
 import org.onereed.helios.datasource.SunResources
+import org.onereed.helios.sun.SunEventType
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @Composable
@@ -84,78 +92,80 @@ private fun StatelessTextScreen(
   scrollbarActions: ScrollbarActions,
   scrollState: ScrollState,
 ) {
-  val haptics = LocalHapticFeedback.current
+  Surface(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize().padding(all = 10.dp)) {
 
-  Column(modifier = Modifier.fillMaxSize()) {
-
-    // Top of screen: select button on the left, title centered.
-    Box(
-      modifier =
-        Modifier.fillMaxWidth()
-          .background(MaterialTheme.colorScheme.surfaceContainer)
-          .padding(all = 10.dp)
-    ) {
-
-      // Enclosing the select button with its dropdown menu in a column makes the menu pop up just
-      // below the button.
-      Column(modifier = Modifier.align(Alignment.CenterStart)) {
-        OutlinedButton(onClick = eventMenuActions.onExpanded) {
-          Icon(
-            painter = painterResource(id = textUi.selected.iconRes),
-            tint = textUi.selected.color,
-            contentDescription = textUi.selected.name,
-          )
-        }
-
-        DropdownMenu(
-          expanded = eventMenuExpanded,
-          onDismissRequest = eventMenuActions.onDismissed,
-          offset = DpOffset(0.dp, 10.dp),
-        ) {
-          textUi.menu.forEach { eventUi ->
-            DropdownMenuItem(
-              enabled = eventUi.enabled,
-              onClick = {
-                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                eventMenuActions.onSelectIndex(eventUi.index)
-              },
-              colors =
-                MenuDefaults.itemColors(
-                  leadingIconColor = eventUi.color,
-                  textColor = eventUi.color,
-                ),
-              leadingIcon = {
-                Icon(painter = painterResource(eventUi.iconRes), contentDescription = eventUi.name)
-              },
-              text = { Text(text = eventUi.name, style = MaterialTheme.typography.labelLarge) },
+      // Top of screen: select button on the left, title centered.
+      Box(
+        modifier =
+          Modifier.fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .padding(all = 10.dp)
+      ) {
+        // Enclosing the select button with its dropdown menu in a column makes the menu pop up just
+        // below the button.
+        Column(modifier = Modifier.align(Alignment.CenterStart)) {
+          OutlinedButton(onClick = eventMenuActions.onExpanded) {
+            Icon(
+              painter = painterResource(id = textUi.selected.iconRes),
+              tint = textUi.selected.color,
+              contentDescription = textUi.selected.name,
             )
           }
+
+          DropdownMenu(
+            expanded = eventMenuExpanded,
+            onDismissRequest = eventMenuActions.onDismissed,
+            offset = DpOffset(0.dp, 10.dp),
+          ) {
+            textUi.menu.forEach { eventUi ->
+              DropdownMenuItem(
+                enabled = eventUi.enabled,
+                onClick = { eventMenuActions.onSelectIndex(eventUi.index) },
+                colors =
+                  MenuDefaults.itemColors(
+                    leadingIconColor = eventUi.color,
+                    textColor = eventUi.color,
+                  ),
+                leadingIcon = {
+                  Icon(
+                    painter = painterResource(eventUi.iconRes),
+                    contentDescription = eventUi.name,
+                  )
+                },
+                text = { Text(text = eventUi.name, style = MaterialTheme.typography.labelLarge) },
+              )
+            }
+          }
         }
+
+        Text(
+          text = textUi.selected.name,
+          color = textUi.selected.color,
+          style = MaterialTheme.typography.headlineMedium,
+          modifier = Modifier.align(Alignment.Center),
+        )
       }
 
-      Text(
-        text = textUi.selected.name,
-        color = textUi.selected.color,
-        style = MaterialTheme.typography.headlineMedium,
-        modifier = Modifier.align(Alignment.Center),
-      )
-    }
+      Spacer(modifier = Modifier.height(20.dp))
 
-    // Rubric text with scroll controls
-    Box(modifier = Modifier.fillMaxSize().padding(vertical = 20.dp)) {
-      MarkdownText(
-        modifier = Modifier.verticalScroll(scrollState).fillMaxWidth().padding(horizontal = 40.dp),
-        markdown = textUi.rubric,
-        style =
-          MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-      )
+      // Rubric text with scroll controls
+      Box(modifier = Modifier.fillMaxSize()) {
+        RichText(
+          modifier =
+            Modifier.verticalScroll(scrollState).fillMaxWidth().padding(horizontal = 40.dp),
+          style = RichTextStyle(paragraphSpacing = TextUnit(15.0f, TextUnitType.Sp)),
+        ) {
+          Markdown(content = textUi.rubric)
+        }
 
-      SimpleVerticalScrollbar(
-        canScrollUp = canScrollUp,
-        canScrollDown = canScrollDown,
-        scrollbarActions = scrollbarActions,
-        modifier = Modifier.align(Alignment.CenterEnd),
-      )
+        SimpleVerticalScrollbar(
+          canScrollUp = canScrollUp,
+          canScrollDown = canScrollDown,
+          scrollbarActions = scrollbarActions,
+          modifier = Modifier.align(Alignment.CenterEnd),
+        )
+      }
     }
   }
 }
@@ -178,17 +188,17 @@ private data class EventMenuActions(
     onDismissed = { eventMenuExpandedState.value = false },
     onSelectIndex = { index ->
       haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-      textViewModel.selectTextIndex(index)
       eventMenuExpandedState.value = false
+      textViewModel.selectTextIndex(index)
     },
   )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0F1416)
+@Preview
 @Composable
 fun TextScreenPreview() {
   val sunResources = SunResources(LocalContext.current)
-  val textUi = TextUi.Factory(sunResources).create(2) // Sunset
+  val textUi = TextUi.Factory(sunResources).create(SunEventType.SET.ordinal)
   val eventMenuActions = EventMenuActions(onExpanded = {}, onDismissed = {}, onSelectIndex = {})
   val scrollbarActions = ScrollbarActions(onScrollToTop = {}, onScrollToBottom = {})
 

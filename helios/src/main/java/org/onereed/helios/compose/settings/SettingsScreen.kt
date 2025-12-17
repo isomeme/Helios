@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
@@ -18,11 +17,14 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
@@ -42,142 +44,157 @@ import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @Composable
 fun SettingsScreen(themeViewModel: ThemeViewModel = hiltViewModel()) {
-  val isDynamicTheme by themeViewModel.isDynamicThemeFlow.collectAsStateWithLifecycle(false)
   val themeType by themeViewModel.themeTypeFlow.collectAsStateWithLifecycle(ThemeType.SYSTEM)
+  val isDynamicTheme by themeViewModel.isDynamicThemeFlow.collectAsStateWithLifecycle(false)
+  val themeActions = remember(themeViewModel) { ThemeActions(themeViewModel) }
+
   val uriHandler = LocalUriHandler.current
+  val onViewDoc = remember(uriHandler) { { uriHandler.openUri("https://www.one-reed.org/helios") } }
 
   StatelessSettingsScreen(
-    isDynamicTheme,
-    themeType,
-    onDynamicThemeSelected = themeViewModel::setDynamicTheme,
-    onThemeTypeSelected = themeViewModel::setThemeType,
-    onViewDoc = { uriHandler.openUri("https://www.one-reed.org/helios") },
+    themeType = themeType,
+    isDynamicTheme = isDynamicTheme,
+    themeActions = themeActions,
+    onViewDoc = onViewDoc,
   )
 }
 
 @Composable
-fun StatelessSettingsScreen(
-  isDynamicTheme: Boolean,
+private fun StatelessSettingsScreen(
   themeType: ThemeType,
-  onDynamicThemeSelected: (Boolean) -> Unit,
-  onThemeTypeSelected: (ThemeType) -> Unit,
+  isDynamicTheme: Boolean,
+  themeActions: ThemeActions,
   onViewDoc: () -> Unit,
 ) {
-  ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-    val (settings) = createRefs()
-
-    Column(
-      modifier =
-        Modifier.width(IntrinsicSize.Max).padding(all = 20.dp).constrainAs(settings) {
-          centerTo(parent)
-        }
-    ) {
-      Column(
-        modifier =
-          Modifier.fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(all = 15.dp),
-        verticalArrangement = Arrangement.spacedBy(15.dp),
-        horizontalAlignment = Alignment.Start,
-      ) {
-        Text(
-          text = stringResource(R.string.heading_theme_type),
-          color = MaterialTheme.colorScheme.onSurface,
-          style = MaterialTheme.typography.labelLarge,
-        )
+  Surface(modifier = Modifier.fillMaxSize()) {
+    ProvideTextStyle(value = MaterialTheme.typography.labelMedium) {
+      ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+        val (settings) = createRefs()
 
         Column(
-          modifier = Modifier.selectableGroup(),
-          horizontalAlignment = Alignment.Start,
-          verticalArrangement = Arrangement.spacedBy(15.dp),
+          modifier =
+            Modifier.width(IntrinsicSize.Max).padding(all = 20.dp).constrainAs(settings) {
+              centerTo(parent)
+            },
+          verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-          ThemeType.entries.forEach { type ->
-            Row(
-              modifier =
-                Modifier.selectable(
-                  selected = (type == themeType),
-                  onClick = { onThemeTypeSelected(type) },
-                  role = Role.RadioButton,
-                ),
-              horizontalArrangement = Arrangement.Start,
-              verticalAlignment = Alignment.CenterVertically,
-            ) {
-              Spacer(modifier = Modifier.width(30.dp))
+          ThemeSettings(themeType, isDynamicTheme, themeActions)
 
-              RadioButton(selected = themeType == type, onClick = null)
-
-              Spacer(modifier = Modifier.width(10.dp))
-
-              Text(
-                text = stringResource(type.labelRes),
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.labelMedium,
-              )
-            }
-          }
-        }
-
-        if (dynamicThemeSupported) {
-          Row(
-            modifier =
-              Modifier.toggleable(
-                value = isDynamicTheme,
-                onValueChange = { onDynamicThemeSelected(it) },
-                role = Role.Checkbox,
-              ),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            Checkbox(checked = isDynamicTheme, onCheckedChange = null)
-
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Text(
-              text = stringResource(R.string.label_use_dynamic_theme_colors),
-              color = MaterialTheme.colorScheme.onSurface,
-              style = MaterialTheme.typography.labelMedium,
-            )
-          }
-        }
-      }
-
-      Spacer(modifier = Modifier.height(20.dp))
-
-      Column(
-        modifier =
-          Modifier.fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(start = 10.dp)
-      ) {
-        TextButton(onClick = onViewDoc, contentPadding = PaddingValues(all = 0.dp)) {
-          Icon(
-            painter = painterResource(R.drawable.help_24px),
-            contentDescription = stringResource(R.string.view_online_documentation),
-            tint = MaterialTheme.colorScheme.primary,
-          )
-
-          Spacer(modifier = Modifier.width(10.dp))
-
-          Text(
-            text = stringResource(R.string.view_online_documentation),
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.labelMedium,
-          )
+          OnlineDocLink(onViewDoc)
         }
       }
     }
   }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0F1416)
+@Composable
+private fun ThemeSettings(
+  themeType: ThemeType,
+  isDynamicTheme: Boolean,
+  themeActions: ThemeActions,
+) {
+  Column(
+    modifier =
+      Modifier.fillMaxWidth()
+        .background(MaterialTheme.colorScheme.surfaceContainer)
+        .padding(all = 15.dp),
+    verticalArrangement = Arrangement.spacedBy(15.dp),
+  ) {
+    Text(
+      text = stringResource(R.string.heading_theme_type),
+      style = MaterialTheme.typography.labelLarge,
+    )
+
+    Column(
+      modifier = Modifier.selectableGroup(),
+      verticalArrangement = Arrangement.spacedBy(15.dp),
+    ) {
+      ThemeType.entries.forEach { type ->
+        Row(
+          modifier =
+            Modifier.selectable(
+              selected = (type == themeType),
+              onClick = { themeActions.onThemeTypeSelected(type) },
+              role = Role.RadioButton,
+            ),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Spacer(modifier = Modifier.width(30.dp))
+
+          RadioButton(selected = themeType == type, onClick = null)
+
+          Spacer(modifier = Modifier.width(10.dp))
+
+          Text(text = stringResource(type.labelRes))
+        }
+      }
+    }
+
+    if (dynamicThemeSupported) {
+      Row(
+        modifier =
+          Modifier.toggleable(
+            value = isDynamicTheme,
+            onValueChange = { themeActions.onDynamicThemeSelected(it) },
+            role = Role.Checkbox,
+          ),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Checkbox(checked = isDynamicTheme, onCheckedChange = null)
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Text(text = stringResource(R.string.label_use_dynamic_theme_colors))
+      }
+    }
+  }
+}
+
+@Composable
+private fun OnlineDocLink(onViewDoc: () -> Unit) {
+  TextButton(
+    modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer),
+    onClick = onViewDoc,
+    contentPadding = PaddingValues(vertical = 0.dp, horizontal = 15.dp),
+  ) {
+    Icon(
+      painter = painterResource(R.drawable.help_24px),
+      contentDescription = stringResource(R.string.view_online_documentation),
+      tint = MaterialTheme.colorScheme.primary,
+    )
+
+    Spacer(modifier = Modifier.width(10.dp))
+
+    Text(
+      text = stringResource(R.string.view_online_documentation),
+      style = MaterialTheme.typography.labelMedium,
+      color = MaterialTheme.colorScheme.onSurface,
+    )
+  }
+}
+
+private data class ThemeActions(
+  val onThemeTypeSelected: (ThemeType) -> Unit,
+  val onDynamicThemeSelected: (Boolean) -> Unit,
+) {
+  constructor(
+    themeViewModel: ThemeViewModel
+  ) : this(
+    onThemeTypeSelected = themeViewModel::setThemeType,
+    onDynamicThemeSelected = themeViewModel::setDynamicTheme,
+  )
+}
+
+@Preview
 @Composable
 fun SettingsScreenPreview() {
+  val themeActions = ThemeActions(onThemeTypeSelected = {}, onDynamicThemeSelected = {})
+
   DarkHeliosTheme {
     StatelessSettingsScreen(
-      isDynamicTheme = true,
       themeType = ThemeType.SYSTEM,
-      onDynamicThemeSelected = {},
-      onThemeTypeSelected = {},
+      isDynamicTheme = true,
+      themeActions = themeActions,
       onViewDoc = {},
     )
   }
