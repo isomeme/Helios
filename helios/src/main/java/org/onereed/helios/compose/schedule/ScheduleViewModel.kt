@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.onereed.helios.common.Locator
-import org.onereed.helios.compose.text.TextStateHolder
+import org.onereed.helios.compose.text.SelectTextIndexUseCase
 import org.onereed.helios.sun.SunSchedule
 import org.onereed.helios.sun.SunTimeSeries
 
@@ -19,7 +19,7 @@ class ScheduleViewModel
 constructor(
   locator: Locator,
   uiFactory: ScheduleUi.Factory,
-  private val textStateHolder: TextStateHolder,
+  val selectTextIndex: SelectTextIndexUseCase,
 ) : ViewModel() {
 
   val scheduleUiFlow =
@@ -32,10 +32,6 @@ constructor(
         SharingStarted.WhileSubscribed(FLOW_TIMEOUT_MILLIS),
         ScheduleUi(emptyList()),
       )
-
-  fun selectTextIndex(index: Int) {
-    textStateHolder.selectIndex(index)
-  }
 
   companion object {
 

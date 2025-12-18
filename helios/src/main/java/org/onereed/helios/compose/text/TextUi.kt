@@ -3,9 +3,8 @@ package org.onereed.helios.compose.text
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
-import org.onereed.helios.datasource.SunResources
 import javax.inject.Inject
-import javax.inject.Singleton
+import org.onereed.helios.datasource.SunResources
 
 @Stable
 data class TextUi(val menu: List<EventUi>, val selected: EventUi, val rubric: String) {
@@ -18,7 +17,6 @@ data class TextUi(val menu: List<EventUi>, val selected: EventUi, val rubric: St
     val index: Int,
   )
 
-  @Singleton
   class Factory @Inject constructor(private val sunResources: SunResources) {
 
     fun create(selectedIndex: Int): TextUi {
