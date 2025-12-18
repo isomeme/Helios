@@ -82,7 +82,7 @@ dependencies {
   implementation("androidx.core:core-ktx:1.17.0")
 
   // Misc androidx
-  implementation("androidx.activity:activity-ktx:1.12.1")
+  implementation("androidx.activity:activity-ktx:1.12.2")
   implementation("androidx.datastore:datastore-preferences:1.2.0")
   implementation("androidx.fragment:fragment-ktx:1.8.9")
 
@@ -109,7 +109,7 @@ dependencies {
 
   // Compose
 
-  implementation("androidx.activity:activity-compose:1.12.1")
+  implementation("androidx.activity:activity-compose:1.12.2")
   implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
   implementation("androidx.work:work-runtime:2.11.0")
 
