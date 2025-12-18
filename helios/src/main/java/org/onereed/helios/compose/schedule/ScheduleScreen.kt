@@ -29,7 +29,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -61,9 +63,11 @@ fun ScheduleScreen(navActions: NavActions, scheduleViewModel: ScheduleViewModel 
   val scrollbarActions =
     remember(lazyListState, coroutineScope) { ScrollbarActions(lazyListState, coroutineScope) }
 
+  val haptics = LocalHapticFeedback.current
   val onSelectEvent =
-    remember(scheduleViewModel, navActions) {
+    remember(scheduleViewModel, navActions, haptics) {
       { index: Int ->
+        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
         scheduleViewModel.selectTextIndex(index)
         navActions.navigateTo(Screen.Text)
       }

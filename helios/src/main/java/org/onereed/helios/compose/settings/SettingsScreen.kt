@@ -27,6 +27,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,7 +49,9 @@ import org.onereed.helios.ui.theme.DarkHeliosTheme
 fun SettingsScreen(themeViewModel: ThemeViewModel = hiltViewModel()) {
   val themeType by themeViewModel.themeTypeFlow.collectAsStateWithLifecycle(ThemeType.SYSTEM)
   val isDynamicTheme by themeViewModel.isDynamicThemeFlow.collectAsStateWithLifecycle(false)
-  val themeActions = remember(themeViewModel) { ThemeActions(themeViewModel) }
+
+  val haptics = LocalHapticFeedback.current
+  val themeActions = remember(themeViewModel, haptics) { ThemeActions(themeViewModel, haptics) }
 
   val uriHandler = LocalUriHandler.current
   val onViewDoc = remember(uriHandler) { { uriHandler.openUri("https://www.one-reed.org/helios") } }
@@ -113,7 +118,8 @@ private fun ThemeSettings(
         Row(
           modifier =
             Modifier.selectable(
-              selected = (type == themeType),
+              selected = type == themeType,
+              enabled = type != themeType,
               onClick = { themeActions.onThemeTypeSelected(type) },
               role = Role.RadioButton,
             ),
@@ -178,10 +184,17 @@ private data class ThemeActions(
   val onDynamicThemeSelected: (Boolean) -> Unit,
 ) {
   constructor(
-    themeViewModel: ThemeViewModel
+    themeViewModel: ThemeViewModel,
+    haptics: HapticFeedback,
   ) : this(
-    onThemeTypeSelected = themeViewModel::setThemeType,
-    onDynamicThemeSelected = themeViewModel::setDynamicTheme,
+    onThemeTypeSelected = {
+      haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+      themeViewModel.setThemeType(it)
+    },
+    onDynamicThemeSelected = {
+      haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+      themeViewModel.setDynamicTheme(it)
+    },
   )
 }
 

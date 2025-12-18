@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -38,8 +37,7 @@ import timber.log.Timber
 fun HeliosApp(heliosAppState: HeliosAppState = rememberHeliosAppState()) {
   Timber.d("HeliosApp start")
 
-  val haptics = LocalHapticFeedback.current
-  val navActions = remember(heliosAppState, haptics) { NavActions(heliosAppState, haptics) }
+  val navActions = remember(heliosAppState) { NavActions(heliosAppState) }
 
   val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
