@@ -22,7 +22,6 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -72,8 +71,6 @@ fun ScheduleScreen(navActions: NavActions, scheduleViewModel: ScheduleViewModel 
         navActions.navigateTo(Screen.Text)
       }
     }
-
-  LaunchedEffect(scheduleUi) { lazyListState.scrollToItem(0) }
 
   StatelessScheduleScreen(
     scheduleUi = scheduleUi,

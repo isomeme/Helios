@@ -1,22 +1,14 @@
 package org.onereed.helios.sun
 
 import com.google.common.truth.Truth.assertThat
-import org.junit.Before
-import org.junit.Test
-import org.onereed.helios.common.PlaceTime
-import timber.log.Timber
-import timber.log.Timber.DebugTree
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+import org.junit.Test
+import org.onereed.helios.common.PlaceTime
 
 /** Tests for [SunTimeSeries]. */
 @OptIn(ExperimentalTime::class)
 class SunTimeSeriesTest {
-
-  @Before
-  fun setup() {
-    Timber.plant(DebugTree())
-  }
 
   /**
    * Make sure we don't use a "preceding" event in the future. In this case, the same sunset appears

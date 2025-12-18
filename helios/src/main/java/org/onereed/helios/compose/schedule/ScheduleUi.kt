@@ -9,7 +9,7 @@ import android.text.format.DateUtils.FORMAT_SHOW_TIME
 import android.text.format.DateUtils.FORMAT_SHOW_WEEKDAY
 import android.text.format.DateUtils.formatDateTime
 import androidx.annotation.DrawableRes
-import androidx.compose.runtime.Stable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -19,9 +19,9 @@ import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunSchedule
 
 @OptIn(ExperimentalTime::class)
-@Stable
+@Immutable
 data class ScheduleUi(val events: List<EventUi>) {
-  @Stable
+  @Immutable
   data class EventUi(
     val color: Color,
     @param:DrawableRes val iconRes: Int,
@@ -81,7 +81,7 @@ data class ScheduleUi(val events: List<EventUi>) {
           FORMAT_SHOW_WEEKDAY or
           FORMAT_ABBREV_ALL
 
-      private const val TIME_FORMAT_FLAGS = 0 or FORMAT_SHOW_TIME or FORMAT_ABBREV_ALL
+      private const val TIME_FORMAT_FLAGS = FORMAT_SHOW_TIME or FORMAT_ABBREV_ALL
     }
   }
 }
