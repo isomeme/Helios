@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -101,13 +103,14 @@ private fun ThemeSettings(
   Column(
     modifier =
       Modifier.fillMaxWidth()
-        .background(MaterialTheme.colorScheme.surfaceContainer)
+        .background(MaterialTheme.colorScheme.secondaryContainer)
         .padding(all = 15.dp),
     verticalArrangement = Arrangement.spacedBy(15.dp),
   ) {
     Text(
       text = stringResource(R.string.heading_theme_type),
       style = MaterialTheme.typography.labelLarge,
+      color = MaterialTheme.colorScheme.onSecondaryContainer,
     )
 
     Column(
@@ -131,7 +134,10 @@ private fun ThemeSettings(
 
           Spacer(modifier = Modifier.width(10.dp))
 
-          Text(text = stringResource(type.labelRes))
+          Text(
+            text = stringResource(type.labelRes),
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+          )
         }
       }
     }
@@ -150,7 +156,10 @@ private fun ThemeSettings(
 
         Spacer(modifier = Modifier.width(10.dp))
 
-        Text(text = stringResource(R.string.label_use_dynamic_theme_colors))
+        Text(
+          text = stringResource(R.string.label_use_dynamic_theme_colors),
+          color = MaterialTheme.colorScheme.onSecondaryContainer,
+        )
       }
     }
   }
@@ -159,8 +168,14 @@ private fun ThemeSettings(
 @Composable
 private fun OnlineDocLink(onViewDoc: () -> Unit) {
   TextButton(
-    modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer),
+    modifier = Modifier.fillMaxWidth(),
     onClick = onViewDoc,
+    colors =
+      ButtonDefaults.textButtonColors(
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+      ),
+    shape = RectangleShape,
     contentPadding = PaddingValues(vertical = 0.dp, horizontal = 15.dp),
   ) {
     Icon(
@@ -174,7 +189,6 @@ private fun OnlineDocLink(onViewDoc: () -> Unit) {
     Text(
       text = stringResource(R.string.view_online_documentation),
       style = MaterialTheme.typography.labelMedium,
-      color = MaterialTheme.colorScheme.onSurface,
     )
   }
 }

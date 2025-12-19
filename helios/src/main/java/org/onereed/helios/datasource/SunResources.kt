@@ -2,32 +2,25 @@ package org.onereed.helios.datasource
 
 import android.content.Context
 import androidx.annotation.DrawableRes
-import androidx.compose.ui.graphics.Color
 import androidx.core.content.res.use
 import dagger.hilt.android.qualifiers.ApplicationContext
-import org.onereed.helios.R
-import org.onereed.helios.sun.SunEventType
 import java.io.IOException
 import java.io.UncheckedIOException
 import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 import javax.inject.Singleton
+import org.onereed.helios.R
+import org.onereed.helios.sun.SunEventType
 
 @Singleton
 class SunResources @Inject constructor(@ApplicationContext context: Context) {
-  data class EventSet(
-      val name: String,
-      val color: Color,
-      @param:DrawableRes val iconRes: Int,
-      val rubric: String,
-  )
+  data class EventSet(val name: String, @param:DrawableRes val iconRes: Int, val rubric: String)
 
   val eventSets: List<EventSet>
 
   init {
     val resources = context.resources
     val names = resources.getStringArray(R.array.sun_event_names).toList()
-    val colors = resources.getIntArray(R.array.sun_event_colors).map(::Color)
 
     val icons =
       resources.obtainTypedArray(R.array.sun_event_icons).use { typedArray ->
@@ -43,15 +36,17 @@ class SunResources @Inject constructor(@ApplicationContext context: Context) {
         rubricTemplate.format(*subs)
       }
 
-    this.eventSets =
-      sunEventOrdinals.map { EventSet(names[it], colors[it], icons[it], rubrics[it]) }
+    this.eventSets = sunEventOrdinals.map { EventSet(names[it], icons[it], rubrics[it]) }
   }
 
   companion object {
 
     private fun readRubricTemplate(context: Context): String {
       try {
-        return context.assets.open("rubric_template.md").bufferedReader(StandardCharsets.UTF_8).use { it.readText() }
+        return context.assets
+          .open("rubric_template.md")
+          .bufferedReader(StandardCharsets.UTF_8)
+          .use { it.readText() }
       } catch (e: IOException) {
         throw UncheckedIOException(e)
       }

@@ -10,8 +10,10 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -19,6 +21,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.onereed.helios.common.dynamicThemeSupported
 import org.onereed.helios.compose.theme.ThemeType
 import org.onereed.helios.compose.theme.ThemeViewModel
+
+@Immutable
+data class ExtendedColorScheme(
+  val sun: ColorFamily,
+  val rise: ColorFamily,
+  val noon: ColorFamily,
+  val set: ColorFamily,
+  val nadir: ColorFamily,
+)
 
 private val lightScheme =
   lightColorScheme(
@@ -254,6 +265,180 @@ private val highContrastDarkColorScheme =
     surfaceContainerHighest = surfaceContainerHighestDarkHighContrast,
   )
 
+val extendedLight =
+  ExtendedColorScheme(
+    sun = ColorFamily(sunLight, onSunLight, sunContainerLight, onSunContainerLight),
+    rise = ColorFamily(riseLight, onRiseLight, riseContainerLight, onRiseContainerLight),
+    noon = ColorFamily(noonLight, onNoonLight, noonContainerLight, onNoonContainerLight),
+    set = ColorFamily(setLight, onSetLight, setContainerLight, onSetContainerLight),
+    nadir = ColorFamily(nadirLight, onNadirLight, nadirContainerLight, onNadirContainerLight),
+  )
+
+val extendedDark =
+  ExtendedColorScheme(
+    sun = ColorFamily(sunDark, onSunDark, sunContainerDark, onSunContainerDark),
+    rise = ColorFamily(riseDark, onRiseDark, riseContainerDark, onRiseContainerDark),
+    noon = ColorFamily(noonDark, onNoonDark, noonContainerDark, onNoonContainerDark),
+    set = ColorFamily(setDark, onSetDark, setContainerDark, onSetContainerDark),
+    nadir = ColorFamily(nadirDark, onNadirDark, nadirContainerDark, onNadirContainerDark),
+  )
+
+val extendedLightMediumContrast =
+  ExtendedColorScheme(
+    sun =
+      ColorFamily(
+        sunLightMediumContrast,
+        onSunLightMediumContrast,
+        sunContainerLightMediumContrast,
+        onSunContainerLightMediumContrast,
+      ),
+    rise =
+      ColorFamily(
+        riseLightMediumContrast,
+        onRiseLightMediumContrast,
+        riseContainerLightMediumContrast,
+        onRiseContainerLightMediumContrast,
+      ),
+    noon =
+      ColorFamily(
+        noonLightMediumContrast,
+        onNoonLightMediumContrast,
+        noonContainerLightMediumContrast,
+        onNoonContainerLightMediumContrast,
+      ),
+    set =
+      ColorFamily(
+        setLightMediumContrast,
+        onSetLightMediumContrast,
+        setContainerLightMediumContrast,
+        onSetContainerLightMediumContrast,
+      ),
+    nadir =
+      ColorFamily(
+        nadirLightMediumContrast,
+        onNadirLightMediumContrast,
+        nadirContainerLightMediumContrast,
+        onNadirContainerLightMediumContrast,
+      ),
+  )
+
+val extendedLightHighContrast =
+  ExtendedColorScheme(
+    sun =
+      ColorFamily(
+        sunLightHighContrast,
+        onSunLightHighContrast,
+        sunContainerLightHighContrast,
+        onSunContainerLightHighContrast,
+      ),
+    rise =
+      ColorFamily(
+        riseLightHighContrast,
+        onRiseLightHighContrast,
+        riseContainerLightHighContrast,
+        onRiseContainerLightHighContrast,
+      ),
+    noon =
+      ColorFamily(
+        noonLightHighContrast,
+        onNoonLightHighContrast,
+        noonContainerLightHighContrast,
+        onNoonContainerLightHighContrast,
+      ),
+    set =
+      ColorFamily(
+        setLightHighContrast,
+        onSetLightHighContrast,
+        setContainerLightHighContrast,
+        onSetContainerLightHighContrast,
+      ),
+    nadir =
+      ColorFamily(
+        nadirLightHighContrast,
+        onNadirLightHighContrast,
+        nadirContainerLightHighContrast,
+        onNadirContainerLightHighContrast,
+      ),
+  )
+
+val extendedDarkMediumContrast =
+  ExtendedColorScheme(
+    sun =
+      ColorFamily(
+        sunDarkMediumContrast,
+        onSunDarkMediumContrast,
+        sunContainerDarkMediumContrast,
+        onSunContainerDarkMediumContrast,
+      ),
+    rise =
+      ColorFamily(
+        riseDarkMediumContrast,
+        onRiseDarkMediumContrast,
+        riseContainerDarkMediumContrast,
+        onRiseContainerDarkMediumContrast,
+      ),
+    noon =
+      ColorFamily(
+        noonDarkMediumContrast,
+        onNoonDarkMediumContrast,
+        noonContainerDarkMediumContrast,
+        onNoonContainerDarkMediumContrast,
+      ),
+    set =
+      ColorFamily(
+        setDarkMediumContrast,
+        onSetDarkMediumContrast,
+        setContainerDarkMediumContrast,
+        onSetContainerDarkMediumContrast,
+      ),
+    nadir =
+      ColorFamily(
+        nadirDarkMediumContrast,
+        onNadirDarkMediumContrast,
+        nadirContainerDarkMediumContrast,
+        onNadirContainerDarkMediumContrast,
+      ),
+  )
+
+val extendedDarkHighContrast =
+  ExtendedColorScheme(
+    sun =
+      ColorFamily(
+        sunDarkHighContrast,
+        onSunDarkHighContrast,
+        sunContainerDarkHighContrast,
+        onSunContainerDarkHighContrast,
+      ),
+    rise =
+      ColorFamily(
+        riseDarkHighContrast,
+        onRiseDarkHighContrast,
+        riseContainerDarkHighContrast,
+        onRiseContainerDarkHighContrast,
+      ),
+    noon =
+      ColorFamily(
+        noonDarkHighContrast,
+        onNoonDarkHighContrast,
+        noonContainerDarkHighContrast,
+        onNoonContainerDarkHighContrast,
+      ),
+    set =
+      ColorFamily(
+        setDarkHighContrast,
+        onSetDarkHighContrast,
+        setContainerDarkHighContrast,
+        onSetContainerDarkHighContrast,
+      ),
+    nadir =
+      ColorFamily(
+        nadirDarkHighContrast,
+        onNadirDarkHighContrast,
+        nadirContainerDarkHighContrast,
+        onNadirContainerDarkHighContrast,
+      ),
+  )
+
 @Immutable
 data class ColorFamily(
   val color: Color,
@@ -267,8 +452,17 @@ val unspecified_scheme =
 
 // Above is from Material Design theme generation tool. Customized code below.
 
+val LocalExtendedColorScheme = staticCompositionLocalOf { extendedLight }
+
+val MaterialTheme.extendedColors: ExtendedColorScheme
+  @Composable
+  get() = LocalExtendedColorScheme.current
+
 val usedDarkScheme = darkScheme
 val usedLightScheme = lightScheme
+
+val usedLightExtendedColorScheme = extendedLight
+val usedDarkExtendedColorScheme = extendedDark
 
 @Composable
 fun HeliosTheme(themeViewModel: ThemeViewModel = hiltViewModel(), content: @Composable () -> Unit) {
@@ -294,16 +488,33 @@ fun HeliosTheme(themeViewModel: ThemeViewModel = hiltViewModel(), content: @Comp
       else -> usedLightScheme
     }
 
-  StatelessHeliosTheme(colorScheme = colorScheme, content = content)
+  val extendedColorScheme =
+    if (isDarkTheme) usedDarkExtendedColorScheme else usedLightExtendedColorScheme
+
+  StatelessHeliosTheme(
+    colorScheme = colorScheme,
+    extendedColorScheme = extendedColorScheme,
+    content = content,
+  )
 }
 
 @Composable
-fun StatelessHeliosTheme(colorScheme: ColorScheme, content: @Composable () -> Unit) {
-  MaterialTheme(colorScheme = colorScheme, typography = AppTypography, content = content)
+fun StatelessHeliosTheme(
+  colorScheme: ColorScheme,
+  extendedColorScheme: ExtendedColorScheme,
+  content: @Composable () -> Unit,
+) {
+  CompositionLocalProvider(LocalExtendedColorScheme provides extendedColorScheme) {
+    MaterialTheme(colorScheme = colorScheme, typography = AppTypography, content = content)
+  }
 }
 
 /** For use in previews. */
 @Composable
 fun DarkHeliosTheme(content: @Composable () -> Unit) {
-  StatelessHeliosTheme(colorScheme = usedDarkScheme, content = content)
+  StatelessHeliosTheme(
+    colorScheme = usedDarkScheme,
+    extendedColorScheme = usedDarkExtendedColorScheme,
+    content = content,
+  )
 }

@@ -1,6 +1,5 @@
 package org.onereed.helios.compose.schedule
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,11 +13,10 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,6 +45,7 @@ import org.onereed.helios.compose.app.Screen
 import org.onereed.helios.compose.schedule.ScheduleUi.EventUi
 import org.onereed.helios.compose.shared.ScrollbarActions
 import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
+import org.onereed.helios.compose.shared.sunColors
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunSchedule
 import org.onereed.helios.sun.SunTimeSeries
@@ -123,15 +122,16 @@ fun StatelessScheduleScreen(
 
 @Composable
 private fun LazyItemScope.EventCard(event: EventUi, onSelectEvent: (Int) -> Unit) {
-  OutlinedCard(
+  val eventColors = sunColors()[event.ordinal]
+
+  Card(
     modifier = Modifier.requiredWidth(CARD_WIDTH).animateItem(),
     onClick = { onSelectEvent(event.ordinal) },
     colors =
-      CardDefaults.outlinedCardColors(
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        contentColor = MaterialTheme.colorScheme.onSurface,
+      CardDefaults.cardColors(
+        containerColor = eventColors.colorContainer,
+        contentColor = eventColors.onColorContainer,
       ),
-    border = BorderStroke(width = 2.dp, color = event.color),
   ) {
     Row(
       modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp),
@@ -140,7 +140,7 @@ private fun LazyItemScope.EventCard(event: EventUi, onSelectEvent: (Int) -> Unit
       Icon(
         painter = painterResource(event.iconRes),
         contentDescription = event.name,
-        tint = event.color,
+        tint = eventColors.color,
       )
       Spacer(modifier = Modifier.width(20.dp))
       Text(

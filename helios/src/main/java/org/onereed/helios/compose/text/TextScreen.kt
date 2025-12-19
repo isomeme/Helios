@@ -1,5 +1,6 @@
 package org.onereed.helios.compose.text
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -47,6 +49,7 @@ import com.halilibo.richtext.ui.RichTextStyle
 import com.halilibo.richtext.ui.material3.RichText
 import org.onereed.helios.compose.shared.ScrollbarActions
 import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
+import org.onereed.helios.compose.shared.sunColors
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunEventType
 import org.onereed.helios.ui.theme.DarkHeliosTheme
@@ -92,23 +95,31 @@ private fun StatelessTextScreen(
   scrollbarActions: ScrollbarActions,
   scrollState: ScrollState,
 ) {
+  val sunColors = sunColors()
+
   Surface(modifier = Modifier.fillMaxSize()) {
-    Column(modifier = Modifier.fillMaxSize().padding(all = 10.dp)) {
+    Column(modifier = Modifier.fillMaxSize().padding(bottom = 10.dp)) {
 
       // Top of screen: select button on the left, title centered.
       Box(
         modifier =
-          Modifier.fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(all = 10.dp)
+          Modifier.fillMaxWidth().background(sunColors[textUi.selected.index].colorContainer).padding(all = 10.dp)
       ) {
+
         // Enclosing the select button with its dropdown menu in a column makes the menu pop up just
         // below the button.
         Column(modifier = Modifier.align(Alignment.CenterStart)) {
-          OutlinedButton(onClick = eventMenuActions.onExpanded) {
+          OutlinedButton(
+            onClick = eventMenuActions.onExpanded,
+            colors =
+              ButtonDefaults.outlinedButtonColors(
+                containerColor = sunColors[textUi.selected.index].colorContainer,
+                contentColor = sunColors[textUi.selected.index].onColorContainer,
+              ),
+            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
+          ) {
             Icon(
               painter = painterResource(id = textUi.selected.iconRes),
-              tint = textUi.selected.color,
               contentDescription = textUi.selected.name,
             )
           }
@@ -124,8 +135,8 @@ private fun StatelessTextScreen(
                 onClick = { eventMenuActions.onSelectIndex(eventUi.index) },
                 colors =
                   MenuDefaults.itemColors(
-                    leadingIconColor = eventUi.color,
-                    textColor = eventUi.color,
+                    leadingIconColor = sunColors[eventUi.index].color,
+                    textColor = sunColors[eventUi.index].color,
                   ),
                 leadingIcon = {
                   Icon(
@@ -141,7 +152,7 @@ private fun StatelessTextScreen(
 
         Text(
           text = textUi.selected.name,
-          color = textUi.selected.color,
+          color = sunColors[textUi.selected.index].onColorContainer,
           style = MaterialTheme.typography.headlineMedium,
           modifier = Modifier.align(Alignment.Center),
         )

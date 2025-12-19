@@ -10,7 +10,6 @@ import android.text.format.DateUtils.FORMAT_SHOW_WEEKDAY
 import android.text.format.DateUtils.formatDateTime
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.graphics.Color
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlin.time.ExperimentalTime
@@ -23,7 +22,6 @@ import org.onereed.helios.sun.SunSchedule
 data class ScheduleUi(val events: List<EventUi>) {
   @Immutable
   data class EventUi(
-    val color: Color,
     @param:DrawableRes val iconRes: Int,
     val name: String,
     val timeText: String,
@@ -46,7 +44,6 @@ data class ScheduleUi(val events: List<EventUi>) {
           val eventSet = sunResources.eventSets[ordinal]
 
           EventUi(
-            color = eventSet.color,
             iconRes = eventSet.iconRes,
             name = eventSet.name,
             timeText = formatInstant(context, it.instant),
