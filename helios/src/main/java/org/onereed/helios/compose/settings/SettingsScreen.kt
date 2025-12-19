@@ -16,10 +16,12 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -103,14 +105,14 @@ private fun ThemeSettings(
   Column(
     modifier =
       Modifier.fillMaxWidth()
-        .background(MaterialTheme.colorScheme.secondaryContainer)
+        .background(MaterialTheme.colorScheme.surfaceContainer)
         .padding(all = 15.dp),
     verticalArrangement = Arrangement.spacedBy(15.dp),
   ) {
     Text(
       text = stringResource(R.string.heading_theme_type),
       style = MaterialTheme.typography.labelLarge,
-      color = MaterialTheme.colorScheme.onSecondaryContainer,
+      color = MaterialTheme.colorScheme.onSurface,
     )
 
     Column(
@@ -130,13 +132,21 @@ private fun ThemeSettings(
         ) {
           Spacer(modifier = Modifier.width(30.dp))
 
-          RadioButton(selected = themeType == type, onClick = null)
+          RadioButton(
+            selected = themeType == type,
+            onClick = null,
+            colors =
+              RadioButtonDefaults.colors(
+                selectedColor = MaterialTheme.colorScheme.onSurface,
+                unselectedColor = MaterialTheme.colorScheme.onSurface,
+              ),
+          )
 
           Spacer(modifier = Modifier.width(10.dp))
 
           Text(
             text = stringResource(type.labelRes),
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            color = MaterialTheme.colorScheme.onSurface,
           )
         }
       }
@@ -152,13 +162,22 @@ private fun ThemeSettings(
           ),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        Checkbox(checked = isDynamicTheme, onCheckedChange = null)
+        Checkbox(
+          checked = isDynamicTheme,
+          onCheckedChange = null,
+          colors =
+            CheckboxDefaults.colors(
+              checkedColor = MaterialTheme.colorScheme.onSurface,
+              uncheckedColor = MaterialTheme.colorScheme.onSurface,
+              checkmarkColor = MaterialTheme.colorScheme.surfaceContainer,
+            ),
+        )
 
         Spacer(modifier = Modifier.width(10.dp))
 
         Text(
           text = stringResource(R.string.label_use_dynamic_theme_colors),
-          color = MaterialTheme.colorScheme.onSecondaryContainer,
+          color = MaterialTheme.colorScheme.onSurface,
         )
       }
     }
@@ -172,8 +191,8 @@ private fun OnlineDocLink(onViewDoc: () -> Unit) {
     onClick = onViewDoc,
     colors =
       ButtonDefaults.textButtonColors(
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
       ),
     shape = RectangleShape,
     contentPadding = PaddingValues(vertical = 0.dp, horizontal = 15.dp),
@@ -181,7 +200,6 @@ private fun OnlineDocLink(onViewDoc: () -> Unit) {
     Icon(
       painter = painterResource(R.drawable.help_24px),
       contentDescription = stringResource(R.string.view_online_documentation),
-      tint = MaterialTheme.colorScheme.primary,
     )
 
     Spacer(modifier = Modifier.width(10.dp))
