@@ -1,7 +1,6 @@
 package org.onereed.helios.compose.app
 
 import android.Manifest
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -15,7 +14,6 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -26,19 +24,16 @@ import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import org.onereed.helios.compose.compass.CompassScreen
 import org.onereed.helios.compose.permission.PermissionScreen
 import org.onereed.helios.compose.schedule.ScheduleScreen
 import org.onereed.helios.compose.settings.SettingsScreen
 import org.onereed.helios.compose.text.TextScreen
-import timber.log.Timber
 
 @Composable
 @OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class, ExperimentalPermissionsApi::class)
 fun HeliosApp(heliosAppState: HeliosAppState = rememberHeliosAppState()) {
-  Timber.d("HeliosApp start")
-
   val navActions = remember(heliosAppState) { NavActions(heliosAppState) }
-
   val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
   if (locationPermissionState.status.isGranted) {
@@ -81,11 +76,8 @@ fun StatelessHeliosApp(
         modifier = Modifier.padding(innerPadding),
       ) {
         composable<Screen.Schedule> { ScheduleScreen(navActions = navActions) }
-
         composable<Screen.Text> { TextScreen() }
-
-        composable<Screen.Compass> { Greeting("compass") }
-
+        composable<Screen.Compass> { CompassScreen() }
         composable<Screen.Settings> { SettingsScreen() }
       }
     }
@@ -95,10 +87,3 @@ fun StatelessHeliosApp(
 // See https://issuetracker.google.com/issues/378726489#comment5
 @Composable
 private fun navSuiteType(): NavigationSuiteType = navigationSuiteType(currentWindowAdaptiveInfo())
-
-@Composable
-fun Greeting(name: String) {
-  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-    Text(text = "Hello $name!")
-  }
-}

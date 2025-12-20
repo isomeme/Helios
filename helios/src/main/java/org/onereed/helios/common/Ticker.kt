@@ -9,17 +9,13 @@ import kotlinx.coroutines.flow.onStart
 import timber.log.Timber
 
 @OptIn(ExperimentalTime::class)
-class Ticker(
-  private val interval: Duration,
-) {
+class Ticker(private val interval: Duration) {
 
   val flow =
     flow {
         var count = 0
         while (true) {
-          ++count
-          Timber.d("Ticker count: $count")
-          emit(Unit)
+          emit(++count)
           delay(interval)
         }
       }
