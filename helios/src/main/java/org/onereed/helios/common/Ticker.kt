@@ -15,7 +15,7 @@ class Ticker(private val interval: Duration) {
     flow {
         var count = 0
         while (true) {
-          emit(++count)
+          emit(count++)
           delay(interval)
         }
       }

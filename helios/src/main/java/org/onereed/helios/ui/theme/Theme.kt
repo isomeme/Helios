@@ -454,6 +454,7 @@ val unspecified_scheme =
 
 val LocalExtendedColorScheme = staticCompositionLocalOf { extendedLight }
 
+@Suppress("UnusedReceiverParameter")
 val MaterialTheme.extendedColors: ExtendedColorScheme
   @Composable
   get() = LocalExtendedColorScheme.current

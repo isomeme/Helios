@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.location.Location
 import android.os.Looper
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -32,10 +31,9 @@ import timber.log.Timber
 
 @Singleton
 @OptIn(ExperimentalTime::class)
-class Locator @Inject constructor(@param:ApplicationContext val context: Context) {
+class Locator @Inject constructor(@param:ApplicationContext private val context: Context) {
 
-  private val locationProvider: FusedLocationProviderClient =
-    LocationServices.getFusedLocationProviderClient(context)
+  private val locationProvider by lazy { LocationServices.getFusedLocationProviderClient(context) }
 
   private val ticker = Ticker(TICKER_INTERVAL)
 
@@ -65,7 +63,7 @@ class Locator @Inject constructor(@param:ApplicationContext val context: Context
     val locationCallback =
       object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
-          Timber.d("Location result received: ${locationResult.lastLocation}")
+          Timber.d("Location update: ${locationResult.lastLocation}")
           locationResult.lastLocation?.let { sendLocation(it) }
         }
       }
