@@ -6,6 +6,8 @@ import com.google.android.gms.location.DeviceOrientationListener
 import com.google.android.gms.location.DeviceOrientationRequest
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asExecutor
 import java.util.concurrent.Executors
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,7 +23,7 @@ import timber.log.Timber
 @Singleton
 class Orienter @Inject constructor(@param:ApplicationContext private val context: Context) {
 
-  private val executor = Executors.newSingleThreadExecutor()
+  private val executor by lazy { Dispatchers.Default.asExecutor() }
 
   private val orientationProvider by lazy {
     LocationServices.getFusedOrientationProviderClient(context)
