@@ -113,7 +113,7 @@ dependencies {
   implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
   implementation("androidx.work:work-runtime:2.11.0")
 
-  val composeBom = platform("androidx.compose:compose-bom:2025.12.00")
+  val composeBom = platform("androidx.compose:compose-bom:2025.12.01")
   implementation(composeBom)
   debugImplementation(composeBom)
   testImplementation(composeBom)
@@ -165,7 +165,7 @@ dependencies {
 
   testImplementation("com.google.truth:truth:1.4.5")
   testImplementation("junit:junit:4.13.2")
-  testImplementation("org.jetbrains.kotlin:kotlin-test:2.2.21")
+  testImplementation("org.jetbrains.kotlin:kotlin-test:2.3.0")
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
   testImplementation("org.junit.jupiter:junit-jupiter:6.0.1")
   testImplementation("org.mockito:mockito-core:5.21.0")
