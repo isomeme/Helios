@@ -1,7 +1,8 @@
 package org.onereed.helios.compose.compass
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +24,7 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
 import org.onereed.helios.R
 import org.onereed.helios.common.arc
 import org.onereed.helios.ui.theme.DarkHeliosTheme
@@ -30,16 +32,19 @@ import org.onereed.helios.ui.theme.DarkHeliosTheme
 @OptIn(FlowPreview::class)
 @Composable
 fun CompassScreen(compassViewModel: CompassViewModel = hiltViewModel()) {
-  val initialHeading by compassViewModel.headingFlow.collectAsStateWithLifecycle(0f)
+  val initialHeading by compassViewModel.headingFlow.collectAsStateWithLifecycle()
   val rotationAnimatable = remember { Animatable(initialHeading) }
 
   LaunchedEffect(compassViewModel.headingFlow) {
-    compassViewModel.headingFlow.collect { newHeading ->
+    compassViewModel.headingFlow.collectLatest { newHeading ->
       val currentRotation = rotationAnimatable.value
       val shortestRotationDelta = arc(from = currentRotation, to = -newHeading)
       val nextRotation = currentRotation + shortestRotationDelta
 
-      rotationAnimatable.animateTo(targetValue = nextRotation, animationSpec = snap())
+      rotationAnimatable.animateTo(
+        targetValue = nextRotation,
+        animationSpec = tween(durationMillis = 50, easing = LinearEasing),
+      )
     }
   }
 

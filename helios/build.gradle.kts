@@ -28,13 +28,28 @@ android {
   }
 
   buildTypes {
+    val commonProguardFiles = listOf(
+      getDefaultProguardFile("proguard-android-optimize.txt"),
+      "proguard-rules.pro"
+    )
+
     getByName("release") {
       isMinifyEnabled = true
       isShrinkResources = true
-      proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+      setProguardFiles(commonProguardFiles)
       versionNameSuffix = ""
     }
+
     getByName("debug") { versionNameSuffix = " (debug)" }
+
+    create("staging") {
+      initWith(getByName("debug"))
+      isDebuggable = false
+      isMinifyEnabled = true
+      isShrinkResources = true
+      setProguardFiles(commonProguardFiles)
+      versionNameSuffix = " (staging)"
+    }
   }
 
   compileOptions {

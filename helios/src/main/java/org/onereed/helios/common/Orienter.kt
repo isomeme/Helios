@@ -6,11 +6,10 @@ import com.google.android.gms.location.DeviceOrientationListener
 import com.google.android.gms.location.DeviceOrientationRequest
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asExecutor
-import java.util.concurrent.Executors
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
@@ -40,13 +39,20 @@ class Orienter @Inject constructor(@param:ApplicationContext private val context
       trySend(it).onFailure { t -> Timber.e(t, "Failed to send orientation to flow.") }
     }
 
-    orientationProvider.requestOrientationUpdates(
-      DEVICE_ORIENTATION_REQUEST,
-      executor,
-      orientationListener,
-    )
+    orientationProvider
+      .requestOrientationUpdates(DEVICE_ORIENTATION_REQUEST, executor, orientationListener)
+      .addOnSuccessListener { Timber.d("Orientation updates started.") }
+      .addOnFailureListener { e ->
+        Timber.e(e, "Orientation updates start failed.")
+        close(e)
+      }
 
-    awaitClose { orientationProvider.removeOrientationUpdates(orientationListener) }
+    awaitClose {
+      orientationProvider
+        .removeOrientationUpdates(orientationListener)
+        .addOnSuccessListener { Timber.d("Orientation updates stopped.") }
+        .addOnFailureListener { e -> Timber.e(e, "Orientation updates stop failed.") }
+    }
   }
 
   private companion object {
