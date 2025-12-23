@@ -19,19 +19,23 @@ class SunTimeSeries(val placeTime: PlaceTime) {
   val events: List<Event>
 
   init {
-    val futureSunTimes = placeTime.computeSunTimes(FUTURE_LIMIT)
-    val futureEvents = toEvents(futureSunTimes)
-    val nextEvent = futureEvents.first()
+    if (placeTime.isEmpty()) {
+      this.events = emptyList()
+    } else {
+      val futureSunTimes = placeTime.computeSunTimes(FUTURE_LIMIT)
+      val futureEvents = toEvents(futureSunTimes)
+      val nextEvent = futureEvents.first()
 
-    val earlierPlaceTime = placeTime.copy(instant = placeTime.instant - PRECEDING_OFFSET)
-    val pastSunTimes = earlierPlaceTime.computeSunTimes(PRECEDING_LIMIT)
-    val pastEvents = toEvents(pastSunTimes)
-    val lastEvent =
-      pastEvents
-        .filter { it.sunEventType != nextEvent.sunEventType }
-        .last { it.instant < placeTime.instant }
+      val earlierPlaceTime = placeTime.copy(instant = placeTime.instant - PRECEDING_OFFSET)
+      val pastSunTimes = earlierPlaceTime.computeSunTimes(PRECEDING_LIMIT)
+      val pastEvents = toEvents(pastSunTimes)
+      val lastEvent =
+        pastEvents
+          .filter { it.sunEventType != nextEvent.sunEventType }
+          .last { it.instant < placeTime.instant }
 
-    this.events = listOf(lastEvent) + futureEvents
+      this.events = listOf(lastEvent) + futureEvents
+    }
   }
 
   companion object {

@@ -15,19 +15,23 @@ class SunSchedule(sunTimeSeries: SunTimeSeries) {
   val events: List<Event>
 
   init {
-    val closestEventIndex =
-      getClosestEventIndex(
-        sunTimeSeries.placeTime.instant,
-        sunTimeSeries.events[0].instant,
-        sunTimeSeries.events[1].instant,
-      )
+    if (sunTimeSeries.events.isEmpty()) {
+      this.events = emptyList()
+    } else {
+      val closestEventIndex =
+        getClosestEventIndex(
+          sunTimeSeries.placeTime.instant,
+          sunTimeSeries.events[0].instant,
+          sunTimeSeries.events[1].instant,
+        )
 
-    this.events =
-      sunTimeSeries.events.mapIndexed { index, event ->
-        val isClosestEvent = index == closestEventIndex
-        val weakId = weakIdOf(event)
-        Event(event.sunEventType, event.instant, isClosestEvent, weakId)
-      }
+      this.events =
+        sunTimeSeries.events.mapIndexed { index, event ->
+          val isClosestEvent = index == closestEventIndex
+          val weakId = weakIdOf(event)
+          Event(event.sunEventType, event.instant, isClosestEvent, weakId)
+        }
+    }
   }
 
   companion object {

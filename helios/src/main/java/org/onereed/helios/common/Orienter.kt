@@ -8,31 +8,46 @@ import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import timber.log.Timber
 
 @Singleton
-class Orienter @Inject constructor(@param:ApplicationContext private val context: Context) {
-
+class Orienter
+@Inject
+constructor(
+  @param:ApplicationContext private val context: Context,
+  @param:ApplicationScope private val externalScope: CoroutineScope,
+) {
   private val executor by lazy { Dispatchers.Default.asExecutor() }
 
   private val orientationProvider by lazy {
     LocationServices.getFusedOrientationProviderClient(context)
   }
 
-  val flow =
+  val headingFlow =
     getOrientationUpdates()
-      .map { it.headingDegrees }
       .onStart { Timber.d("Orienter.onStart") }
       .onCompletion { Timber.d("Orienter.onCompletion") }
+      .map { it.headingDegrees }
+      .map(::round)
+      .stateIn(
+        scope = externalScope,
+        started = SharingStarted.WhileSubscribed(FLOW_TIMEOUT_MILLIS),
+        initialValue = 0f,
+      )
 
   private fun getOrientationUpdates(): Flow<DeviceOrientation> = callbackFlow {
     val orientationListener = DeviceOrientationListener {
@@ -56,6 +71,10 @@ class Orienter @Inject constructor(@param:ApplicationContext private val context
   }
 
   private companion object {
+
+    private fun round(value: Float): Float = (value * 2).roundToInt() / 2.0f
+
+    private val FLOW_TIMEOUT_MILLIS = 5.seconds.inWholeMilliseconds
 
     private val DEVICE_ORIENTATION_REQUEST =
       DeviceOrientationRequest.Builder(DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT).build()

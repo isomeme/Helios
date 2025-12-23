@@ -11,6 +11,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Clock.System.now
@@ -22,17 +23,21 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.channels.onSuccess
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import timber.log.Timber
 
 @Singleton
 @OptIn(ExperimentalTime::class)
-class Locator @Inject constructor(@param:ApplicationContext private val context: Context) {
-
+class Locator @Inject constructor(
+  @param:ApplicationContext private val context: Context,
+  @param:ApplicationScope private val externalScope: CoroutineScope,
+) {
   private val locationProvider by lazy { LocationServices.getFusedLocationProviderClient(context) }
 
   private val ticker = Ticker(TICKER_INTERVAL)
@@ -43,6 +48,11 @@ class Locator @Inject constructor(@param:ApplicationContext private val context:
       .onStart { Timber.d("Locator.onStart") }
       .onEach { Timber.d("Locator.onEach $it") }
       .onCompletion { Timber.d("Locator.onCompletion") }
+      .stateIn(
+        scope = externalScope,
+        started = SharingStarted.WhileSubscribed(FLOW_TIMEOUT_MILLIS),
+        initialValue = PlaceTime.EMPTY,
+      )
 
   private fun getLocationUpdates(): Flow<Location> = callbackFlow {
     if (context.checkSelfPermission(ACCESS_FINE_LOCATION) != PERMISSION_GRANTED) {
@@ -87,6 +97,8 @@ class Locator @Inject constructor(@param:ApplicationContext private val context:
   companion object {
 
     private val TICKER_INTERVAL = 15.seconds
+    private val FLOW_TIMEOUT_MILLIS = 5.seconds.inWholeMilliseconds
+
     private val LOCATION_UPDATE_INTERVAL_MILLIS = 2.minutes.inWholeMilliseconds
     private val MIN_LOCATION_UPDATE_INTERVAL_MILLIS = 30.seconds.inWholeMilliseconds
 

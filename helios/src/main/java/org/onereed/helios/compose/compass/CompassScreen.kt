@@ -1,7 +1,9 @@
 package org.onereed.helios.compose.compass
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -23,6 +25,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.math.abs
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import org.onereed.helios.R
@@ -41,42 +45,52 @@ fun CompassScreen(compassViewModel: CompassViewModel = hiltViewModel()) {
       val shortestRotationDelta = arc(from = currentRotation, to = -newHeading)
       val nextRotation = currentRotation + shortestRotationDelta
 
-      rotationAnimatable.animateTo(
-        targetValue = nextRotation,
-        animationSpec = tween(durationMillis = 50, easing = LinearEasing),
-      )
+      val animationSpec: AnimationSpec<Float> =
+        if (abs(shortestRotationDelta) <= 3.0f) snap()
+        else tween(durationMillis = 50, easing = LinearEasing)
+
+      rotationAnimatable.animateTo(targetValue = nextRotation, animationSpec = animationSpec)
     }
   }
 
   StatelessCompassScreen(rotationAnimatable.value)
 }
 
+@OptIn(ExperimentalAtomicApi::class)
 @Composable
 fun StatelessCompassScreen(animatedHeading: Float) {
+  val viewLinePainterResource = painterResource(id = R.drawable.ic_view_line)
+  val compassFacePainterResource = painterResource(id = R.drawable.ic_compass_face)
+
+  val viewLineColor = MaterialTheme.colorScheme.outlineVariant
+  val compassFaceColor = MaterialTheme.colorScheme.outline
+
+  val viewLineColorFilter =
+    remember(viewLineColor) { ColorFilter.tint(color = viewLineColor, blendMode = BlendMode.SrcIn) }
+  val compassFaceColorFilter =
+    remember(compassFaceColor) {
+      ColorFilter.tint(color = compassFaceColor, blendMode = BlendMode.SrcIn)
+    }
+
   Surface(modifier = Modifier.fillMaxSize()) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
       Image(
-        painter = painterResource(id = R.drawable.ic_view_line),
-        contentDescription = "View line",
-        colorFilter =
-          ColorFilter.tint(
-            color = MaterialTheme.colorScheme.outlineVariant,
-            blendMode = BlendMode.SrcIn,
-          ),
+        painter = viewLinePainterResource,
+        colorFilter = viewLineColorFilter,
         contentScale = ContentScale.Fit,
         modifier = Modifier.fillMaxSize().zIndex(0f),
+        contentDescription = null,
       )
       Image(
-        painter = painterResource(id = R.drawable.ic_compass_face),
-        contentDescription = "Compass face",
-        colorFilter =
-          ColorFilter.tint(color = MaterialTheme.colorScheme.outline, blendMode = BlendMode.SrcIn),
+        painter = compassFacePainterResource,
+        colorFilter = compassFaceColorFilter,
         contentScale = ContentScale.Fit,
         modifier =
           Modifier.fillMaxSize().zIndex(1f).graphicsLayer {
             // The animatedHeading value smoothly updates the rotation
             rotationZ = animatedHeading
           },
+        contentDescription = null,
       )
     }
   }
