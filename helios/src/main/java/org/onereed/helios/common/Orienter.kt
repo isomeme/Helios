@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
 import timber.log.Timber
 
@@ -42,7 +43,8 @@ constructor(
       .onStart { Timber.d("Orienter.onStart") }
       .onCompletion { Timber.d("Orienter.onCompletion") }
       .map { it.headingDegrees }
-      .map(::round)
+      .scan(0f, ::smooth)
+      .map(::quantize)
       .stateIn(
         scope = externalScope,
         started = SharingStarted.WhileSubscribed(FLOW_TIMEOUT_MILLIS),
@@ -72,7 +74,19 @@ constructor(
 
   private companion object {
 
-    private fun round(value: Float): Float = (value * 2).roundToInt() / 2.0f
+    private fun smooth(previous: Float, next: Float): Float {
+      val shortestDelta = arc(from = previous, to = next)
+      val smoothed = previous + ALPHA * shortestDelta
+      return smoothed.mod(360f) // Normalize angle into [0..360]
+    }
+
+    private fun quantize(value: Float): Float = (value / QUANTUM).roundToInt() * QUANTUM
+
+    /** The low-pass filter weighting parameter. */
+    private const val ALPHA = 0.15f
+
+    /** The granularity of heading angles. */
+    private const val QUANTUM = 0.5f
 
     private val FLOW_TIMEOUT_MILLIS = 5.seconds.inWholeMilliseconds
 

@@ -1,4 +1,4 @@
-package org.onereed.helios.common
+package org.onereed.helios.findahome
 
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text

@@ -16,10 +16,11 @@ import kotlinx.coroutines.SupervisorJob
 @InstallIn(SingletonComponent::class)
 object CoroutineScopesModule {
 
+  @Provides
   @Singleton
   @ApplicationScope
-  @Provides
   fun providesCoroutineScope(): CoroutineScope {
+
     // SupervisorJob is crucial here. It means if one coroutine in this
     // scope fails, it won't cancel the entire scope.
     return CoroutineScope(SupervisorJob() + Dispatchers.Default)

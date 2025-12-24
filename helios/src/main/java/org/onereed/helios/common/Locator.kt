@@ -42,7 +42,7 @@ class Locator @Inject constructor(
 
   private val ticker = Ticker(TICKER_INTERVAL)
 
-  val flow =
+  val placeTimeFlow =
     getLocationUpdates()
       .combine(ticker.flow) { location, _ -> PlaceTime(location, now()) }
       .onStart { Timber.d("Locator.onStart") }
