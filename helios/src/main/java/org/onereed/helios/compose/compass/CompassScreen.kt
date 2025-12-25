@@ -3,8 +3,11 @@ package org.onereed.helios.compose.compass
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -18,9 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -39,11 +45,15 @@ fun CompassScreen(compassViewModel: CompassViewModel = hiltViewModel()) {
   val compassAngle by remember {
     derivedStateOf { 360f - heading } // Compass turns opposite heading
   }
+  val haptics = LocalHapticFeedback.current
 
   StatelessCompassScreen(
     compassAngle = compassAngle,
     isLocked = isLocked,
-    onLockChange = compassViewModel::setLocked,
+    onLockChange = {
+      haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+      compassViewModel.setLocked(it)
+    },
   )
 }
 
@@ -70,10 +80,15 @@ fun StatelessCompassScreen(
   Surface(modifier = Modifier.fillMaxSize()) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
       Row(
-        modifier = Modifier.align(Alignment.BottomEnd).padding(end = 10.dp, bottom = 20.dp),
+        modifier =
+          Modifier.align(Alignment.BottomEnd)
+            .padding(all = 20.dp)
+            .toggleable(value = isLocked, onValueChange = onLockChange, role = Role.Checkbox),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        Checkbox(checked = isLocked, onCheckedChange = onLockChange)
+        Checkbox(checked = isLocked, onCheckedChange = null)
+
+        Spacer(modifier = Modifier.width(10.dp))
 
         Text(
           text = stringResource(R.string.control_lock_compass),
@@ -107,7 +122,5 @@ fun StatelessCompassScreen(
 @Preview
 @Composable
 fun CompassScreenPreview() {
-  DarkHeliosTheme {
-    StatelessCompassScreen(compassAngle = 30.0f, isLocked = true, onLockChange = {})
-  }
+  DarkHeliosTheme { StatelessCompassScreen(compassAngle = 30f, isLocked = true, onLockChange = {}) }
 }

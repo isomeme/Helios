@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
@@ -103,7 +104,9 @@ private fun StatelessTextScreen(
       // Top of screen: select button on the left, title centered.
       Box(
         modifier =
-          Modifier.fillMaxWidth().background(sunColors[textUi.selected.index].colorContainer).padding(all = 10.dp)
+          Modifier.fillMaxWidth()
+            .background(sunColors[textUi.selected.index].colorContainer)
+            .padding(all = 10.dp)
       ) {
 
         // Enclosing the select button with its dropdown menu in a column makes the menu pop up just
@@ -158,13 +161,13 @@ private fun StatelessTextScreen(
         )
       }
 
-      Spacer(modifier = Modifier.height(20.dp))
+      Spacer(modifier = Modifier.height(15.dp))
 
       // Rubric text with scroll controls
-      Box(modifier = Modifier.fillMaxSize()) {
+      Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         RichText(
           modifier =
-            Modifier.verticalScroll(scrollState).fillMaxWidth().padding(horizontal = 40.dp),
+            Modifier.verticalScroll(scrollState).widthIn(max = 600.dp).padding(horizontal = 40.dp),
           style = RichTextStyle(paragraphSpacing = TextUnit(15.0f, TextUnitType.Sp)),
         ) {
           Markdown(content = textUi.rubric)

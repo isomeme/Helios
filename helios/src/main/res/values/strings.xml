@@ -32,13 +32,15 @@
     <string name="scroll_to_top">Scroll to top</string>
     <string name="scroll_to_bottom">Scroll to bottom</string>
 
-    <string name="label_use_dynamic_theme_colors">Use dynamic theme colors</string>
     <string name="label_system_theme">System</string>
     <string name="label_light_theme">Light</string>
     <string name="label_dark_theme">Dark</string>
+    <string name="label_use_dynamic_theme_colors">Use dynamic theme colors</string>
+    <string name="label_compass_south_top">South at top when locked</string>
 
     <string name="toast_activity_not_found">Target is not available.</string>
-    <string name="heading_theme_type">Theme type</string>
+    <string name="heading_theme">Theme</string>
+    <string name="heading_compass">Compass</string>
     <string name="view_online_documentation">View online documentation</string>
 
     <string name="location_permission_rationale">

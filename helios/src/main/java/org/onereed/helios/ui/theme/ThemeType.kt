@@ -1,4 +1,4 @@
-package org.onereed.helios.compose.theme
+package org.onereed.helios.ui.theme
 
 import androidx.annotation.StringRes
 import org.onereed.helios.R

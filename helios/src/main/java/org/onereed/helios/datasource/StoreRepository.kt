@@ -12,7 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.onereed.helios.compose.theme.ThemeType
+import org.onereed.helios.ui.theme.ThemeType
 
 @Singleton
 class StoreRepository @Inject constructor(@param:ApplicationContext val context: Context) {

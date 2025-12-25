@@ -91,7 +91,7 @@ fun StatelessScheduleScreen(
   onSelectEvent: (Int) -> Unit,
 ) {
   Surface(modifier = Modifier.fillMaxSize()) {
-    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+    ConstraintLayout(modifier = Modifier.fillMaxSize().padding(vertical = 10.dp)) {
       val (progress, events, scrollbar) = createRefs()
 
       if (scheduleUi.events.isEmpty()) {

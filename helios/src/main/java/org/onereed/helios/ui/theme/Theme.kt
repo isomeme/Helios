@@ -19,8 +19,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.onereed.helios.common.dynamicThemeSupported
-import org.onereed.helios.compose.theme.ThemeType
-import org.onereed.helios.compose.theme.ThemeViewModel
 
 @Immutable
 data class ExtendedColorScheme(
@@ -456,8 +454,7 @@ val LocalExtendedColorScheme = staticCompositionLocalOf { extendedLight }
 
 @Suppress("UnusedReceiverParameter")
 val MaterialTheme.extendedColors: ExtendedColorScheme
-  @Composable
-  get() = LocalExtendedColorScheme.current
+  @Composable get() = LocalExtendedColorScheme.current
 
 val usedDarkScheme = darkScheme
 val usedLightScheme = lightScheme
@@ -467,8 +464,8 @@ val usedDarkExtendedColorScheme = extendedDark
 
 @Composable
 fun HeliosTheme(themeViewModel: ThemeViewModel = hiltViewModel(), content: @Composable () -> Unit) {
-  val isDynamicTheme by themeViewModel.isDynamicThemeFlow.collectAsStateWithLifecycle(false)
-  val themeType by themeViewModel.themeTypeFlow.collectAsStateWithLifecycle(ThemeType.SYSTEM)
+  val isDynamicTheme by themeViewModel.isDynamicThemeFlow.collectAsStateWithLifecycle()
+  val themeType by themeViewModel.themeTypeFlow.collectAsStateWithLifecycle()
 
   val isDarkTheme =
     when (themeType) {
