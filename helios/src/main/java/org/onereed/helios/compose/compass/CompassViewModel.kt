@@ -1,17 +1,40 @@
 package org.onereed.helios.compose.compass
 
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import org.onereed.helios.common.BaseViewModel
 import org.onereed.helios.common.Orienter
-import org.onereed.helios.common.Ticker
+import org.onereed.helios.datasource.StoreRepository
 
-@Suppress("unused")
 @HiltViewModel
-class CompassViewModel @Inject constructor(orienter: Orienter) : ViewModel() {
+class CompassViewModel
+@Inject
+constructor(orienter: Orienter, private val storeRepository: StoreRepository) : BaseViewModel() {
 
-  val tickerFlow = Ticker(10.milliseconds).flow
+  val isLockedFlow = storeRepository.isCompassLockedFlow.stateIn(initialValue = false)
 
-  val headingFlow = orienter.headingFlow
+  private val lockedHeadingFlow =
+    storeRepository.isCompassSouthTopFlow
+      .map { southTop -> if (southTop) 180f else 0f }
+      .stateIn(initialValue = 0f)
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  val headingFlow =
+    isLockedFlow
+      .flatMapLatest { locked ->
+        if (locked) {
+          lockedHeadingFlow
+        } else {
+          orienter.headingFlow(initial = lockedHeadingFlow.value)
+        }
+      }
+      .stateIn(initialValue = 0f)
+
+  fun setLocked(locked: Boolean) {
+    storeRepository.setCompassLocked(value = locked, scope = viewModelScope)
+  }
 }

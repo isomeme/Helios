@@ -11,7 +11,7 @@
     <string name="screen_compass">Compass</string>
     <string name="screen_settings">Settings</string>
 
-    <string name="control_lock_compass">Lock compass</string>
+    <string name="control_lock_compass">Lock</string>
     <string name="control_south_at_top">South at top</string>
 
     <string name="content_compass_display">Compass display</string>

@@ -60,11 +60,17 @@ fun StatelessHeliosApp(
     navigationSuiteType = navSuiteType(),
     navigationItems = {
       Screen.TopLevelScreens.forEach { screen ->
+        val isSelected = isSelected(screen)
+
         NavigationSuiteItem(
           icon = { Icon(painterResource(screen.iconRes), stringResource(screen.titleRes)) },
           label = { Text(stringResource(screen.titleRes)) },
-          selected = isSelected(screen),
-          onClick = { navActions.navigateTo(screen) },
+          selected = isSelected,
+          onClick = {
+            if (!isSelected) {
+              navActions.navigateTo(screen)
+            }
+          },
         )
       }
     },

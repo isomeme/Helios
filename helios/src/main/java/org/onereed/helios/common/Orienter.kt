@@ -9,20 +9,18 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
-import kotlinx.coroutines.flow.stateIn
 import timber.log.Timber
 
 @Singleton
@@ -38,18 +36,15 @@ constructor(
     LocationServices.getFusedOrientationProviderClient(context)
   }
 
-  val headingFlow =
-    getOrientationUpdates()
+  fun headingFlow(initial: Float): StateFlow<Float> {
+    return getOrientationUpdates()
       .onStart { Timber.d("Orienter.onStart") }
       .onCompletion { Timber.d("Orienter.onCompletion") }
       .map { it.headingDegrees }
-      .scan(0f, ::smooth)
+      .scan(initial, ::smooth)
       .map(::quantize)
-      .stateIn(
-        scope = externalScope,
-        started = SharingStarted.WhileSubscribed(FLOW_TIMEOUT_MILLIS),
-        initialValue = 0f,
-      )
+      .stateIn(scope = externalScope, initialValue = initial)
+  }
 
   private fun getOrientationUpdates(): Flow<DeviceOrientation> = callbackFlow {
     val orientationListener = DeviceOrientationListener {
@@ -87,8 +82,6 @@ constructor(
 
     /** The granularity of heading angles. */
     private const val QUANTUM = 0.5f
-
-    private val FLOW_TIMEOUT_MILLIS = 5.seconds.inWholeMilliseconds
 
     private val DEVICE_ORIENTATION_REQUEST =
       DeviceOrientationRequest.Builder(DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT).build()
