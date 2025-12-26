@@ -36,11 +36,14 @@ constructor(
     LocationServices.getFusedOrientationProviderClient(context)
   }
 
+  private val rawHeadingFlow = getOrientationUpdates()
+    .onStart { Timber.d("Orienter.onStart") }
+    .onCompletion { Timber.d("Orienter.onCompletion") }
+    .map { it.headingDegrees }
+    .stateIn(scope = externalScope, initialValue = 0f)
+
   fun headingFlow(initial: Float): StateFlow<Float> {
-    return getOrientationUpdates()
-      .onStart { Timber.d("Orienter.onStart") }
-      .onCompletion { Timber.d("Orienter.onCompletion") }
-      .map { it.headingDegrees }
+    return rawHeadingFlow
       .scan(initial, ::smooth)
       .map(::quantize)
       .stateIn(scope = externalScope, initialValue = initial)
