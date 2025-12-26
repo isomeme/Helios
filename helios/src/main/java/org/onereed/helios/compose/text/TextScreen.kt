@@ -3,12 +3,11 @@ package org.onereed.helios.compose.text
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -96,91 +95,121 @@ private fun StatelessTextScreen(
   scrollbarActions: ScrollbarActions,
   scrollState: ScrollState,
 ) {
-  val sunColors = sunColors()
-
   Surface(modifier = Modifier.fillMaxSize()) {
-    Column(modifier = Modifier.fillMaxSize().padding(bottom = 10.dp)) {
-
-      // Top of screen: select button on the left, title centered.
-      Box(
-        modifier =
-          Modifier.fillMaxWidth()
-            .background(sunColors[textUi.selected.index].colorContainer)
-            .padding(all = 10.dp)
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+      Column(
+        modifier = Modifier.widthIn(max = 640.dp).padding(vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(15.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
       ) {
-
-        // Enclosing the select button with its dropdown menu in a column makes the menu pop up just
-        // below the button.
-        Column(modifier = Modifier.align(Alignment.CenterStart)) {
-          OutlinedButton(
-            onClick = eventMenuActions.onExpanded,
-            colors =
-              ButtonDefaults.outlinedButtonColors(
-                containerColor = sunColors[textUi.selected.index].colorContainer,
-                contentColor = sunColors[textUi.selected.index].onColorContainer,
-              ),
-            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
-          ) {
-            Icon(
-              painter = painterResource(id = textUi.selected.iconRes),
-              contentDescription = textUi.selected.name,
-            )
-          }
-
-          DropdownMenu(
-            expanded = eventMenuExpanded,
-            onDismissRequest = eventMenuActions.onDismissed,
-            offset = DpOffset(0.dp, 10.dp),
-          ) {
-            textUi.menu.forEach { eventUi ->
-              DropdownMenuItem(
-                enabled = eventUi.enabled,
-                onClick = { eventMenuActions.onSelectIndex(eventUi.index) },
-                colors =
-                  MenuDefaults.itemColors(
-                    leadingIconColor = sunColors[eventUi.index].color,
-                    textColor = sunColors[eventUi.index].color,
-                  ),
-                leadingIcon = {
-                  Icon(
-                    painter = painterResource(eventUi.iconRes),
-                    contentDescription = eventUi.name,
-                  )
-                },
-                text = { Text(text = eventUi.name, style = MaterialTheme.typography.labelLarge) },
-              )
-            }
-          }
-        }
-
-        Text(
-          text = textUi.selected.name,
-          color = sunColors[textUi.selected.index].onColorContainer,
-          style = MaterialTheme.typography.headlineMedium,
-          modifier = Modifier.align(Alignment.Center),
+        TitleBar(
+          textUi = textUi,
+          eventMenuActions = eventMenuActions,
+          eventMenuExpanded = eventMenuExpanded,
         )
-      }
 
-      Spacer(modifier = Modifier.height(15.dp))
-
-      // Rubric text with scroll controls
-      Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-        RichText(
-          modifier =
-            Modifier.verticalScroll(scrollState).widthIn(max = 600.dp).padding(horizontal = 40.dp),
-          style = RichTextStyle(paragraphSpacing = TextUnit(15.0f, TextUnitType.Sp)),
-        ) {
-          Markdown(content = textUi.rubric)
-        }
-
-        SimpleVerticalScrollbar(
+        Body(
+          textUi = textUi,
+          scrollState = scrollState,
           canScrollUp = canScrollUp,
           canScrollDown = canScrollDown,
           scrollbarActions = scrollbarActions,
-          modifier = Modifier.align(Alignment.CenterEnd),
         )
       }
     }
+  }
+}
+
+@Composable
+private fun TitleBar(
+  textUi: TextUi,
+  eventMenuActions: EventMenuActions,
+  eventMenuExpanded: Boolean,
+) {
+  val sunColors = sunColors()
+
+  Box(
+    modifier =
+      Modifier.fillMaxWidth()
+        .background(sunColors[textUi.selected.index].colorContainer)
+        .padding(all = 10.dp)
+  ) {
+    // Enclosing the select button with its dropdown menu in a column makes the menu pop up just
+    // below the button.
+
+    Column(modifier = Modifier.align(Alignment.CenterStart)) {
+      OutlinedButton(
+        onClick = eventMenuActions.onExpanded,
+        colors =
+          ButtonDefaults.outlinedButtonColors(
+            containerColor = sunColors[textUi.selected.index].colorContainer,
+            contentColor = sunColors[textUi.selected.index].onColorContainer,
+          ),
+        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
+      ) {
+        Icon(
+          painter = painterResource(id = textUi.selected.iconRes),
+          contentDescription = textUi.selected.name,
+        )
+      }
+
+      DropdownMenu(
+        expanded = eventMenuExpanded,
+        onDismissRequest = eventMenuActions.onDismissed,
+        offset = DpOffset(0.dp, 10.dp),
+      ) {
+        textUi.menu.forEach { eventUi ->
+          DropdownMenuItem(
+            enabled = eventUi.enabled,
+            onClick = { eventMenuActions.onSelectIndex(eventUi.index) },
+            colors =
+              MenuDefaults.itemColors(
+                leadingIconColor = sunColors[eventUi.index].color,
+                textColor = sunColors[eventUi.index].color,
+              ),
+            leadingIcon = {
+              Icon(painter = painterResource(eventUi.iconRes), contentDescription = eventUi.name)
+            },
+            text = { Text(text = eventUi.name, style = MaterialTheme.typography.labelLarge) },
+          )
+        }
+      }
+    }
+
+    Text(
+      text = textUi.selected.name,
+      color = sunColors[textUi.selected.index].onColorContainer,
+      style = MaterialTheme.typography.headlineMedium,
+      modifier = Modifier.align(Alignment.Center),
+    )
+  }
+}
+
+@Composable
+private fun Body(
+  textUi: TextUi,
+  scrollState: ScrollState,
+  canScrollUp: Boolean,
+  canScrollDown: Boolean,
+  scrollbarActions: ScrollbarActions,
+) {
+  Box(modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceContainer)) {
+    RichText(
+      modifier =
+        Modifier.verticalScroll(scrollState)
+          .padding(horizontal = 40.dp, vertical = 10.dp)
+          .align(alignment = Alignment.TopCenter),
+      style = RichTextStyle(paragraphSpacing = TextUnit(15.0f, TextUnitType.Sp)),
+    ) {
+      Markdown(content = textUi.rubric)
+    }
+
+    SimpleVerticalScrollbar(
+      canScrollUp = canScrollUp,
+      canScrollDown = canScrollDown,
+      scrollbarActions = scrollbarActions,
+      modifier = Modifier.align(Alignment.CenterEnd),
+    )
   }
 }
 
