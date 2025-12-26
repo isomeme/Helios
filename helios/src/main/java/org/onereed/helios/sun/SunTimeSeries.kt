@@ -1,5 +1,6 @@
 package org.onereed.helios.sun
 
+import androidx.compose.runtime.Immutable
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
@@ -10,6 +11,7 @@ import org.onereed.helios.common.PlaceTime
 import org.shredzone.commons.suncalc.SunTimes
 
 @OptIn(ExperimentalTime::class)
+@Immutable
 class SunTimeSeries(val placeTime: PlaceTime) {
   data class Event(val sunEventType: SunEventType, val instant: Instant) : Comparable<Event> {
     override fun compareTo(other: Event) =

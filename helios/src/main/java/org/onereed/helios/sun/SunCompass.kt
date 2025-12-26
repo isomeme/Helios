@@ -1,5 +1,6 @@
 package org.onereed.helios.sun
 
+import androidx.compose.runtime.Immutable
 import java.util.EnumMap
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
@@ -11,6 +12,7 @@ import org.shredzone.commons.suncalc.SunPosition
 import timber.log.Timber
 
 @OptIn(ExperimentalTime::class)
+@Immutable
 data class SunCompass(
   val sunAzimuth: Double,
   val isSunClockwise: Boolean,

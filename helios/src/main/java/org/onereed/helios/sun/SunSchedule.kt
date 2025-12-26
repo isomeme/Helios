@@ -1,9 +1,11 @@
 package org.onereed.helios.sun
 
+import androidx.compose.runtime.Immutable
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
+@Immutable
 class SunSchedule(sunTimeSeries: SunTimeSeries) {
   data class Event(
     val sunEventType: SunEventType,

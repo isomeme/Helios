@@ -36,18 +36,29 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlinx.coroutines.FlowPreview
 import org.onereed.helios.R
 import org.onereed.helios.ui.theme.DarkHeliosTheme
+import org.onereed.helios.ui.theme.extendedColors
+import java.lang.Math.toRadians
+import kotlin.math.cos
+import kotlin.math.sin
 
 @OptIn(FlowPreview::class)
 @Composable
 fun CompassScreen(compassViewModel: CompassViewModel = hiltViewModel()) {
-  val isLocked by compassViewModel.isLockedFlow.collectAsStateWithLifecycle()
+  val sunCompass by compassViewModel.sunCompassFlow.collectAsStateWithLifecycle()
+  val sunAzimuth by remember { derivedStateOf { sunCompass.sunAzimuth.toFloat() } }
+  val isSunClockwise by remember { derivedStateOf { sunCompass.isSunClockwise } }
+
   val heading by compassViewModel.headingFlow.collectAsStateWithLifecycle()
   val compassAngle by remember {
     derivedStateOf { 360f - heading } // Compass turns opposite heading
   }
+
+  val isLocked by compassViewModel.isLockedFlow.collectAsStateWithLifecycle()
   val haptics = LocalHapticFeedback.current
 
   StatelessCompassScreen(
+    sunAzimuth = sunAzimuth,
+    isSunClockwise = isSunClockwise,
     compassAngle = compassAngle,
     isLocked = isLocked,
     onLockChange = {
@@ -61,14 +72,14 @@ fun CompassScreen(compassViewModel: CompassViewModel = hiltViewModel()) {
 @Composable
 fun StatelessCompassScreen(
   compassAngle: Float,
+  sunAzimuth: Float,
+  isSunClockwise: Boolean,
   isLocked: Boolean,
   onLockChange: (Boolean) -> Unit,
 ) {
-  val viewLinePainterResource = painterResource(id = R.drawable.ic_view_line)
-  val compassFacePainterResource = painterResource(id = R.drawable.ic_compass_face)
-
   val viewLineColor = MaterialTheme.colorScheme.outlineVariant
   val compassFaceColor = MaterialTheme.colorScheme.outline
+  val sunColor = MaterialTheme.extendedColors.sun.color
 
   val viewLineColorFilter =
     remember(viewLineColor) { ColorFilter.tint(color = viewLineColor, blendMode = BlendMode.SrcIn) }
@@ -76,6 +87,8 @@ fun StatelessCompassScreen(
     remember(compassFaceColor) {
       ColorFilter.tint(color = compassFaceColor, blendMode = BlendMode.SrcIn)
     }
+  val sunColorFilter =
+    remember(sunColor) { ColorFilter.tint(color = sunColor, blendMode = BlendMode.SrcIn) }
 
   Surface(modifier = Modifier.fillMaxSize()) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -97,24 +110,40 @@ fun StatelessCompassScreen(
       }
 
       Image(
-        painter = viewLinePainterResource,
+        painter = painterResource(id = R.drawable.ic_view_line),
         colorFilter = viewLineColorFilter,
         contentScale = ContentScale.Fit,
         modifier = Modifier.fillMaxSize().zIndex(0f),
         contentDescription = null,
       )
 
-      Image(
-        painter = compassFacePainterResource,
-        colorFilter = compassFaceColorFilter,
-        contentScale = ContentScale.Fit,
-        modifier =
-          Modifier.fillMaxSize().zIndex(1f).graphicsLayer {
-            // The animatedHeading value smoothly updates the rotation
-            rotationZ = compassAngle
-          },
-        contentDescription = null,
-      )
+      Box(
+        modifier = Modifier.fillMaxSize().graphicsLayer { rotationZ = compassAngle },
+        contentAlignment = Alignment.Center,
+      ) {
+        Image(
+          painter = painterResource(id = R.drawable.ic_compass_face),
+          colorFilter = compassFaceColorFilter,
+          contentScale = ContentScale.Fit,
+          modifier = Modifier.fillMaxSize().zIndex(1f),
+          contentDescription = null,
+        )
+
+        val sunAzimuthRad = toRadians(sunAzimuth.toDouble()).toFloat()
+
+        Image(
+          painter = painterResource(id = R.drawable.ic_solid_dot),
+          colorFilter = sunColorFilter,
+          modifier =
+            Modifier.fillMaxSize().zIndex(2f).graphicsLayer {
+              scaleX = 0.1f
+              scaleY = 0.1f
+              translationX = sin(sunAzimuthRad) * 0.44f * size.minDimension
+              translationY = -cos(sunAzimuthRad) * 0.44f * size.minDimension
+            },
+          contentDescription = null,
+        )
+      }
     }
   }
 }
@@ -122,5 +151,13 @@ fun StatelessCompassScreen(
 @Preview
 @Composable
 fun CompassScreenPreview() {
-  DarkHeliosTheme { StatelessCompassScreen(compassAngle = 30f, isLocked = true, onLockChange = {}) }
+  DarkHeliosTheme {
+    StatelessCompassScreen(
+      compassAngle = 30f,
+      sunAzimuth = 60f,
+      isSunClockwise = true,
+      isLocked = true,
+      onLockChange = {},
+    )
+  }
 }
