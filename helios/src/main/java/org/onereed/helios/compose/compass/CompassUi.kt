@@ -2,14 +2,18 @@ package org.onereed.helios.compose.compass
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Immutable
 import java.lang.Math.toRadians
 import javax.inject.Inject
 import kotlin.math.cos
 import kotlin.math.sin
 import org.onereed.helios.R
+import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunCompass
 
+@Immutable
 data class CompassUi(val items: List<CompassItem>) {
+  @Immutable
   data class CompassItem(
     @param:DrawableRes val iconRes: Int,
     @param:StringRes val nameRes: Int,
@@ -20,6 +24,7 @@ data class CompassUi(val items: List<CompassItem>) {
   )
 
   /** Cartesian coordinates as fractions of the graphics layer size. */
+  @Immutable
   data class Point(val x: Float, val y: Float) {
     companion object {
       /**
@@ -41,7 +46,7 @@ data class CompassUi(val items: List<CompassItem>) {
     }
   }
 
-  class Factory @Inject constructor() {
+  class Factory @Inject constructor(val sunResources: SunResources) {
     fun create(sunCompass: SunCompass): CompassUi {
       val sunAngle = sunCompass.sunAzimuth.toFloat()
 
@@ -63,7 +68,21 @@ data class CompassUi(val items: List<CompassItem>) {
           rotation = if (sunCompass.isSunClockwise) sunAngle else sunAngle + 180f,
         )
 
-      return CompassUi(listOf(sunItem, arrowItem))
+      val eventItems =
+        sunCompass.events.map { (eventType, event) ->
+          val ordinal = eventType.ordinal
+          val eventSet = sunResources.eventSets[ordinal]
+          CompassItem(
+            iconRes = R.drawable.ic_sol_symbol,
+            nameRes = eventSet.nameRes,
+            ordinal = ordinal,
+            point = Point.fromPolar(angle = event.azimuth.toFloat()),
+          )
+        }
+
+      val allItems = eventItems + sunItem + arrowItem
+
+      return CompassUi(items = allItems)
     }
   }
 

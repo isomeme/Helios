@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -39,6 +40,7 @@ import kotlinx.coroutines.FlowPreview
 import org.onereed.helios.R
 import org.onereed.helios.common.PlaceTime
 import org.onereed.helios.compose.shared.sunColorFilters
+import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunCompass
 import org.onereed.helios.sun.SunTimeSeries
 import org.onereed.helios.ui.theme.DarkHeliosTheme
@@ -150,10 +152,11 @@ fun StatelessCompassScreen(
 @Preview
 @Composable
 fun CompassScreenPreview() {
+  val sunResources = SunResources(LocalContext.current)
   val hereNow = PlaceTime(lat = 34.0, lon = -118.0, alt = 0.0, instant = now())
   val sunTimeSeries = SunTimeSeries(hereNow)
   val sunCompass = SunCompass.compute(sunTimeSeries)
-  val compassUi = CompassUi.Factory().create(sunCompass)
+  val compassUi = CompassUi.Factory(sunResources).create(sunCompass)
 
   DarkHeliosTheme {
     StatelessCompassScreen(
