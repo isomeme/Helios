@@ -1,6 +1,7 @@
 package org.onereed.helios.compose.text
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import javax.inject.Inject
 import org.onereed.helios.datasource.SunResources
@@ -10,7 +11,7 @@ data class TextUi(val menu: List<EventUi>, val selected: EventUi, val rubric: St
   @Immutable
   data class EventUi(
     @param:DrawableRes val iconRes: Int,
-    val name: String,
+    @param:StringRes val nameRes: Int,
     val enabled: Boolean,
     val index: Int,
   )
@@ -22,7 +23,7 @@ data class TextUi(val menu: List<EventUi>, val selected: EventUi, val rubric: St
         sunResources.eventSets.mapIndexed { ix, eventSet ->
           EventUi(
             iconRes = eventSet.iconRes,
-            name = eventSet.name,
+            nameRes = eventSet.nameRes,
             enabled = ix != selectedIndex,
             index = ix,
           )

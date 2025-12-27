@@ -9,6 +9,7 @@ import android.text.format.DateUtils.FORMAT_SHOW_TIME
 import android.text.format.DateUtils.FORMAT_SHOW_WEEKDAY
 import android.text.format.DateUtils.formatDateTime
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -23,7 +24,7 @@ data class ScheduleUi(val events: List<EventUi>) {
   @Immutable
   data class EventUi(
     @param:DrawableRes val iconRes: Int,
-    val name: String,
+    @param:StringRes val nameRes: Int,
     val timeText: String,
     val isClosestEvent: Boolean,
     val ordinal: Int,
@@ -36,7 +37,6 @@ data class ScheduleUi(val events: List<EventUi>) {
     @param:ApplicationContext private val context: Context,
     private val sunResources: SunResources,
   ) {
-
     fun create(sunSchedule: SunSchedule): ScheduleUi {
       val events =
         sunSchedule.events.map {
@@ -45,7 +45,7 @@ data class ScheduleUi(val events: List<EventUi>) {
 
           EventUi(
             iconRes = eventSet.iconRes,
-            name = eventSet.name,
+            nameRes = eventSet.nameRes,
             timeText = formatInstant(context, it.instant),
             isClosestEvent = it.isClosestEvent,
             ordinal = ordinal,

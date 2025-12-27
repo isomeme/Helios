@@ -32,24 +32,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import java.lang.Math.toRadians
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.time.Clock.System.now
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.FlowPreview
 import org.onereed.helios.R
+import org.onereed.helios.common.PlaceTime
+import org.onereed.helios.compose.shared.sunColorFilters
+import org.onereed.helios.sun.SunCompass
+import org.onereed.helios.sun.SunTimeSeries
 import org.onereed.helios.ui.theme.DarkHeliosTheme
-import org.onereed.helios.ui.theme.extendedColors
 
 @OptIn(FlowPreview::class)
 @Composable
 fun CompassScreen(compassViewModel: CompassViewModel = hiltViewModel()) {
-  val sunCompass by compassViewModel.sunCompassFlow.collectAsStateWithLifecycle()
-  val sunAzimuth by remember { derivedStateOf { sunCompass.sunAzimuth.toFloat() } }
-  val sunArrowRotation by remember {
-    derivedStateOf { if (sunCompass.isSunClockwise) sunAzimuth else sunAzimuth + 180f }
-  }
-
+  val compassUi by compassViewModel.compassUiFlow.collectAsStateWithLifecycle()
   val heading by compassViewModel.headingFlow.collectAsStateWithLifecycle()
   val compassAngle by remember {
     derivedStateOf { 360f - heading } // Compass turns opposite heading
@@ -59,8 +56,7 @@ fun CompassScreen(compassViewModel: CompassViewModel = hiltViewModel()) {
   val haptics = LocalHapticFeedback.current
 
   StatelessCompassScreen(
-    sunAzimuth = sunAzimuth,
-    sunArrowRotation = sunArrowRotation,
+    compassUi = compassUi,
     compassAngle = compassAngle,
     isLocked = isLocked,
     onLockChange = {
@@ -73,15 +69,13 @@ fun CompassScreen(compassViewModel: CompassViewModel = hiltViewModel()) {
 @OptIn(ExperimentalAtomicApi::class)
 @Composable
 fun StatelessCompassScreen(
+  compassUi: CompassUi,
   compassAngle: Float,
-  sunAzimuth: Float,
-  sunArrowRotation: Float,
   isLocked: Boolean,
   onLockChange: (Boolean) -> Unit,
 ) {
-  val viewLineColor = MaterialTheme.colorScheme.outlineVariant
-  val compassFaceColor = MaterialTheme.colorScheme.outline
-  val sunColor = MaterialTheme.extendedColors.sun.color
+  val viewLineColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+  val compassFaceColor = MaterialTheme.colorScheme.outlineVariant
 
   val viewLineColorFilter =
     remember(viewLineColor) { ColorFilter.tint(color = viewLineColor, blendMode = BlendMode.SrcIn) }
@@ -89,16 +83,17 @@ fun StatelessCompassScreen(
     remember(compassFaceColor) {
       ColorFilter.tint(color = compassFaceColor, blendMode = BlendMode.SrcIn)
     }
-  val sunColorFilter =
-    remember(sunColor) { ColorFilter.tint(color = sunColor, blendMode = BlendMode.SrcIn) }
+
+  val sunColorFilters = sunColorFilters()
 
   Surface(modifier = Modifier.fillMaxSize()) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
       Row(
         modifier =
           Modifier.align(Alignment.BottomEnd)
+            .padding(all = 15.dp)
             .toggleable(value = isLocked, onValueChange = onLockChange, role = Role.Checkbox)
-            .padding(all = 30.dp),
+            .padding(all = 15.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Checkbox(checked = isLocked, onCheckedChange = null)
@@ -131,75 +126,39 @@ fun StatelessCompassScreen(
           contentDescription = stringResource(R.string.content_compass_display),
         )
 
-        Image(
-          painter = painterResource(id = R.drawable.ic_solid_dot),
-          colorFilter = sunColorFilter,
-          modifier =
-            Modifier.fillMaxSize().zIndex(2f).graphicsLayer {
-              val sunCoords = polarToCartesian(size = size.minDimension, angle = sunAzimuth)
-
-              scaleX = ITEM_SCALE
-              scaleY = ITEM_SCALE
-              translationX = sunCoords.x
-              translationY = sunCoords.y
-            },
-          contentDescription = stringResource(R.string.content_sun_position),
-        )
-
-        Image(
-          painter = painterResource(id = R.drawable.ic_baseline_arrow_forward_24),
-          colorFilter = sunColorFilter,
-          modifier =
-            Modifier.fillMaxSize().zIndex(2f).graphicsLayer {
-              val arrowCoords =
-                polarToCartesian(size = size.minDimension, angle = sunAzimuth, radius = 0.6f)
-
-              scaleX = ITEM_SCALE
-              scaleY = ITEM_SCALE
-              translationX = arrowCoords.x
-              translationY = arrowCoords.y
-              rotationZ = sunArrowRotation
-            },
-          contentDescription = stringResource(R.string.content_sun_movement_direction),
-        )
+        compassUi.items.forEach { item ->
+          Image(
+            painter = painterResource(item.iconRes),
+            contentDescription = stringResource(item.nameRes),
+            colorFilter = sunColorFilters[item.ordinal],
+            modifier =
+              Modifier.fillMaxSize().zIndex(2f).graphicsLayer {
+                scaleX = item.scale
+                scaleY = item.scale
+                translationX = item.point.x * size.minDimension
+                translationY = item.point.y * size.minDimension
+                rotationZ = item.rotation
+              },
+          )
+        }
       }
     }
   }
 }
 
-/** Cartesian coordinates in pixels relative to the center of the graphics layer. */
-private data class CartesianCoords(val x: Float, val y: Float)
-
-/**
- * @param size Size of the graphics layer in pixels (minimum dimension)
- * @param angle Angle in degrees clockwise from north.
- * @param radius Radius as a fraction of the compass circle radius.
- * @return Equivalent Cartesian coordinates in the graphics layer.
- */
-private fun polarToCartesian(size: Float, angle: Float, radius: Float = 1f): CartesianCoords {
-  val radAngle = toRadians(angle.toDouble()).toFloat()
-  val scaledRadius = RADIAL_SCALE * size * radius
-
-  return CartesianCoords(x = sin(radAngle) * scaledRadius, y = -cos(radAngle) * scaledRadius)
-}
-
-/** The scale of positionally rendered images as a fraction of the drawable area. */
-private const val ITEM_SCALE = 0.1f
-
-/**
- * The radial scale used for placing positionally rendered images This scale places the compass
- * circle at a radius of 1.
- */
-private const val RADIAL_SCALE = 0.44f
-
+@OptIn(ExperimentalTime::class)
 @Preview
 @Composable
 fun CompassScreenPreview() {
+  val hereNow = PlaceTime(lat = 34.0, lon = -118.0, alt = 0.0, instant = now())
+  val sunTimeSeries = SunTimeSeries(hereNow)
+  val sunCompass = SunCompass.compute(sunTimeSeries)
+  val compassUi = CompassUi.Factory().create(sunCompass)
+
   DarkHeliosTheme {
     StatelessCompassScreen(
+      compassUi = compassUi,
       compassAngle = 30f,
-      sunAzimuth = 60f,
-      sunArrowRotation = 60f,
       isLocked = true,
       onLockChange = {},
     )

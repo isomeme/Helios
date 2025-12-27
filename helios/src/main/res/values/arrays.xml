@@ -29,12 +29,12 @@
         <item>@drawable/ic_nadir_36dp</item>
     </array>
 
-    <string-array name="sun_event_names">
-        <item>Sunrise</item>
-        <item>Noon</item>
-        <item>Sunset</item>
-        <item>Midnight</item>
-    </string-array>
+    <array name="sun_event_name_ids">
+        <item>@string/event_rise</item>
+        <item>@string/event_noon</item>
+        <item>@string/event_set</item>
+        <item>@string/event_nadir</item>
+    </array>
 
     <string-array name="rubric_gods">
         <item>Ra</item>

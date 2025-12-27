@@ -2,6 +2,7 @@ package org.onereed.helios.datasource
 
 import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.core.content.res.use
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.IOException
@@ -14,13 +15,21 @@ import org.onereed.helios.sun.SunEventType
 
 @Singleton
 class SunResources @Inject constructor(@ApplicationContext context: Context) {
-  data class EventSet(val name: String, @param:DrawableRes val iconRes: Int, val rubric: String)
+  data class EventSet(
+    @param:StringRes val nameRes: Int,
+    @param:DrawableRes val iconRes: Int,
+    val rubric: String,
+  )
 
   val eventSets: List<EventSet>
 
   init {
     val resources = context.resources
-    val names = resources.getStringArray(R.array.sun_event_names).toList()
+
+    val names =
+      resources.obtainTypedArray(R.array.sun_event_name_ids).use { typedArray ->
+        sunEventOrdinals.map { typedArray.getResourceId(it, 0) }
+      }
 
     val icons =
       resources.obtainTypedArray(R.array.sun_event_icons).use { typedArray ->

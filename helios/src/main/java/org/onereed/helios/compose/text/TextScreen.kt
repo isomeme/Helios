@@ -37,6 +37,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.TextUnit
@@ -49,7 +50,7 @@ import com.halilibo.richtext.ui.RichTextStyle
 import com.halilibo.richtext.ui.material3.RichText
 import org.onereed.helios.compose.shared.ScrollbarActions
 import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
-import org.onereed.helios.compose.shared.sunColors
+import org.onereed.helios.compose.shared.sunColorFamilies
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunEventType
 import org.onereed.helios.ui.theme.DarkHeliosTheme
@@ -126,12 +127,12 @@ private fun TitleBar(
   eventMenuActions: EventMenuActions,
   eventMenuExpanded: Boolean,
 ) {
-  val sunColors = sunColors()
+  val sunColorFamilies = sunColorFamilies()
 
   Box(
     modifier =
       Modifier.fillMaxWidth()
-        .background(sunColors[textUi.selected.index].colorContainer)
+        .background(sunColorFamilies[textUi.selected.index].colorContainer)
         .padding(all = 10.dp)
   ) {
     // Enclosing the select button with its dropdown menu in a column makes the menu pop up just
@@ -142,14 +143,14 @@ private fun TitleBar(
         onClick = eventMenuActions.onExpanded,
         colors =
           ButtonDefaults.outlinedButtonColors(
-            containerColor = sunColors[textUi.selected.index].colorContainer,
-            contentColor = sunColors[textUi.selected.index].onColorContainer,
+            containerColor = sunColorFamilies[textUi.selected.index].colorContainer,
+            contentColor = sunColorFamilies[textUi.selected.index].onColorContainer,
           ),
         border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
       ) {
         Icon(
           painter = painterResource(id = textUi.selected.iconRes),
-          contentDescription = textUi.selected.name,
+          contentDescription = stringResource(textUi.selected.nameRes),
         )
       }
 
@@ -164,21 +165,29 @@ private fun TitleBar(
             onClick = { eventMenuActions.onSelectIndex(eventUi.index) },
             colors =
               MenuDefaults.itemColors(
-                leadingIconColor = sunColors[eventUi.index].color,
-                textColor = sunColors[eventUi.index].color,
+                leadingIconColor = sunColorFamilies[eventUi.index].color,
+                textColor = sunColorFamilies[eventUi.index].color,
               ),
             leadingIcon = {
-              Icon(painter = painterResource(eventUi.iconRes), contentDescription = eventUi.name)
+              Icon(
+                painter = painterResource(eventUi.iconRes),
+                contentDescription = stringResource(eventUi.nameRes),
+              )
             },
-            text = { Text(text = eventUi.name, style = MaterialTheme.typography.labelLarge) },
+            text = {
+              Text(
+                text = stringResource(eventUi.nameRes),
+                style = MaterialTheme.typography.labelLarge,
+              )
+            },
           )
         }
       }
     }
 
     Text(
-      text = textUi.selected.name,
-      color = sunColors[textUi.selected.index].onColorContainer,
+      text = stringResource(textUi.selected.nameRes),
+      color = sunColorFamilies[textUi.selected.index].onColorContainer,
       style = MaterialTheme.typography.headlineMedium,
       modifier = Modifier.align(Alignment.Center),
     )

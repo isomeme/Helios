@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">Helios</string>
 
+    <string name="event_rise">Sunrise</string>
+    <string name="event_noon">Noon</string>
+    <string name="event_set">Sunset</string>
+    <string name="event_nadir">Midnight</string>
+
     <string name="action_schedule">Schedule</string>
     <string name="action_text">Text</string>
     <string name="action_compass">Compass</string>

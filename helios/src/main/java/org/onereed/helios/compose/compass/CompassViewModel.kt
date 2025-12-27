@@ -16,10 +16,18 @@ import org.onereed.helios.sun.SunTimeSeries
 @HiltViewModel
 class CompassViewModel
 @Inject
-constructor(orienter: Orienter, locator: Locator, private val storeRepository: StoreRepository) :
-  BaseViewModel() {
+constructor(
+  orienter: Orienter,
+  locator: Locator,
+  compassUiFactory: CompassUi.Factory,
+  private val storeRepository: StoreRepository,
+) : BaseViewModel() {
 
-  val sunCompassFlow = locator.placeTimeFlow.mapState(::SunTimeSeries).mapState(SunCompass::compute)
+  val compassUiFlow =
+    locator.placeTimeFlow
+      .mapState(::SunTimeSeries)
+      .mapState(SunCompass::compute)
+      .mapState(compassUiFactory::create)
 
   val isLockedFlow = storeRepository.isCompassLockedFlow.stateIn(initialValue = false)
 

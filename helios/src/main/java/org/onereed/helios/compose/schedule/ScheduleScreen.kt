@@ -30,6 +30,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,7 +46,7 @@ import org.onereed.helios.compose.app.Screen
 import org.onereed.helios.compose.schedule.ScheduleUi.EventUi
 import org.onereed.helios.compose.shared.ScrollbarActions
 import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
-import org.onereed.helios.compose.shared.sunColors
+import org.onereed.helios.compose.shared.sunColorFamilies
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunSchedule
 import org.onereed.helios.sun.SunTimeSeries
@@ -122,15 +123,15 @@ fun StatelessScheduleScreen(
 
 @Composable
 private fun LazyItemScope.EventCard(event: EventUi, onSelectEvent: (Int) -> Unit) {
-  val eventColors = sunColors()[event.ordinal]
+  val eventColorFamily = sunColorFamilies()[event.ordinal]
 
   Card(
     modifier = Modifier.requiredWidth(CARD_WIDTH).animateItem(),
     onClick = { onSelectEvent(event.ordinal) },
     colors =
       CardDefaults.cardColors(
-        containerColor = eventColors.colorContainer,
-        contentColor = eventColors.onColorContainer,
+        containerColor = eventColorFamily.colorContainer,
+        contentColor = eventColorFamily.onColorContainer,
       ),
   ) {
     Row(
@@ -139,8 +140,8 @@ private fun LazyItemScope.EventCard(event: EventUi, onSelectEvent: (Int) -> Unit
     ) {
       Icon(
         painter = painterResource(event.iconRes),
-        contentDescription = event.name,
-        tint = eventColors.color,
+        contentDescription = stringResource(event.nameRes),
+        tint = eventColorFamily.color,
       )
       Spacer(modifier = Modifier.width(20.dp))
       Text(
