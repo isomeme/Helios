@@ -101,17 +101,17 @@ fun StatelessCompassScreen(
         Spacer(modifier = Modifier.width(10.dp))
 
         Text(
-          text = stringResource(R.string.control_lock_compass),
+          text = stringResource(id = R.string.control_lock_compass),
           style = MaterialTheme.typography.labelMedium,
         )
       }
 
       Image(
         painter = painterResource(id = R.drawable.ic_view_line),
+        contentDescription = stringResource(id = R.string.content_view_line),
         colorFilter = viewLineColorFilter,
         contentScale = ContentScale.Fit,
         modifier = Modifier.fillMaxSize().zIndex(0f),
-        contentDescription = stringResource(R.string.content_view_line),
       )
 
       Box(
@@ -120,16 +120,16 @@ fun StatelessCompassScreen(
       ) {
         Image(
           painter = painterResource(id = R.drawable.ic_compass_face),
+          contentDescription = stringResource(id = R.string.content_compass_display),
           colorFilter = compassFaceColorFilter,
           contentScale = ContentScale.Fit,
           modifier = Modifier.fillMaxSize().zIndex(1f),
-          contentDescription = stringResource(R.string.content_compass_display),
         )
 
         compassUi.items.forEach { item ->
           Image(
-            painter = painterResource(item.iconRes),
-            contentDescription = stringResource(item.nameRes),
+            painter = painterResource(id = item.iconRes),
+            contentDescription = stringResource(id = item.nameRes),
             colorFilter = sunColorFilters[item.ordinal],
             modifier =
               Modifier.fillMaxSize().zIndex(2f).graphicsLayer {

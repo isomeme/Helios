@@ -19,7 +19,7 @@ fun sunColorFamilies(): List<ColorFamily> {
   val nadirColors = MaterialTheme.extendedColors.nadir
   val sunColors = MaterialTheme.extendedColors.sun
 
-  return remember(riseColors, noonColors, setColors, nadirColors) {
+  return remember(riseColors, noonColors, setColors, nadirColors, sunColors) {
     listOf(riseColors, noonColors, setColors, nadirColors, sunColors)
   }
 }
