@@ -19,6 +19,7 @@ data class CompassUi(val items: List<CompassItem>) {
     @param:StringRes val nameRes: Int,
     val ordinal: Int,
     val point: Point,
+    val zIndex: Float = 3f,
     val scale: Float = ITEM_SCALE,
     val rotation: Float = 0f,
   )
@@ -56,6 +57,7 @@ data class CompassUi(val items: List<CompassItem>) {
           nameRes = R.string.content_sun_position,
           ordinal = 4,
           point = Point.fromPolar(angle = sunAngle),
+          zIndex = 2f,
         )
 
       val arrowItem =
@@ -64,6 +66,7 @@ data class CompassUi(val items: List<CompassItem>) {
           nameRes = R.string.content_sun_movement_direction,
           ordinal = 4,
           point = Point.fromPolar(angle = sunAngle, radius = 0.6f),
+          zIndex = 2f,
           scale = 0.7f * ITEM_SCALE,
           rotation = if (sunCompass.isSunClockwise) sunAngle else sunAngle + 180f,
         )

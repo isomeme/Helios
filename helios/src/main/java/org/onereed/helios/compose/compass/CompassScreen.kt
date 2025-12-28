@@ -134,7 +134,7 @@ fun StatelessCompassScreen(
             contentDescription = stringResource(id = item.nameRes),
             colorFilter = sunColorFilters[item.ordinal],
             modifier =
-              Modifier.fillMaxSize().zIndex(2f).graphicsLayer {
+              Modifier.fillMaxSize().zIndex(item.zIndex).graphicsLayer {
                 scaleX = item.scale
                 scaleY = item.scale
                 translationX = item.point.x * size.minDimension

@@ -165,8 +165,8 @@ private fun TitleBar(
             onClick = { eventMenuActions.onSelectIndex(eventUi.index) },
             colors =
               MenuDefaults.itemColors(
-                leadingIconColor = sunColorFamilies[eventUi.index].color,
-                textColor = sunColorFamilies[eventUi.index].color,
+                leadingIconColor = sunColorFamilies[eventUi.index].onColorContainer,
+                textColor = sunColorFamilies[eventUi.index].onColorContainer,
               ),
             leadingIcon = {
               Icon(

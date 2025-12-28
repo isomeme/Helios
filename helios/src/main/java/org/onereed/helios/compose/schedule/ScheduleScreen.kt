@@ -141,7 +141,7 @@ private fun LazyItemScope.EventCard(event: EventUi, onSelectEvent: (Int) -> Unit
       Icon(
         painter = painterResource(event.iconRes),
         contentDescription = stringResource(event.nameRes),
-        tint = eventColorFamily.color,
+        tint = eventColorFamily.onColorContainer,
       )
       Spacer(modifier = Modifier.width(20.dp))
       Text(

@@ -516,3 +516,14 @@ fun DarkHeliosTheme(content: @Composable () -> Unit) {
     content = content,
   )
 }
+
+/** For use in previews. */
+@Composable
+fun LightHeliosTheme(content: @Composable () -> Unit) {
+  StatelessHeliosTheme(
+    colorScheme = usedLightScheme,
+    extendedColorScheme = usedLightExtendedColorScheme,
+    content = content,
+  )
+}
+
