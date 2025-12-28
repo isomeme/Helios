@@ -7,6 +7,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlin.time.toJavaInstant
 import org.onereed.helios.common.PlaceTime
+import org.onereed.helios.common.ang
 import org.onereed.helios.common.arc
 import org.shredzone.commons.suncalc.SunPosition
 import timber.log.Timber
@@ -17,8 +18,10 @@ data class SunCompass(
   val sunAzimuth: Double,
   val isSunClockwise: Boolean,
   val events: EnumMap<SunEventType, Event>,
+  val noonNadirOverlap: SunEventType?,
 ) {
-  data class Event(val instant: Instant, val azimuth: Double) : Comparable<Event> {
+  data class Event(val sunEventType: SunEventType, val instant: Instant, val azimuth: Double) :
+    Comparable<Event> {
     override fun compareTo(other: Event): Int {
       return instant.compareTo(other.instant)
     }
@@ -42,21 +45,31 @@ data class SunCompass(
       val deltaAzimuth = arc(sunAzimuth, sunAzimuthSoon)
       val isSunClockwise = deltaAzimuth >= 0
 
+      val events =
+        sunTimeSeries.events
+          .map {
+            Event(
+              it.sunEventType,
+              it.instant,
+              placeTime.copy(instant = it.instant).computeSunAzimuth(),
+            )
+          }
+          .sorted() // Time order
+
+      val noonNadirOverlap = findNoonNadirOverlap(events, placeTime.instant)
+
       /*
        * sunTimeSeries.events will typically contain 5 events in time order, 1 in the past and 4 in
        * the future, with the first and last events having the same SunEventType. For the compass
        * view, we only need one of each type, using the earlier version if there is a type
-       * collision. The associate function keeps the last value for a duplicated key, so we reverse
-       * the time ordering of the list to favor earlier times in key collisions.
+       * collision. This keeps events from jumping around right after the sun passes them. The
+       * associateBy function keeps the last value for a duplicated key, so we reverse the time
+       * ordering of the list to favor earlier times in key collisions.
        */
 
-      val events =
-        sunTimeSeries.events.reversed().associate {
-          it.sunEventType to
-            Event(it.instant, placeTime.copy(instant = it.instant).computeSunAzimuth())
-        }
+      val eventMap = events.reversed().associateBy(Event::sunEventType)
 
-      return SunCompass(sunAzimuth, isSunClockwise, EnumMap(events))
+      return SunCompass(sunAzimuth, isSunClockwise, EnumMap(eventMap), noonNadirOverlap)
     }
 
     private fun PlaceTime.computeSunAzimuth(): Double =
@@ -66,5 +79,27 @@ data class SunCompass(
         .on(instant.toJavaInstant())
         .execute()
         .azimuth
+
+    /**
+     * In the tropics, for part of each year the sun is further from the equator than the local
+     * latitude. During this time the direction to the sun is always either north or south of the
+     * east-west line, and noon and nadir both occur at either due north or due south. We detect
+     * this and report which of the pair occurs later so that our display can indicate this
+     * visually.
+     */
+    private fun findNoonNadirOverlap(events: List<Event>, now: Instant): SunEventType? {
+      // We have to code defensively against the possibility of an empty event list. This can
+      // happen during data flow startup.
+
+      val futureEvents = events.filter { it.instant > now }
+      val nextNoonEvent =
+        futureEvents.firstOrNull { it.sunEventType == SunEventType.NOON } ?: return null
+      val nextNadirEvent =
+        futureEvents.firstOrNull { it.sunEventType == SunEventType.NADIR } ?: return null
+
+      return if (ang(nextNoonEvent.azimuth, nextNadirEvent.azimuth) < 10.0)
+        maxOf(nextNoonEvent, nextNadirEvent).sunEventType // Time comparison
+      else null
+    }
   }
 }

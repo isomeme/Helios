@@ -75,11 +75,14 @@ data class CompassUi(val items: List<CompassItem>) {
         sunCompass.events.map { (eventType, event) ->
           val ordinal = eventType.ordinal
           val eventSet = sunResources.eventSets[ordinal]
+          val radius = if (eventType == sunCompass.noonNadirOverlap) 0.8f else 1.0f
+          val point = Point.fromPolar(angle = event.azimuth.toFloat(), radius = radius)
+
           CompassItem(
             iconRes = R.drawable.ic_sol_symbol,
             nameRes = eventSet.nameRes,
             ordinal = ordinal,
-            point = Point.fromPolar(angle = event.azimuth.toFloat()),
+            point = point,
           )
         }
 

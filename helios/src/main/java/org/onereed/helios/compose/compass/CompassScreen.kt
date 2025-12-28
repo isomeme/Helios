@@ -34,11 +34,10 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.time.Clock.System.now
 import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.FlowPreview
 import org.onereed.helios.R
-import org.onereed.helios.common.PlaceTime
+import org.onereed.helios.common.santaMonicaNow
 import org.onereed.helios.compose.shared.sunColorFilters
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunCompass
@@ -153,8 +152,8 @@ fun StatelessCompassScreen(
 @Composable
 fun CompassScreenPreview() {
   val sunResources = SunResources(LocalContext.current)
-  val hereNow = PlaceTime(lat = 34.0, lon = -118.0, alt = 0.0, instant = now())
-  val sunTimeSeries = SunTimeSeries(hereNow)
+  val placeTime = santaMonicaNow()
+  val sunTimeSeries = SunTimeSeries(placeTime)
   val sunCompass = SunCompass.compute(sunTimeSeries)
   val compassUi = CompassUi.Factory(sunResources).create(sunCompass)
 
