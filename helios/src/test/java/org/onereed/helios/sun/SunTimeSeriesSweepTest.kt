@@ -6,7 +6,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import org.junit.Rule
 import org.junit.Test
-import org.onereed.helios.common.PlaceTime
+import org.onereed.helios.datasource.PlaceTime
 import org.onereed.helios.util.TimberRule
 
 /**

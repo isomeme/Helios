@@ -1,23 +1,24 @@
-package org.onereed.helios.util
+package org.onereed.helios.common
 
-import androidx.lifecycle.Lifecycle.Event
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.google.common.collect.HashMultiset
-import timber.log.Timber
 import java.util.Locale
+import timber.log.Timber
 
-class LifecycleLogger  : LifecycleEventObserver {
+class LifecycleLogger : LifecycleEventObserver {
 
-  override fun onStateChanged(source: LifecycleOwner, event: Event) {
+  override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
     val tag = getTag(source)
     val state = event.targetState
 
-    val dir = when (event) {
-      Event.downTo(state) -> '\u2198' // ↘
-      Event.upTo(state) -> '\u2197' // ↗
-      else -> '\u219d' // ↝
-    }
+    val dir =
+      when (event) {
+        Lifecycle.Event.downTo(state) -> '\u2198' // ↘
+        Lifecycle.Event.upTo(state) -> '\u2197' // ↗
+        else -> '\u219d' // ↝
+      }
 
     Timber.tag(tag).d("%-10s %c %s", event, dir, state)
   }

@@ -6,7 +6,7 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlin.time.toJavaInstant
-import org.onereed.helios.common.PlaceTime
+import org.onereed.helios.datasource.PlaceTime
 import org.onereed.helios.common.ang
 import org.onereed.helios.common.arc
 import org.shredzone.commons.suncalc.SunPosition

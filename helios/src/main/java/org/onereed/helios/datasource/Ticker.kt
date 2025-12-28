@@ -1,4 +1,4 @@
-package org.onereed.helios.common
+package org.onereed.helios.datasource
 
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime

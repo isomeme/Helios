@@ -37,7 +37,7 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.FlowPreview
 import org.onereed.helios.R
-import org.onereed.helios.common.santaMonicaNow
+import org.onereed.helios.datasource.santaMonicaNow
 import org.onereed.helios.compose.shared.sunColorFilters
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunCompass
@@ -102,7 +102,7 @@ fun StatelessCompassScreen(
         Spacer(modifier = Modifier.width(10.dp))
 
         Text(
-          text = stringResource(id = R.string.control_lock_compass),
+          text = stringResource(id = R.string.label_lock_compass),
           style = MaterialTheme.typography.labelMedium,
         )
       }

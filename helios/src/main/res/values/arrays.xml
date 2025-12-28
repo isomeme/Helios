@@ -1,27 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <integer-array name="sun_event_bg_colors">
-        <item>@color/bg_rise</item>
-        <item>@color/bg_noon</item>
-        <item>@color/bg_set</item>
-        <item>@color/bg_nadir</item>
-    </integer-array>
-
-    <integer-array name="sun_event_fg_colors">
-        <item>@color/fg_rise</item>
-        <item>@color/fg_noon</item>
-        <item>@color/fg_set</item>
-        <item>@color/fg_nadir</item>
-    </integer-array>
-
-    <integer-array name="sun_event_colors">
-        <item>@color/rise</item>
-        <item>@color/noon</item>
-        <item>@color/set</item>
-        <item>@color/nadir</item>
-    </integer-array>
-
     <array name="sun_event_icons">
         <item>@drawable/ic_rise_36dp</item>
         <item>@drawable/ic_noon_36dp</item>

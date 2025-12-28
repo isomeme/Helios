@@ -1,4 +1,4 @@
-package org.onereed.helios.common
+package org.onereed.helios.datasource
 
 import android.content.Context
 import com.google.android.gms.location.DeviceOrientation
@@ -21,14 +21,17 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
+import org.onereed.helios.common.ApplicationScope
+import org.onereed.helios.common.arc
+import org.onereed.helios.common.stateIn
 import timber.log.Timber
 
 @Singleton
 class Orienter
 @Inject
 constructor(
-  @param:ApplicationContext private val context: Context,
-  @param:ApplicationScope private val externalScope: CoroutineScope,
+    @param:ApplicationContext private val context: Context,
+    @param:ApplicationScope private val externalScope: CoroutineScope,
 ) {
   private val executor by lazy { Dispatchers.Default.asExecutor() }
 

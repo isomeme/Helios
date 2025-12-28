@@ -1,7 +1,7 @@
 @file:OptIn(ExperimentalTime::class)
 @file:Suppress("unused")
 
-package org.onereed.helios.common
+package org.onereed.helios.datasource
 
 import kotlin.time.Clock.System.now
 import kotlin.time.ExperimentalTime

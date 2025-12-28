@@ -1,4 +1,4 @@
-package org.onereed.helios.common
+package org.onereed.helios.datasource
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
@@ -28,6 +28,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import org.onereed.helios.common.ApplicationScope
+import org.onereed.helios.common.stateIn
 import timber.log.Timber
 
 @Singleton

@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import org.junit.Test
-import org.onereed.helios.common.PlaceTime
+import org.onereed.helios.datasource.PlaceTime
 
 /** Tests for [SunTimeSeries]. */
 @OptIn(ExperimentalTime::class)

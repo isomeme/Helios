@@ -7,8 +7,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import org.onereed.helios.common.BaseViewModel
-import org.onereed.helios.common.Locator
-import org.onereed.helios.common.Orienter
+import org.onereed.helios.datasource.Locator
+import org.onereed.helios.datasource.Orienter
 import org.onereed.helios.datasource.StoreRepository
 import org.onereed.helios.sun.SunCompass
 import org.onereed.helios.sun.SunTimeSeries

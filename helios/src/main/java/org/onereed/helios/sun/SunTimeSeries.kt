@@ -7,7 +7,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlin.time.toJavaDuration
 import kotlin.time.toJavaInstant
-import org.onereed.helios.common.PlaceTime
+import org.onereed.helios.datasource.PlaceTime
 import org.shredzone.commons.suncalc.SunTimes
 
 @OptIn(ExperimentalTime::class)

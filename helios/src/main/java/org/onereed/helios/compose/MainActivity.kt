@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import dagger.hilt.android.AndroidEntryPoint
 import org.onereed.helios.compose.app.HeliosApp
 import org.onereed.helios.ui.theme.HeliosTheme
-import org.onereed.helios.util.LifecycleLogger
+import org.onereed.helios.common.LifecycleLogger
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

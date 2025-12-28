@@ -6,32 +6,17 @@
     <string name="event_set">Sunset</string>
     <string name="event_nadir">Midnight</string>
 
-    <string name="action_schedule">Schedule</string>
-    <string name="action_text">Text</string>
-    <string name="action_compass">Compass</string>
-    <string name="action_help">Help</string>
-
     <string name="screen_schedule">Schedule</string>
     <string name="screen_text">Text</string>
     <string name="screen_compass">Compass</string>
     <string name="screen_settings">Settings</string>
 
-    <string name="control_lock_compass">Lock</string>
-    <string name="control_south_at_top">South at top</string>
-
     <string name="content_compass_display">Compass display</string>
-    <string name="content_sunrise_position">Sunrise position</string>
-    <string name="content_noon_position">Noon position</string>
-    <string name="content_sunset_position">Sunset position</string>
-    <string name="content_midnight_position">Midnight position</string>
     <string name="content_view_line">View line</string>
     <string name="content_sun_position">Sun position</string>
-    <string name="content_sun_event_list">List of sun events</string>
     <string name="content_sun_movement_direction">Sun movement direction</string>
 
-    <string name="button_continue">Continue</string>
     <string name="button_exit">Exit</string>
-    <string name="button_settings">Settings</string>
     <string name="button_ok">OK</string>
 
     <string name="scroll_to_top">Scroll to top</string>
@@ -42,10 +27,11 @@
     <string name="label_dark_theme">Dark</string>
     <string name="label_use_dynamic_theme_colors">Use dynamic theme colors</string>
     <string name="label_compass_south_top">South at top when locked</string>
+    <string name="label_lock_compass">Lock</string>
 
-    <string name="toast_activity_not_found">Target is not available.</string>
     <string name="heading_theme">Theme</string>
     <string name="heading_compass">Compass</string>
+
     <string name="view_online_documentation">View online documentation</string>
 
     <string name="location_permission_rationale">
