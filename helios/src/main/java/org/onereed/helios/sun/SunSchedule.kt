@@ -9,7 +9,7 @@ import kotlin.time.Instant
 class SunSchedule(sunTimeSeries: SunTimeSeries) {
   data class Event(
     val sunEventType: SunEventType,
-    val instant: Instant,
+    val time: Instant,
     val isClosestEvent: Boolean,
     val weakId: Long,
   )
@@ -22,16 +22,16 @@ class SunSchedule(sunTimeSeries: SunTimeSeries) {
     } else {
       val closestEventIndex =
         getClosestEventIndex(
-          sunTimeSeries.placeTime.instant,
-          sunTimeSeries.events[0].instant,
-          sunTimeSeries.events[1].instant,
+          sunTimeSeries.placeTime.time,
+          sunTimeSeries.events[0].time,
+          sunTimeSeries.events[1].time,
         )
 
       this.events =
         sunTimeSeries.events.mapIndexed { index, event ->
           val isClosestEvent = index == closestEventIndex
           val weakId = weakIdOf(event)
-          Event(event.sunEventType, event.instant, isClosestEvent, weakId)
+          Event(event.sunEventType, event.time, isClosestEvent, weakId)
         }
     }
   }
@@ -55,6 +55,6 @@ class SunSchedule(sunTimeSeries: SunTimeSeries) {
      * update.
      */
     private fun weakIdOf(event: SunTimeSeries.Event) =
-      (event.instant.epochSeconds and EVENT_TIME_BUCKET_MASK) + event.sunEventType.ordinal
+      (event.time.epochSeconds and EVENT_TIME_BUCKET_MASK) + event.sunEventType.ordinal
   }
 }

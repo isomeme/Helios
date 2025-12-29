@@ -18,7 +18,7 @@ constructor(
 ) : BaseViewModel() {
 
   val scheduleUiFlow =
-    locator.placeTimeFlow
+    locator.placeTimeFlow()
       .mapState(::SunTimeSeries)
       .mapState(::SunSchedule)
       .mapState(uiFactory::create)

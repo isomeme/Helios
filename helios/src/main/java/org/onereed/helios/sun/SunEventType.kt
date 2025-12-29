@@ -16,6 +16,6 @@ enum class SunEventType(private val timeExtractor: Function<SunTimes, ZonedDateT
 
   /** Returns the instant of the [SunEventType] in [sunTimes] if it is present. */
   @OptIn(ExperimentalTime::class)
-  fun instantOf(sunTimes: SunTimes): Instant? =
+  fun timeOf(sunTimes: SunTimes): Instant? =
     timeExtractor.apply(sunTimes)?.toInstant()?.toKotlinInstant()
 }

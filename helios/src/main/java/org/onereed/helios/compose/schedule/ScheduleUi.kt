@@ -46,7 +46,7 @@ data class ScheduleUi(val events: List<EventUi>) {
           EventUi(
             iconRes = eventSet.iconRes,
             nameRes = eventSet.nameRes,
-            timeText = formatInstant(context, it.instant),
+            timeText = formatInstant(context, it.time),
             isClosestEvent = it.isClosestEvent,
             ordinal = ordinal,
             key = it.weakId,

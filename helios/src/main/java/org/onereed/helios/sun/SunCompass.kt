@@ -20,10 +20,10 @@ data class SunCompass(
   val events: EnumMap<SunEventType, Event>,
   val noonNadirOverlap: SunEventType?,
 ) {
-  data class Event(val sunEventType: SunEventType, val instant: Instant, val azimuth: Double) :
+  data class Event(val sunEventType: SunEventType, val time: Instant, val azimuth: Double) :
     Comparable<Event> {
     override fun compareTo(other: Event): Int {
-      return instant.compareTo(other.instant)
+      return time.compareTo(other.time)
     }
   }
 
@@ -41,7 +41,7 @@ data class SunCompass(
 
       val sunAzimuth = placeTime.computeSunAzimuth()
       val sunAzimuthSoon =
-        placeTime.copy(instant = placeTime.instant + DELTA_TIME).computeSunAzimuth()
+        placeTime.copy(time = placeTime.time + DELTA_TIME).computeSunAzimuth()
       val deltaAzimuth = arc(sunAzimuth, sunAzimuthSoon)
       val isSunClockwise = deltaAzimuth >= 0
 
@@ -50,13 +50,13 @@ data class SunCompass(
           .map {
             Event(
               it.sunEventType,
-              it.instant,
-              placeTime.copy(instant = it.instant).computeSunAzimuth(),
+              it.time,
+              placeTime.copy(time = it.time).computeSunAzimuth(),
             )
           }
           .sorted() // Time order
 
-      val noonNadirOverlap = findNoonNadirOverlap(events, placeTime.instant)
+      val noonNadirOverlap = findNoonNadirOverlap(events, placeTime.time)
 
       /*
        * sunTimeSeries.events will typically contain 5 events in time order, 1 in the past and 4 in
@@ -74,9 +74,9 @@ data class SunCompass(
 
     private fun PlaceTime.computeSunAzimuth(): Double =
       SunPosition.compute()
-        .at(lat, lon)
-        .elevation(alt)
-        .on(instant.toJavaInstant())
+        .at(place.lat, place.lon)
+        .elevation(place.alt)
+        .on(time.toJavaInstant())
         .execute()
         .azimuth
 
@@ -91,7 +91,7 @@ data class SunCompass(
       // We have to code defensively against the possibility of an empty event list. This can
       // happen during data flow startup.
 
-      val futureEvents = events.filter { it.instant > now }
+      val futureEvents = events.filter { it.time > now }
       val nextNoonEvent =
         futureEvents.firstOrNull { it.sunEventType == SunEventType.NOON } ?: return null
       val nextNadirEvent =

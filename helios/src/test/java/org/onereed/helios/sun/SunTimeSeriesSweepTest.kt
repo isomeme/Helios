@@ -7,6 +7,7 @@ import kotlin.time.Instant
 import org.junit.Rule
 import org.junit.Test
 import org.onereed.helios.datasource.PlaceTime
+import org.onereed.helios.datasource.testing.santaMonica
 import org.onereed.helios.util.TimberRule
 
 /**
@@ -22,7 +23,7 @@ class SunTimeSeriesSweepTest {
     var time = T0
 
     while (time < T1) {
-      val placeTime = PlaceTime(LAT, LON, ALT, time)
+      val placeTime = PlaceTime(santaMonica, time)
       val events = SunTimeSeries(placeTime).events
 
       assertWithMessage("placeTime=$placeTime").that(events).hasSize(5)
@@ -32,12 +33,6 @@ class SunTimeSeriesSweepTest {
   }
 
   companion object {
-
-    // Lat and lon are for Playa Vista, California, USA.
-
-    private const val LAT = 33.978
-    private const val LON = -118.407
-    private const val ALT = 0.0
 
     private val T0 = Instant.parse("2025-12-17T20:00:00Z")
     private val T1 = Instant.parse("2025-12-18T08:00:00Z")

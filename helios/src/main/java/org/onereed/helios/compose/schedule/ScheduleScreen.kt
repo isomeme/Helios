@@ -38,9 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlin.time.Clock.System.now
 import kotlin.time.ExperimentalTime
-import org.onereed.helios.datasource.PlaceTime
 import org.onereed.helios.compose.app.NavActions
 import org.onereed.helios.compose.app.Screen
 import org.onereed.helios.compose.schedule.ScheduleUi.EventUi
@@ -48,6 +46,7 @@ import org.onereed.helios.compose.shared.ScrollbarActions
 import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
 import org.onereed.helios.compose.shared.sunColorFamilies
 import org.onereed.helios.datasource.SunResources
+import org.onereed.helios.datasource.testing.santaMonicaNow
 import org.onereed.helios.sun.SunSchedule
 import org.onereed.helios.sun.SunTimeSeries
 import org.onereed.helios.ui.theme.DarkHeliosTheme
@@ -160,8 +159,8 @@ private fun LazyItemScope.EventCard(event: EventUi, onSelectEvent: (Int) -> Unit
 @Composable
 fun ScheduleScreenPreview() {
   val sunResources = SunResources(LocalContext.current)
-  val hereNow = PlaceTime(lat = 34.0, lon = -118.0, alt = 0.0, instant = now())
-  val sunTimeSeries = SunTimeSeries(hereNow)
+  val placeTime = santaMonicaNow()
+  val sunTimeSeries = SunTimeSeries(placeTime)
   val sunSchedule = SunSchedule(sunTimeSeries)
   val scheduleUi = ScheduleUi.Factory(LocalContext.current, sunResources).create(sunSchedule)
   val scrollbarActions = ScrollbarActions(onScrollToTop = {}, onScrollToBottom = {})

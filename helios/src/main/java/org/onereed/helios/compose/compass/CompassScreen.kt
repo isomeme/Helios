@@ -37,7 +37,7 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.FlowPreview
 import org.onereed.helios.R
-import org.onereed.helios.datasource.santaMonicaNow
+import org.onereed.helios.datasource.testing.santaMonicaNow
 import org.onereed.helios.compose.shared.sunColorFilters
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunCompass

@@ -13,9 +13,9 @@ import org.shredzone.commons.suncalc.SunTimes
 @OptIn(ExperimentalTime::class)
 @Immutable
 class SunTimeSeries(val placeTime: PlaceTime) {
-  data class Event(val sunEventType: SunEventType, val instant: Instant) : Comparable<Event> {
+  data class Event(val sunEventType: SunEventType, val time: Instant) : Comparable<Event> {
     override fun compareTo(other: Event) =
-      compareValuesBy(this, other, { it.instant }, { it.sunEventType })
+      compareValuesBy(this, other, { it.time }, { it.sunEventType })
   }
 
   val events: List<Event>
@@ -28,13 +28,13 @@ class SunTimeSeries(val placeTime: PlaceTime) {
       val futureEvents = toEvents(futureSunTimes)
       val nextEvent = futureEvents.first()
 
-      val earlierPlaceTime = placeTime.copy(instant = placeTime.instant - PRECEDING_OFFSET)
+      val earlierPlaceTime = placeTime.copy(time = placeTime.time - PRECEDING_OFFSET)
       val pastSunTimes = earlierPlaceTime.computeSunTimes(PRECEDING_LIMIT)
       val pastEvents = toEvents(pastSunTimes)
       val lastEvent =
         pastEvents
           .filter { it.sunEventType != nextEvent.sunEventType }
-          .last { it.instant < placeTime.instant }
+          .last { it.time < placeTime.time }
 
       this.events = listOf(lastEvent) + futureEvents
     }
@@ -62,15 +62,15 @@ class SunTimeSeries(val placeTime: PlaceTime) {
 
     private fun PlaceTime.computeSunTimes(limit: Duration): SunTimes =
       SunTimes.compute()
-        .at(lat, lon)
-        .elevation(alt)
-        .on(instant.toJavaInstant())
+        .at(place.lat, place.lon)
+        .elevation(place.alt)
+        .on(time.toJavaInstant())
         .limit(limit.toJavaDuration())
         .execute()
 
     private fun toEvents(sunTimes: SunTimes): List<Event> {
       return SunEventType.entries
-        .map { Pair(it, it.instantOf(sunTimes)) }
+        .map { Pair(it, it.timeOf(sunTimes)) }
         .filter { it.second != null }
         .map { Event(it.first, it.second!!) }
         .sorted()

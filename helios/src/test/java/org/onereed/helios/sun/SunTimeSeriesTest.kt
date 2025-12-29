@@ -5,6 +5,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import org.junit.Test
 import org.onereed.helios.datasource.PlaceTime
+import org.onereed.helios.datasource.testing.santaMonica
 
 /** Tests for [SunTimeSeries]. */
 @OptIn(ExperimentalTime::class)
@@ -17,7 +18,7 @@ class SunTimeSeriesTest {
   @Test
   fun testEventOverlap() {
     val instant = Instant.parse("2020-05-09T02:30:15Z")
-    val placeTime = PlaceTime(34.0, -118.5, 0.0, instant)
+    val placeTime = PlaceTime(santaMonica, instant)
     val events = SunTimeSeries(placeTime).events
 
     assertThat(events).hasSize(5)
@@ -36,7 +37,7 @@ class SunTimeSeriesTest {
   @Test
   fun testEventGap() {
     val instant = Instant.parse("2020-05-18T02:50:50Z")
-    val placeTime = PlaceTime(34.0, -118.5, 0.0, instant)
+    val placeTime = PlaceTime(santaMonica, instant)
     val events = SunTimeSeries(placeTime).events
 
     assertThat(events).hasSize(5)
@@ -56,7 +57,7 @@ class SunTimeSeriesTest {
       instantStr: String,
     ) {
       assertThat(event.sunEventType).isEqualTo(sunEventType)
-      assertThat(event.instant).isEqualTo(Instant.parse(instantStr))
+      assertThat(event.time).isEqualTo(Instant.parse(instantStr))
     }
   }
 }

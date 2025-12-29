@@ -24,7 +24,7 @@ constructor(
 ) : BaseViewModel() {
 
   val compassUiFlow =
-    locator.placeTimeFlow
+    locator.placeTimeFlow()
       .mapState(::SunTimeSeries)
       .mapState(SunCompass::compute)
       .mapState(compassUiFactory::create)
