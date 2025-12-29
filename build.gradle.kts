@@ -1,4 +1,4 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// Root build config.
 
 plugins {
   id("com.android.application") version "8.13.2" apply false
@@ -7,6 +7,10 @@ plugins {
   id("com.google.gms.google-services") version "4.4.4" apply false
   id("org.jetbrains.kotlin.android") version "2.2.21" apply false
   id("org.jetbrains.kotlin.plugin.compose") version "2.2.21" apply false
+
+  // Intentionally allowing this to operate at root level.
+
+  id("com.github.ben-manes.versions") version "0.53.0"
 }
 
 tasks.register<Delete>("clean") { delete(rootProject.layout.buildDirectory) }

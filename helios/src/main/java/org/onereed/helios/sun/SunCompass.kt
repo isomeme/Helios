@@ -6,11 +6,10 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlin.time.toJavaInstant
-import org.onereed.helios.datasource.PlaceTime
 import org.onereed.helios.common.ang
 import org.onereed.helios.common.arc
+import org.onereed.helios.datasource.PlaceTime
 import org.shredzone.commons.suncalc.SunPosition
-import timber.log.Timber
 
 @OptIn(ExperimentalTime::class)
 @Immutable
@@ -33,26 +32,19 @@ data class SunCompass(
     private val DELTA_TIME = 1.minutes
 
     fun compute(sunTimeSeries: SunTimeSeries): SunCompass {
-      Timber.d("compute start")
-
       val placeTime = sunTimeSeries.placeTime
 
       // Calculate current sun azimuth and movement direction.
 
       val sunAzimuth = placeTime.computeSunAzimuth()
-      val sunAzimuthSoon =
-        placeTime.copy(time = placeTime.time + DELTA_TIME).computeSunAzimuth()
+      val sunAzimuthSoon = placeTime.copy(time = placeTime.time + DELTA_TIME).computeSunAzimuth()
       val deltaAzimuth = arc(sunAzimuth, sunAzimuthSoon)
       val isSunClockwise = deltaAzimuth >= 0
 
       val events =
         sunTimeSeries.events
           .map {
-            Event(
-              it.sunEventType,
-              it.time,
-              placeTime.copy(time = it.time).computeSunAzimuth(),
-            )
+            Event(it.sunEventType, it.time, placeTime.copy(time = it.time).computeSunAzimuth())
           }
           .sorted() // Time order
 

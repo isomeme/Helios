@@ -28,10 +28,8 @@ android {
   }
 
   buildTypes {
-    val commonProguardFiles = listOf(
-      getDefaultProguardFile("proguard-android-optimize.txt"),
-      "proguard-rules.pro"
-    )
+    val commonProguardFiles =
+      listOf(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
 
     getByName("release") {
       isMinifyEnabled = true
@@ -118,6 +116,9 @@ dependencies {
 
   // JSON serialization library, works with the Kotlin serialization plugin
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+
+  // Kotlin date-time library
+  implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
 
   // Collection KTX
   implementation("androidx.collection:collection-ktx:1.5.0")
