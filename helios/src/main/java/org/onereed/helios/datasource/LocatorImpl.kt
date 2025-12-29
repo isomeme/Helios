@@ -17,10 +17,8 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
-import kotlinx.coroutines.channels.onSuccess
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
@@ -62,20 +60,11 @@ constructor(
       return@callbackFlow
     }
 
-    // Grab the last location to send something down the flow before we start listening for updates.
-
-    locationProvider.lastLocation
-      .addOnSuccessListener { location ->
-        Timber.d("Last location: $location")
-        location?.let { sendLocation(it) }
-      }
-      .addOnFailureListener { e -> Timber.e(e, "Failed to get last location.") }
-
     val locationCallback =
       object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult) {
-          Timber.d("Location update: ${locationResult.lastLocation}")
-          locationResult.lastLocation?.let { sendLocation(it) }
+        override fun onLocationResult(locationResult: LocationResult) { locationResult.lastLocation?.let {
+            trySend(it).onFailure { t -> Timber.e(t, "Failed to send location to flow.") }
+          }
         }
       }
 
@@ -109,11 +98,5 @@ constructor(
         )
         .setMinUpdateIntervalMillis(MIN_LOCATION_UPDATE_INTERVAL_MILLIS)
         .build()
-
-    private fun ProducerScope<Location>.sendLocation(location: Location) {
-      trySend(location)
-        .onSuccess { Timber.d("Location sent to flow.") }
-        .onFailure { t -> Timber.e(t, "Failed to send location to flow.") }
-    }
   }
 }

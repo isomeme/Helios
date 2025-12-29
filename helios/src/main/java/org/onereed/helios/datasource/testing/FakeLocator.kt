@@ -3,9 +3,8 @@
 package org.onereed.helios.datasource.testing
 
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -41,10 +40,10 @@ constructor(@param:ApplicationScope private val externalScope: CoroutineScope) :
 
   companion object {
 
-    private val place = santaMonica
-    private val timeZone = santaMonicaTimeZone
-    private val t0 = juneSolstice + 8.hours
-    private val dt = 3.days
+    private val place = honolulu
+    private val timeZone = honoluluTimeZone
+    private val t0 = lahainaNoon2
+    private val dt = 30.minutes
     private val tickerInterval = 500.milliseconds
 
     private fun timeFormat(time: Instant): String {

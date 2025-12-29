@@ -48,8 +48,6 @@ data class SunCompass(
           }
           .sorted() // Time order
 
-      val noonNadirOverlap = findNoonNadirOverlap(events, placeTime.time)
-
       /*
        * sunTimeSeries.events will typically contain 5 events in time order, 1 in the past and 4 in
        * the future, with the first and last events having the same SunEventType. For the compass
@@ -60,6 +58,7 @@ data class SunCompass(
        */
 
       val eventMap = events.reversed().associateBy(Event::sunEventType)
+      val noonNadirOverlap = findNoonNadirOverlap(eventMap)
 
       return SunCompass(sunAzimuth, isSunClockwise, EnumMap(eventMap), noonNadirOverlap)
     }
@@ -79,18 +78,15 @@ data class SunCompass(
      * this and report which of the pair occurs later so that our display can indicate this
      * visually.
      */
-    private fun findNoonNadirOverlap(events: List<Event>, now: Instant): SunEventType? {
+    private fun findNoonNadirOverlap(eventMap: Map<SunEventType, Event>): SunEventType? {
       // We have to code defensively against the possibility of an empty event list. This can
       // happen during data flow startup.
 
-      val futureEvents = events.filter { it.time > now }
-      val nextNoonEvent =
-        futureEvents.firstOrNull { it.sunEventType == SunEventType.NOON } ?: return null
-      val nextNadirEvent =
-        futureEvents.firstOrNull { it.sunEventType == SunEventType.NADIR } ?: return null
+      val noon = eventMap[SunEventType.NOON] ?: return null
+      val nadir = eventMap[SunEventType.NADIR] ?: return null
 
-      return if (ang(nextNoonEvent.azimuth, nextNadirEvent.azimuth) < 10.0)
-        maxOf(nextNoonEvent, nextNadirEvent).sunEventType // Time comparison
+      return if (ang(noon.azimuth, nadir.azimuth) < 10.0)
+        maxOf(noon, nadir).sunEventType // Time comparison
       else null
     }
   }
