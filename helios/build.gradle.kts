@@ -1,15 +1,11 @@
 plugins {
-  id("com.android.application")
-  id("com.google.dagger.hilt.android")
-  id("com.google.gms.google-services")
-  id("org.jetbrains.kotlin.android")
-  id("org.jetbrains.kotlin.plugin.compose")
-
-  // This may need to be the last ordinary plugin, to pick up resources from other plugins.
-  id("com.google.devtools.ksp")
-
-  // Kotlin serialization plugin for type safe routes and navigation arguments.
-  kotlin("plugin.serialization") version "2.0.21"
+  alias(libs.plugins.android.application)
+  alias(libs.plugins.hilt.android)
+  alias(libs.plugins.google.services)
+  alias(libs.plugins.kotlin.android)
+  alias(libs.plugins.kotlin.compose)
+  alias(libs.plugins.ksp)
+  alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -74,119 +70,113 @@ dependencies {
 
   // Language
 
-  coreLibraryDesugaring("com.android.tools:desugar_jdk_libs_nio:2.1.5")
+  coreLibraryDesugaring(libs.desugar.jdk.libs.nio)
+
+  // Bumdles
+
+  implementation(libs.bundles.compose)
+  implementation(libs.bundles.navigation)
 
   // Services
 
-  implementation("com.google.firebase:firebase-analytics:23.0.0")
-  implementation("com.google.android.gms:play-services-location:21.3.0")
+  implementation(libs.firebase.analytics)
+  implementation(libs.play.services.location)
 
   // Android
 
-  implementation("androidx.appcompat:appcompat:1.7.1")
-  implementation("androidx.cardview:cardview:1.0.0")
-  implementation("androidx.constraintlayout:constraintlayout:2.2.1")
-  implementation("androidx.recyclerview:recyclerview:1.4.0")
-  implementation("com.google.android.material:material:1.13.0")
+  implementation(libs.appcompat)
+  implementation(libs.cardview)
+  implementation(libs.constraintlayout)
+  implementation(libs.recyclerview)
+  implementation(libs.material)
 
   // Android Kotlin
 
   // Core KTX
-  implementation("androidx.core:core-ktx:1.17.0")
+  implementation(libs.core.ktx)
 
   // Misc androidx
-  implementation("androidx.activity:activity-ktx:1.12.2")
-  implementation("androidx.datastore:datastore-preferences:1.2.0")
-  implementation("androidx.fragment:fragment-ktx:1.8.9")
+  implementation(libs.activity.ktx)
+  implementation(libs.datastore.preferences)
+  implementation(libs.fragment.ktx)
 
-  // Lifecycle & ViewModel KTX (use a single version variable)
-  val lifecycleVersion = "2.10.0"
-  implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
-  implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
-  implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
-  implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
+  // Lifecycle & ViewModel KTX
+  implementation(libs.lifecycle.viewmodel.ktx)
+  implementation(libs.lifecycle.livedata.ktx)
+  implementation(libs.lifecycle.runtime.ktx)
+  implementation(libs.lifecycle.viewmodel.compose)
 
-  // Navigation KTX (use a single version variable)
-  val navVersion = "2.9.6"
-  implementation("androidx.navigation:navigation-compose:${navVersion}")
-  implementation("androidx.navigation:navigation-dynamic-features-fragment:${navVersion}")
-  implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
-  implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
-  androidTestImplementation("androidx.navigation:navigation-testing:$navVersion")
+  // Navigation KTX
+  implementation(libs.navigation.compose)
+  implementation(libs.navigation.dynamic.features.fragment)
+  androidTestImplementation(libs.navigation.testing)
 
   // JSON serialization library, works with the Kotlin serialization plugin
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+  implementation(libs.kotlinx.serialization.json)
 
   // Kotlin date-time library
-  implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
+  implementation(libs.kotlinx.datetime)
 
   // Collection KTX
-  implementation("androidx.collection:collection-ktx:1.5.0")
+  implementation(libs.collection.ktx)
 
   // Compose
 
-  implementation("androidx.activity:activity-compose:1.12.2")
-  implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
-  implementation("androidx.work:work-runtime:2.11.0")
+  implementation(libs.work.runtime)
 
-  val composeBom = platform("androidx.compose:compose-bom:2025.12.01")
+  val composeBom = platform(libs.compose.bom)
   implementation(composeBom)
   debugImplementation(composeBom)
   testImplementation(composeBom)
   androidTestImplementation(composeBom)
 
-  implementation("androidx.compose.material3:material3")
-  implementation("androidx.compose.material3:material3-adaptive-navigation-suite")
-  implementation("androidx.compose.ui:ui")
-  implementation("androidx.compose.ui:ui-graphics")
-  implementation("androidx.compose.ui:ui-tooling-preview")
+  implementation(libs.material3.adaptive.navigation.suite)
+  implementation(libs.ui.graphics)
 
-  debugImplementation("androidx.compose.ui:ui-tooling")
+  debugImplementation(libs.ui.tooling)
 
   // Not in bom
 
-  implementation("androidx.compose.ui:ui-text-google-fonts:1.10.0")
-  debugImplementation("androidx.compose.ui:ui-test-manifest:1.10.0")
+  implementation(libs.ui.text.google.fonts)
+  debugImplementation(libs.ui.test.manifest)
 
   // Hilt
 
-  val hiltVersion = "2.57.2"
-  implementation("com.google.dagger:hilt-android:$hiltVersion")
-  ksp("com.google.dagger:hilt-compiler:$hiltVersion")
+  implementation(libs.hilt.android)
+  ksp(libs.hilt.compiler)
 
-  val androidxHiltVersion = "1.3.0"
-  implementation("androidx.hilt:hilt-navigation-compose:${androidxHiltVersion}")
-  implementation("androidx.hilt:hilt-navigation-fragment:${androidxHiltVersion}")
-  implementation("androidx.hilt:hilt-work:$androidxHiltVersion")
-  ksp("androidx.hilt:hilt-compiler:$androidxHiltVersion")
+  implementation(libs.androidx.hilt.navigation.compose)
+  implementation(libs.androidx.hilt.navigation.fragment)
+  implementation(libs.androidx.hilt.work)
+  ksp(libs.androidx.hilt.compiler)
 
   // SunCalc
 
-  implementation("org.shredzone.commons:commons-suncalc:3.11")
+  implementation(libs.suncalc)
 
   // Markdown support
 
-  implementation("com.halilibo.compose-richtext:richtext-ui-material3:1.0.0-alpha03")
-  implementation("com.halilibo.compose-richtext:richtext-commonmark:1.0.0-alpha03")
+  implementation(libs.richtext.ui.material3)
+  implementation(libs.richtext.commonmark)
 
   // Accompanist (permission management)
 
-  implementation("com.google.accompanist:accompanist-permissions:0.37.3")
+  implementation(libs.accompanist.permissions)
 
   // Logging
 
-  implementation("com.jakewharton.timber:timber:5.0.1")
+  implementation(libs.timber)
 
   // Testing
 
-  testImplementation("com.google.truth:truth:1.4.5")
-  testImplementation("junit:junit:4.13.2")
-  testImplementation("org.jetbrains.kotlin:kotlin-test:2.3.0")
-  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
-  testImplementation("org.junit.jupiter:junit-jupiter:6.0.1")
-  testImplementation("org.mockito:mockito-core:5.21.0")
+  testImplementation(libs.truth)
+  testImplementation(libs.junit)
+  testImplementation(libs.kotlin.test)
+  testImplementation(libs.kotlinx.coroutines.test)
+  testImplementation(libs.junit.jupiter)
+  testImplementation(libs.mockito.core)
 
-  androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-  androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
-  androidTestImplementation("androidx.test.ext:junit:1.3.0")
+  androidTestImplementation(libs.ui.test.junit4)
+  androidTestImplementation(libs.espresso.core)
+  androidTestImplementation(libs.androidx.test.ext.junit)
 }
