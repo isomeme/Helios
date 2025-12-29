@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -92,9 +95,11 @@ fun StatelessPermissionScreen(
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
       Column(
         modifier =
-          Modifier.padding(all = 15.dp)
+          Modifier.padding(all = 40.dp)
+            .widthIn(max = 640.dp)
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(all = 15.dp)
+            .verticalScroll(rememberScrollState())
       ) {
         Text(text = stringResource(explanationRes))
 
