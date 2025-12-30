@@ -17,7 +17,6 @@ material = "1.13.0"
 coreKtx = "1.17.0"
 activityKtx = "1.12.2"
 datastorePreferences = "1.2.0"
-fragmentKtx = "1.8.9"
 lifecycle = "2.10.0"
 navigation = "2.9.6"
 kotlinxSerializationJson = "1.9.0"
@@ -25,10 +24,8 @@ kotlinxDatetime = "0.7.1"
 collectionKtx = "1.5.0"
 activityCompose = "1.12.2"
 constraintlayoutCompose = "1.1.1"
-workRuntime = "2.11.0"
 composeBom = "2025.12.01"
 uiTextGoogleFonts = "1.10.0"
-uiTestManifest = "1.10.0"
 androidxHilt = "1.3.0"
 suncalc = "3.11"
 composeRichtext = "1.0.0-alpha03"
@@ -38,79 +35,100 @@ truth = "1.4.5"
 junit = "4.13.2"
 kotlinTest = "2.3.0"
 kotlinxCoroutinesTest = "1.10.2"
-junitJupiter = "6.0.1"
 mockitoCore = "5.21.0"
 espressoCore = "3.7.0"
 androidxTestExtJunit = "1.3.0"
 
 [libraries]
-desugar-jdk-libs-nio = { module = "com.android.tools:desugar_jdk_libs_nio", version.ref = "desugarJdkLibsNio" }
-firebase-analytics = { module = "com.google.firebase:firebase-analytics", version.ref = "firebaseAnalytics" }
-play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+desugarJdkLibsNio = { module = "com.android.tools:desugar_jdk_libs_nio", version.ref = "desugarJdkLibsNio" }
+firebaseAnalytics = { module = "com.google.firebase:firebase-analytics", version.ref = "firebaseAnalytics" }
+playServicesLocation = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
-navigation-dynamic-features-fragment = { module = "androidx.navigation:navigation-dynamic-features-fragment", version.ref = "navigation" }
-navigationFragmentKtx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation" }
+coreKtx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+activityKtx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
+datastorePreferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+lifecycleViewmodelKtx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+lifecycleRuntimeKtx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
+lifecycleViewmodelCompose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+navigationCompose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
 navigationUiKtx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
-navigation-testing = { module = "androidx.navigation:navigation-testing", version.ref = "navigation" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
-collection-ktx = { module = "androidx.collection:collection-ktx", version.ref = "collectionKtx" }
+kotlinxSerializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+collectionKtx = { module = "androidx.collection:collection-ktx", version.ref = "collectionKtx" }
 activityCompose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 constraintlayoutCompose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
-work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+composeBom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 material3 = { module = "androidx.compose.material3:material3" }
-material3-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
+material3AdaptiveNavigationSuite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
 ui = { module = "androidx.compose.ui:ui" }
-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
+uiGraphics = { module = "androidx.compose.ui:ui-graphics" }
 uiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview" }
-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "uiTestManifest" }
-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
-androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "androidxHilt" }
-androidx-hilt-navigation-fragment = { module = "androidx.hilt:hilt-navigation-fragment", version.ref = "androidxHilt" }
-androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "androidxHilt" }
-androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidxHilt" }
+uiTooling = { module = "androidx.compose.ui:ui-tooling" }
+uiTextGoogleFonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
+uiTestJunit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hiltCompiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
+androidxHiltNavigationCompose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "androidxHilt" }
+androidxHiltCompiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidxHilt" }
 suncalc = { module = "org.shredzone.commons:commons-suncalc", version.ref = "suncalc" }
-richtext-ui-material3 = { module = "com.halilibo.compose-richtext:richtext-ui-material3", version.ref = "composeRichtext" }
-richtext-commonmark = { module = "com.halilibo.compose-richtext:richtext-commonmark", version.ref = "composeRichtext" }
-accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
+richtextUiMaterial3 = { module = "com.halilibo.compose-richtext:richtext-ui-material3", version.ref = "composeRichtext" }
+richtextCommonmark = { module = "com.halilibo.compose-richtext:richtext-commonmark", version.ref = "composeRichtext" }
+accompanistPermissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
 junit = { module = "junit:junit", version.ref = "junit" }
-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlinTest" }
-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
-junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junitJupiter" }
-mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
-androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidxTestExtJunit" }
+kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlinTest" }
+kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+mockitoCore = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
+espressoCore = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
+androidxTestExtJunit = { module = "androidx.test.ext:junit", version.ref = "androidxTestExtJunit" }
 
 [plugins]
-android-application = { id = "com.android.application", version.ref = "androidApplication" }
-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+androidApplication = { id = "com.android.application", version.ref = "androidApplication" }
+hiltAndroid = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinPluginSerialization" }
-ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "benManesVersions" }
+googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlinCompose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinPluginSerialization" }
+benManesVersions = { id = "com.github.ben-manes.versions", version.ref = "benManesVersions" }
 
 [bundles]
-compose = [ "material3", "ui", "uiToolingPreview", "activityCompose", "constraintlayoutCompose" ]
-navigation = ["navigationFragmentKtx", "navigationUiKtx"]
+# For core UI in production code
+composeRuntime = [
+    "activityCompose",
+    "constraintlayoutCompose",
+    "material3",
+    "material3AdaptiveNavigationSuite",
+    "ui",
+    "uiGraphics",
+    "uiTextGoogleFonts",
+]
+
+# For core Navigation in production code
+navigationRuntime = ["navigationCompose", "navigationUiKtx"]
+
+lifecycleRuntime = ["lifecycleRuntimeKtx", "lifecycleViewmodelCompose", "lifecycleViewmodelKtx"]
+
+# For Markdown rendering support
+markdownRuntime = ["richtextUiMaterial3", "richtextCommonmark"]
+
+# For core Hilt in production code
+# Note: The hiltProcessor bundle must be added separately using the 'ksp' configuration.
+hiltRuntime = ["hiltAndroid", "androidxHiltNavigationCompose"]
+
+# For Hilt compiler support (ksp processors)
+hiltProcessor = ["hiltCompiler", "androidxHiltCompiler"]
+
+# For Previews and the Layout Inspector
+composeDebug = ["uiTooling", "uiToolingPreview"]
+
+# For local unit tests
+unitTest = ["junit", "kotlinTest", "kotlinxCoroutinesTest", "mockitoCore", "truth"]
+
+# For instrumented Android tests
+androidTest = ["androidxTestExtJunit", "espressoCore", "uiTestJunit4"]

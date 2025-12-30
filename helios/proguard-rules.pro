@@ -22,3 +22,8 @@
 
 # Recommended by APK bundle build
 -dontwarn edu.umd.cs.findbugs.annotations.Nullable
+
+# Keep the internal zze class from the Play Services Location library.
+# R8 incorrectly removes its companion object, which is likely accessed via reflection,
+# causing build warnings.
+-keep class com.google.android.gms.internal.location.zze { *; }

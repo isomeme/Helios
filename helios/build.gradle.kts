@@ -1,11 +1,11 @@
 plugins {
-  alias(libs.plugins.android.application)
-  alias(libs.plugins.hilt.android)
-  alias(libs.plugins.google.services)
-  alias(libs.plugins.kotlin.android)
-  alias(libs.plugins.kotlin.compose)
+  alias(libs.plugins.androidApplication)
+  alias(libs.plugins.googleServices)
+  alias(libs.plugins.hiltAndroid)
+  alias(libs.plugins.kotlinAndroid)
+  alias(libs.plugins.kotlinCompose)
+  alias(libs.plugins.kotlinSerialization)
   alias(libs.plugins.ksp)
-  alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -14,8 +14,8 @@ android {
 
   defaultConfig {
     applicationId = "org.onereed.helios"
-    versionCode = 19
-    versionName = "2.3.2"
+    versionCode = 20
+    versionName = "3.0.0"
 
     minSdk = 26
     targetSdk = 36
@@ -68,115 +68,58 @@ android {
 
 dependencies {
 
-  // Language
+  // Required for Java 8+ APIs on API levels < 33
+  coreLibraryDesugaring(libs.desugarJdkLibsNio)
 
-  coreLibraryDesugaring(libs.desugar.jdk.libs.nio)
+  // Core Dependencies
+  implementation(libs.coreKtx)
+  implementation(libs.bundles.composeRuntime)
+  implementation(libs.bundles.navigationRuntime)
+  implementation(libs.bundles.hiltRuntime)
+  ksp(libs.bundles.hiltProcessor)
 
-  // Bumdles
-
-  implementation(libs.bundles.compose)
-  implementation(libs.bundles.navigation)
+  // Compose BOM
+  val composeBom = platform(libs.composeBom)
+  implementation(composeBom)
+  debugImplementation(composeBom)
+  testImplementation(composeBom)
+  androidTestImplementation(composeBom)
 
   // Services
-
-  implementation(libs.firebase.analytics)
-  implementation(libs.play.services.location)
+  implementation(libs.firebaseAnalytics)
+  implementation(libs.playServicesLocation)
 
   // Android
-
   implementation(libs.appcompat)
   implementation(libs.cardview)
   implementation(libs.constraintlayout)
   implementation(libs.recyclerview)
   implementation(libs.material)
 
-  // Android Kotlin
-
-  // Core KTX
-  implementation(libs.core.ktx)
-
   // Misc androidx
-  implementation(libs.activity.ktx)
-  implementation(libs.datastore.preferences)
-  implementation(libs.fragment.ktx)
+  implementation(libs.activityKtx)
+  implementation(libs.datastorePreferences)
 
-  // Lifecycle & ViewModel KTX
-  implementation(libs.lifecycle.viewmodel.ktx)
-  implementation(libs.lifecycle.livedata.ktx)
-  implementation(libs.lifecycle.runtime.ktx)
-  implementation(libs.lifecycle.viewmodel.compose)
+  // Lifecycle
+  implementation(libs.bundles.lifecycleRuntime)
 
-  // Navigation KTX
-  implementation(libs.navigation.compose)
-  implementation(libs.navigation.dynamic.features.fragment)
-  androidTestImplementation(libs.navigation.testing)
+  // Misc Kotlin libraries
+  implementation(libs.collectionKtx)
+  implementation(libs.kotlinxDatetime)
+  implementation(libs.kotlinxSerializationJson)
 
-  // JSON serialization library, works with the Kotlin serialization plugin
-  implementation(libs.kotlinx.serialization.json)
-
-  // Kotlin date-time library
-  implementation(libs.kotlinx.datetime)
-
-  // Collection KTX
-  implementation(libs.collection.ktx)
-
-  // Compose
-
-  implementation(libs.work.runtime)
-
-  val composeBom = platform(libs.compose.bom)
-  implementation(composeBom)
-  debugImplementation(composeBom)
-  testImplementation(composeBom)
-  androidTestImplementation(composeBom)
-
-  implementation(libs.material3.adaptive.navigation.suite)
-  implementation(libs.ui.graphics)
-
-  debugImplementation(libs.ui.tooling)
-
-  // Not in bom
-
-  implementation(libs.ui.text.google.fonts)
-  debugImplementation(libs.ui.test.manifest)
-
-  // Hilt
-
-  implementation(libs.hilt.android)
-  ksp(libs.hilt.compiler)
-
-  implementation(libs.androidx.hilt.navigation.compose)
-  implementation(libs.androidx.hilt.navigation.fragment)
-  implementation(libs.androidx.hilt.work)
-  ksp(libs.androidx.hilt.compiler)
-
-  // SunCalc
-
+  // Misc 3rd-party libraries
+  implementation(libs.accompanistPermissions)
+  implementation(libs.bundles.markdownRuntime)
   implementation(libs.suncalc)
-
-  // Markdown support
-
-  implementation(libs.richtext.ui.material3)
-  implementation(libs.richtext.commonmark)
-
-  // Accompanist (permission management)
-
-  implementation(libs.accompanist.permissions)
-
-  // Logging
-
   implementation(libs.timber)
 
-  // Testing
+  // Debug and Tooling Dependencies
+  debugImplementation(libs.bundles.composeDebug)
 
-  testImplementation(libs.truth)
-  testImplementation(libs.junit)
-  testImplementation(libs.kotlin.test)
-  testImplementation(libs.kotlinx.coroutines.test)
-  testImplementation(libs.junit.jupiter)
-  testImplementation(libs.mockito.core)
+  // Local Unit Tests
+  testImplementation(libs.bundles.unitTest)
 
-  androidTestImplementation(libs.ui.test.junit4)
-  androidTestImplementation(libs.espresso.core)
-  androidTestImplementation(libs.androidx.test.ext.junit)
+  // Instrumented Android Tests
+  androidTestImplementation(libs.bundles.androidTest)
 }
