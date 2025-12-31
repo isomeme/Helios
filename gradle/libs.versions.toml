@@ -107,6 +107,7 @@ composeRuntime = [
     "ui",
     "uiGraphics",
     "uiTextGoogleFonts",
+    "uiToolingPreview",
 ]
 
 # For core Navigation in production code
@@ -125,7 +126,7 @@ hiltRuntime = ["hiltAndroid", "androidxHiltNavigationCompose"]
 hiltProcessor = ["hiltCompiler", "androidxHiltCompiler"]
 
 # For Previews and the Layout Inspector
-composeDebug = ["uiTooling", "uiToolingPreview"]
+composeDebug = ["uiTooling"]
 
 # For local unit tests
 unitTest = ["junit", "kotlinTest", "kotlinxCoroutinesTest", "mockitoCore", "truth"]
