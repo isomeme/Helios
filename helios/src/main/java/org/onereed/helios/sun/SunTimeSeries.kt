@@ -19,10 +19,12 @@ class SunTimeSeries(val placeTime: PlaceTime) {
   }
 
   val events: List<Event>
+  val isValid: Boolean
 
   init {
     if (placeTime.isEmpty()) {
       this.events = emptyList()
+      this.isValid = false
     } else {
       val futureSunTimes = placeTime.computeSunTimes(FUTURE_LIMIT)
       val futureEvents = toEvents(futureSunTimes)
@@ -37,6 +39,11 @@ class SunTimeSeries(val placeTime: PlaceTime) {
           .last { it.time < placeTime.time }
 
       this.events = listOf(lastEvent) + futureEvents
+
+      // Downstream logic relies on there being at least two events (noon and midnight), so if for
+      // some reason we have fewer, mark the data as being invalid.
+
+      this.isValid = this.events.size >= 2
     }
   }
 

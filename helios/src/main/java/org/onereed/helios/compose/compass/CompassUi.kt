@@ -49,6 +49,9 @@ data class CompassUi(val items: List<CompassItem>) {
 
   class Factory @Inject constructor(val sunResources: SunResources) {
     fun create(sunCompass: SunCompass): CompassUi {
+      if (!sunCompass.isValid)
+        return CompassUi(items = emptyList())
+
       val sunAngle = sunCompass.sunAzimuth.toFloat()
 
       val sunItem =

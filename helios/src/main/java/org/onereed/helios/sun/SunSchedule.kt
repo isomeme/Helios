@@ -17,7 +17,7 @@ class SunSchedule(sunTimeSeries: SunTimeSeries) {
   val events: List<Event>
 
   init {
-    if (sunTimeSeries.events.isEmpty()) {
+    if (!sunTimeSeries.isValid) {
       this.events = emptyList()
     } else {
       val closestEventIndex =
