@@ -20,7 +20,7 @@ import org.onereed.helios.sun.SunSchedule
 
 @OptIn(ExperimentalTime::class)
 @Immutable
-data class ScheduleUi(val events: List<EventUi>) {
+data class ScheduleUi(val events: List<EventUi>, val isValid: Boolean) {
   @Immutable
   data class EventUi(
     @param:DrawableRes val iconRes: Int,
@@ -38,6 +38,9 @@ data class ScheduleUi(val events: List<EventUi>) {
     private val sunResources: SunResources,
   ) {
     fun create(sunSchedule: SunSchedule): ScheduleUi {
+      if (!sunSchedule.isValid)
+        return ScheduleUi(events = emptyList(), isValid = false)
+
       val events =
         sunSchedule.events.map {
           val ordinal = it.sunEventType.ordinal
@@ -53,7 +56,7 @@ data class ScheduleUi(val events: List<EventUi>) {
           )
         }
 
-      return ScheduleUi(events)
+      return ScheduleUi(events = events, isValid = true)
     }
 
     companion object {

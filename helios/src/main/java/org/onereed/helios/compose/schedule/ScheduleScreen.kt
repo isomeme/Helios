@@ -94,7 +94,7 @@ fun StatelessScheduleScreen(
     ConstraintLayout(modifier = Modifier.fillMaxSize().padding(vertical = 10.dp)) {
       val (progress, events, scrollbar) = createRefs()
 
-      if (scheduleUi.events.isEmpty()) {
+      if (!scheduleUi.isValid) {
         CircularProgressIndicator(modifier = Modifier.constrainAs(progress) { centerTo(parent) })
         return@ConstraintLayout
       }

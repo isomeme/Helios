@@ -8,8 +8,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import org.onereed.helios.ui.theme.ColorFamily
 import org.onereed.helios.ui.theme.extendedColors
 
-// These lists place the results for the 4 sun events at indices 0-3, and for the sun itself at
-// index 4.
+/**
+ * The sun color lists place the values for the 4 sun events at the usual ordinal indices 0-3, and
+ * for the sun (and sun direction arrow) at ordinal index 4.
+ */
+const val SUN_ORDINAL = 4
 
 @Composable
 fun sunColorFamilies(): List<ColorFamily> {

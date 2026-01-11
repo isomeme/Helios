@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalTime::class)
+@file:Suppress("unused")
 
 package org.onereed.helios.datasource.testing
 
@@ -9,6 +10,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -34,8 +36,10 @@ constructor(@param:ApplicationScope private val externalScope: CoroutineScope) :
       .map { time -> PlaceTime(place, time) }
       .stateIn(scope = externalScope, initialValue = PlaceTime.EMPTY, stopTimeout = 0.seconds)
 
+  private val _emptyPlaceTimeFlow = MutableStateFlow(PlaceTime.EMPTY)
+
   override fun placeTimeFlow(): StateFlow<PlaceTime> {
-    return _placeTimeFlow
+    return _emptyPlaceTimeFlow
   }
 
   companion object {

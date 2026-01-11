@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,6 +38,9 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.FlowPreview
 import org.onereed.helios.R
+import org.onereed.helios.compose.compass.ZIndex.COMPASS_FACE
+import org.onereed.helios.compose.compass.ZIndex.OVERLAY
+import org.onereed.helios.compose.compass.ZIndex.VIEW_LINE
 import org.onereed.helios.datasource.testing.santaMonicaNow
 import org.onereed.helios.compose.shared.sunColorFilters
 import org.onereed.helios.datasource.SunResources
@@ -89,6 +93,10 @@ fun StatelessCompassScreen(
 
   Surface(modifier = Modifier.fillMaxSize()) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+      if (!compassUi.isValid) {
+        CircularProgressIndicator(modifier = Modifier.zIndex(OVERLAY.zIndex))
+      }
+
       Row(
         modifier =
           Modifier.align(Alignment.BottomEnd)
@@ -112,7 +120,7 @@ fun StatelessCompassScreen(
         contentDescription = stringResource(id = R.string.content_view_line),
         colorFilter = viewLineColorFilter,
         contentScale = ContentScale.Fit,
-        modifier = Modifier.fillMaxSize().zIndex(0f),
+        modifier = Modifier.fillMaxSize().zIndex(VIEW_LINE.zIndex),
       )
 
       Box(
@@ -124,7 +132,7 @@ fun StatelessCompassScreen(
           contentDescription = stringResource(id = R.string.content_compass_display),
           colorFilter = compassFaceColorFilter,
           contentScale = ContentScale.Fit,
-          modifier = Modifier.fillMaxSize().zIndex(1f),
+          modifier = Modifier.fillMaxSize().zIndex(COMPASS_FACE.zIndex),
         )
 
         compassUi.items.forEach { item ->

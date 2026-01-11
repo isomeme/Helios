@@ -15,10 +15,12 @@ class SunSchedule(sunTimeSeries: SunTimeSeries) {
   )
 
   val events: List<Event>
+  val isValid: Boolean
 
   init {
     if (!sunTimeSeries.isValid) {
       this.events = emptyList()
+      this.isValid = false
     } else {
       val closestEventIndex =
         getClosestEventIndex(
@@ -33,6 +35,8 @@ class SunSchedule(sunTimeSeries: SunTimeSeries) {
           val weakId = weakIdOf(event)
           Event(event.sunEventType, event.time, isClosestEvent, weakId)
         }
+
+      this.isValid = true
     }
   }
 
