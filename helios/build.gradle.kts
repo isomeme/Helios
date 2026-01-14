@@ -32,6 +32,10 @@ android {
       isShrinkResources = true
       setProguardFiles(commonProguardFiles)
       versionNameSuffix = ""
+
+      ndk {
+        debugSymbolLevel = "FULL"
+      }
     }
 
     getByName("debug") { versionNameSuffix = " (debug)" }
