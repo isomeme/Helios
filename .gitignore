@@ -38,5 +38,5 @@ output.json
 obj/
 .externalNativeBuild
 /gradle/wrapper/gradle-wrapper.jar
-/gradlew
+# /gradlew
 /gradlew.bat
