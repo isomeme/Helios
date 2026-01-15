@@ -11,6 +11,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.microseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,16 +21,17 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.take
 import org.onereed.helios.common.ApplicationScope
 import org.onereed.helios.common.arc
 import org.onereed.helios.common.stateIn
 import timber.log.Timber
-import kotlin.time.Duration.Companion.seconds
 
 @Singleton
 class Orienter
@@ -44,11 +47,15 @@ constructor(
     LocationServices.getFusedOrientationProviderClient(context)
   }
 
-  private val isLockedFlow = storeRepository.isCompassLockedFlow
-  private val isCompassSouthTopFlow = storeRepository.isCompassSouthTopFlow
+  private val ticker = Ticker(TICKER_INTERVAL, "LockedHeadingTicker")
 
-  private val lockedHeadingFlow =
-    isCompassSouthTopFlow.map { southTop -> if (southTop) 180f else 0f }
+  private val lockedHeadingStateFlow =
+    storeRepository.isCompassSouthTopFlow
+      .map { southTop -> if (southTop) 180f else 0f }
+      .stateIn(scope = externalScope, initialValue = 0f)
+
+  private val lockedHeadingTickerFlow =
+    lockedHeadingStateFlow.combine(ticker.flow) { heading, _ -> heading }.take(LOCK_SWING_TICKS)
 
   private val liveHeadingFlow =
     getOrientationUpdates()
@@ -57,15 +64,15 @@ constructor(
       .onCompletion { Timber.d("Live heading flow stop") }
 
   val headingFlow =
-    isLockedFlow
-      .flatMapLatest { isLocked ->
-        if (isLocked) lockedHeadingFlow
-        else
-          lockedHeadingFlow.flatMapLatest { lockedHeading ->
-            liveHeadingFlow.scan(lockedHeading, ::smooth).map(::quantize)
-          }
-      }
-      .stateIn(scope = externalScope, initialValue = 0f, stopTimeout = 30.seconds)
+    storeRepository.isCompassLockedFlow
+      .flatMapLatest { isLocked -> if (isLocked) lockedHeadingTickerFlow else liveHeadingFlow }
+      .scan(lockedHeadingStateFlow.value, ::smooth)
+      .map(::quantize)
+      .stateIn(
+        scope = externalScope,
+        initialValue = lockedHeadingStateFlow.value,
+        stopTimeout = 30.seconds,
+      )
 
   private fun getOrientationUpdates(): Flow<DeviceOrientation> = callbackFlow {
     val orientationListener = DeviceOrientationListener {
@@ -83,8 +90,8 @@ constructor(
     awaitClose {
       orientationProvider
         .removeOrientationUpdates(orientationListener)
-        .addOnSuccessListener { Timber.d("Orientation updates stopped.") }
-        .addOnFailureListener { e -> Timber.e(e, "Orientation updates stop failed.") }
+        .addOnSuccessListener { Timber.d("Orientation updates removed.") }
+        .addOnFailureListener { e -> Timber.e(e, "Orientation updates removal failed.") }
     }
   }
 
@@ -93,7 +100,7 @@ constructor(
     private fun smooth(previous: Float, next: Float): Float {
       val shortestDelta = arc(from = previous, to = next)
       val smoothed = previous + ALPHA * shortestDelta
-      return smoothed.mod(360f) // Normalize angle into [0..360]
+      return smoothed.mod(360f) // Normalize angle into [0..360)
     }
 
     private fun quantize(value: Float): Float = (value / QUANTUM).roundToInt() * QUANTUM
@@ -106,5 +113,13 @@ constructor(
 
     private val DEVICE_ORIENTATION_REQUEST =
       DeviceOrientationRequest.Builder(DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT).build()
+
+    /**
+     * The ticker that animates swinging the compass into locked position needs to fire at the same
+     * rate as orientation updates.
+     */
+    private val TICKER_INTERVAL = DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT.microseconds
+    private val LOCK_SWING_INTERVAL = 3.seconds
+    private val LOCK_SWING_TICKS = (LOCK_SWING_INTERVAL / TICKER_INTERVAL).toInt()
   }
 }
