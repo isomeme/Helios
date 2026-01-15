@@ -14,9 +14,13 @@ import kotlinx.coroutines.flow.stateIn
 
 // See https://proandroiddev.com/clean-stateflow-transformations-in-kotlin-608f4c7de5ab
 
+fun <T, K> StateFlow<T>.mapState(scope: CoroutineScope, transform: (data: T) -> K): StateFlow<K> {
+  return mapLatest { transform(it) }.stateIn(scope = scope, initialValue = transform(value))
+}
+
 fun <T, K> StateFlow<T>.mapState(
   scope: CoroutineScope,
-  stopTimeout: Duration? = null,
+  stopTimeout: Duration,
   transform: (data: T) -> K,
 ): StateFlow<K> {
   return mapLatest { transform(it) }
@@ -26,13 +30,11 @@ fun <T, K> StateFlow<T>.mapState(
 fun <T> Flow<T>.stateIn(
   scope: CoroutineScope,
   initialValue: T,
-  stopTimeout: Duration? = null,
+  stopTimeout: Duration = defaultStopTimeout,
 ): StateFlow<T> {
-  val stopTimeoutMillis = stopTimeout?.inWholeMilliseconds ?: defaultStopTimeoutMillis
-
   return stateIn(
     scope = scope,
-    started = SharingStarted.WhileSubscribed(stopTimeoutMillis = stopTimeoutMillis),
+    started = SharingStarted.WhileSubscribed(stopTimeoutMillis = stopTimeout.inWholeMilliseconds),
     initialValue = initialValue,
   )
 }
@@ -41,4 +43,4 @@ fun <T> Flow<T>.stateIn(
  * We build in a short delay before unsubscribing so that established flows survive brief
  * interruptions for e.g. navigation events or portrait/landscape swaps.
  */
-private val defaultStopTimeoutMillis = 2.seconds.inWholeMilliseconds
+private val defaultStopTimeout = 2.seconds

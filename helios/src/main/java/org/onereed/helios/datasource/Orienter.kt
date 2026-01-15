@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package org.onereed.helios.datasource
 
 import android.content.Context
@@ -11,12 +13,13 @@ import javax.inject.Singleton
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
@@ -25,13 +28,15 @@ import org.onereed.helios.common.ApplicationScope
 import org.onereed.helios.common.arc
 import org.onereed.helios.common.stateIn
 import timber.log.Timber
+import kotlin.time.Duration.Companion.seconds
 
 @Singleton
 class Orienter
 @Inject
 constructor(
-    @param:ApplicationContext private val context: Context,
-    @param:ApplicationScope private val externalScope: CoroutineScope,
+  @ApplicationContext context: Context,
+  @ApplicationScope externalScope: CoroutineScope,
+  storeRepository: StoreRepository,
 ) {
   private val executor by lazy { Dispatchers.Default.asExecutor() }
 
@@ -39,18 +44,28 @@ constructor(
     LocationServices.getFusedOrientationProviderClient(context)
   }
 
-  private val rawHeadingFlow =
-    getOrientationUpdates()
-      .onStart { Timber.d("Orienter.onStart") }
-      .onCompletion { Timber.d("Orienter.onCompletion") }
-      .map { it.headingDegrees }
+  private val isLockedFlow = storeRepository.isCompassLockedFlow
+  private val isCompassSouthTopFlow = storeRepository.isCompassSouthTopFlow
 
-  fun headingFlow(initial: Float): StateFlow<Float> {
-    return rawHeadingFlow
-      .scan(initial, ::smooth)
-      .map(::quantize)
-      .stateIn(scope = externalScope, initialValue = initial)
-  }
+  private val lockedHeadingFlow =
+    isCompassSouthTopFlow.map { southTop -> if (southTop) 180f else 0f }
+
+  private val liveHeadingFlow =
+    getOrientationUpdates()
+      .map { it.headingDegrees }
+      .onStart { Timber.d("Live heading flow start") }
+      .onCompletion { Timber.d("Live heading flow stop") }
+
+  val headingFlow =
+    isLockedFlow
+      .flatMapLatest { isLocked ->
+        if (isLocked) lockedHeadingFlow
+        else
+          lockedHeadingFlow.flatMapLatest { lockedHeading ->
+            liveHeadingFlow.scan(lockedHeading, ::smooth).map(::quantize)
+          }
+      }
+      .stateIn(scope = externalScope, initialValue = 0f, stopTimeout = 30.seconds)
 
   private fun getOrientationUpdates(): Flow<DeviceOrientation> = callbackFlow {
     val orientationListener = DeviceOrientationListener {
@@ -59,9 +74,9 @@ constructor(
 
     orientationProvider
       .requestOrientationUpdates(DEVICE_ORIENTATION_REQUEST, executor, orientationListener)
-      .addOnSuccessListener { Timber.d("Orientation updates started.") }
+      .addOnSuccessListener { Timber.d("Orientation updates requested.") }
       .addOnFailureListener { e ->
-        Timber.e(e, "Orientation updates start failed.")
+        Timber.e(e, "Orientation updates request failed.")
         close(e)
       }
 

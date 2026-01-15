@@ -40,15 +40,15 @@ constructor(
 ) : Locator {
   private val locationProvider by lazy { LocationServices.getFusedLocationProviderClient(context) }
 
-  private val ticker = Ticker(TICKER_INTERVAL)
+  private val ticker = Ticker(TICKER_INTERVAL, "LocatorTicker")
 
   private val _placeTimeFlow =
     getLocationUpdates()
       .map(::Place)
       .combine(ticker.flow) { place, _ -> PlaceTime(place, now()) }
-      .onStart { Timber.d("Locator.onStart") }
-      .onEach { Timber.d("Locator.onEach $it") }
-      .onCompletion { Timber.d("Locator.onCompletion") }
+      .onStart { Timber.d("Locator flow start") }
+      .onEach { Timber.d("Locator flow onEach $it") }
+      .onCompletion { Timber.d("Locator flow stop") }
       .stateIn(scope = externalScope, initialValue = PlaceTime.EMPTY, stopTimeout = 5.seconds)
 
   override fun placeTimeFlow() = _placeTimeFlow
@@ -70,9 +70,9 @@ constructor(
 
     locationProvider
       .requestLocationUpdates(LOCATION_REQUEST, locationCallback, Looper.getMainLooper())
-      .addOnSuccessListener { Timber.d("Location updates started.") }
+      .addOnSuccessListener { Timber.d("Location updates requested.") }
       .addOnFailureListener { e ->
-        Timber.e(e, "Location updates start failed.")
+        Timber.e(e, "Location updates request failed.")
         close(e)
       }
 

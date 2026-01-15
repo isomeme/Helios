@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.onStart
 import timber.log.Timber
 
 @OptIn(ExperimentalTime::class)
-class Ticker(private val interval: Duration) {
+class Ticker(private val interval: Duration, val name: String = "Ticker") {
 
   val flow =
     flow {
@@ -19,6 +19,6 @@ class Ticker(private val interval: Duration) {
           delay(interval)
         }
       }
-      .onStart { Timber.d("Ticker.onStart") }
-      .onCompletion { Timber.d("Ticker.onCompletion") }
+      .onStart { Timber.d("$name start") }
+      .onCompletion { Timber.d("$name stop") }
 }
