@@ -37,6 +37,6 @@ output.json
 #NDK
 obj/
 .externalNativeBuild
-/gradle/wrapper/gradle-wrapper.jar
+# /gradle/wrapper/gradle-wrapper.jar
 # /gradlew
 /gradlew.bat
