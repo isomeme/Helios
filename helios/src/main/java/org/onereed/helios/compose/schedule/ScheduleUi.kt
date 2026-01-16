@@ -23,8 +23,8 @@ import org.onereed.helios.sun.SunSchedule
 data class ScheduleUi(val events: List<EventUi>, val isValid: Boolean) {
   @Immutable
   data class EventUi(
-    @param:DrawableRes val iconRes: Int,
-    @param:StringRes val nameRes: Int,
+    @DrawableRes val iconRes: Int,
+    @StringRes val nameRes: Int,
     val timeText: String,
     val isClosestEvent: Boolean,
     val ordinal: Int,
@@ -34,7 +34,7 @@ data class ScheduleUi(val events: List<EventUi>, val isValid: Boolean) {
   class Factory
   @Inject
   constructor(
-    @param:ApplicationContext private val context: Context,
+    @ApplicationContext private val context: Context,
     private val sunResources: SunResources,
   ) {
     fun create(sunSchedule: SunSchedule): ScheduleUi {

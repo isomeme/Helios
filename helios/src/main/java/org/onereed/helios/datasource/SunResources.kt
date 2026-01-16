@@ -16,8 +16,8 @@ import org.onereed.helios.sun.SunEventType
 @Singleton
 class SunResources @Inject constructor(@ApplicationContext context: Context) {
   data class EventSet(
-    @param:StringRes val nameRes: Int,
-    @param:DrawableRes val iconRes: Int,
+    @StringRes val nameRes: Int,
+    @DrawableRes val iconRes: Int,
     val rubric: String,
   )
 

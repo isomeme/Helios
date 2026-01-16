@@ -10,8 +10,8 @@ import org.onereed.helios.datasource.SunResources
 data class TextUi(val menu: List<EventUi>, val selected: EventUi, val rubric: String) {
   @Immutable
   data class EventUi(
-    @param:DrawableRes val iconRes: Int,
-    @param:StringRes val nameRes: Int,
+    @DrawableRes val iconRes: Int,
+    @StringRes val nameRes: Int,
     val enabled: Boolean,
     val index: Int,
   )

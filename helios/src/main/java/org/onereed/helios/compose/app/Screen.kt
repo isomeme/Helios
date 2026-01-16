@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 import org.onereed.helios.R
 
 @Serializable
-sealed class Screen(@param:StringRes val titleRes: Int, @param:DrawableRes val iconRes: Int) {
+sealed class Screen(@StringRes val titleRes: Int, @DrawableRes val iconRes: Int) {
 
   @Serializable
   data object Schedule :

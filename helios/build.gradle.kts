@@ -59,7 +59,13 @@ android {
   // See https://stackoverflow.com/questions/65124097
   lint.disable += "UseCompatLoadingForDrawables"
 
-  kotlin { jvmToolchain(17) }
+  kotlin {
+    jvmToolchain(17)
+
+    compilerOptions {
+      freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
+  }
 
   buildFeatures {
     buildConfig = true

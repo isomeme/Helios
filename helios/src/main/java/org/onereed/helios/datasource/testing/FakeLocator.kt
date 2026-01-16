@@ -26,7 +26,7 @@ import timber.log.Timber
 
 class FakeLocator
 @Inject
-constructor(@param:ApplicationScope private val externalScope: CoroutineScope) : Locator {
+constructor(@ApplicationScope private val externalScope: CoroutineScope) : Locator {
 
   private val ticker = Ticker(tickerInterval)
   private val _placeTimeFlow =

@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import org.onereed.helios.ui.theme.ThemeType
 
 @Singleton
-class StoreRepository @Inject constructor(@param:ApplicationContext val context: Context) {
+class StoreRepository @Inject constructor(@ApplicationContext val context: Context) {
 
   private val Context.dataStore by preferencesDataStore("app_preferences")
 

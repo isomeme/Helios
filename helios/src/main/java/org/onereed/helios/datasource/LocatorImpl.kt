@@ -35,8 +35,8 @@ import timber.log.Timber
 class LocatorImpl
 @Inject
 constructor(
-  @param:ApplicationContext private val context: Context,
-  @param:ApplicationScope private val externalScope: CoroutineScope,
+  @ApplicationContext private val context: Context,
+  @ApplicationScope private val externalScope: CoroutineScope,
 ) : Locator {
   private val locationProvider by lazy { LocationServices.getFusedLocationProviderClient(context) }
 

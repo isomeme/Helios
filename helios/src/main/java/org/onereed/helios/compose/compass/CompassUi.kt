@@ -17,8 +17,8 @@ data class CompassUi(val items: List<CompassItem>, val isValid: Boolean) {
 
   @Immutable
   data class CompassItem(
-    @param:DrawableRes val iconRes: Int,
-    @param:StringRes val nameRes: Int,
+    @DrawableRes val iconRes: Int,
+    @StringRes val nameRes: Int,
     val ordinal: Int,
     val zIndex: Float,
     val point: Point,
