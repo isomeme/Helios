@@ -1,8 +1,8 @@
 package org.onereed.helios.datasource
 
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 interface Locator {
 
-  fun placeTimeFlow(): StateFlow<PlaceTime>
+  fun placeTimeFlow(): Flow<PlaceTime>
 }

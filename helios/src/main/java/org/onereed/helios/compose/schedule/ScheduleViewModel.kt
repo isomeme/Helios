@@ -1,6 +1,7 @@
 package org.onereed.helios.compose.schedule
 
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import org.onereed.helios.common.BaseViewModel
 import org.onereed.helios.datasource.Locator
@@ -19,7 +20,7 @@ constructor(
 
   val scheduleUiFlow =
     locator.placeTimeFlow()
-      .mapState(::SunTimeSeries)
-      .mapState(::SunSchedule)
-      .mapState(uiFactory::create)
+      .map(::SunTimeSeries)
+      .map(::SunSchedule)
+      .map(uiFactory::create)
 }

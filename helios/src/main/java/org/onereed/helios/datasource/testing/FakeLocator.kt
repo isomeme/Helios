@@ -6,27 +6,24 @@ package org.onereed.helios.datasource.testing
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import org.onereed.helios.common.ApplicationScope
-import org.onereed.helios.common.stateIn
 import org.onereed.helios.datasource.Locator
 import org.onereed.helios.datasource.PlaceTime
 import org.onereed.helios.datasource.Ticker
 import timber.log.Timber
 
-class FakeLocator
-@Inject
-constructor(@ApplicationScope private val externalScope: CoroutineScope) : Locator {
+class FakeLocator @Inject constructor(@ApplicationScope private val externalScope: CoroutineScope) :
+  Locator {
 
   private val ticker = Ticker(tickerInterval)
   private val _placeTimeFlow =
@@ -34,12 +31,11 @@ constructor(@ApplicationScope private val externalScope: CoroutineScope) : Locat
       .map { tick -> t0 + dt * tick }
       .onEach { time -> Timber.d("time: ${timeFormat(time)}") }
       .map { time -> PlaceTime(place, time) }
-      .stateIn(scope = externalScope, initialValue = PlaceTime.EMPTY, stopTimeout = 0.seconds)
 
-  private val _emptyPlaceTimeFlow = MutableStateFlow(PlaceTime.EMPTY)
+  private val _emptyPlaceTimeFlow = MutableStateFlow(PlaceTime.INVALID)
 
-  override fun placeTimeFlow(): StateFlow<PlaceTime> {
-    return _emptyPlaceTimeFlow
+  override fun placeTimeFlow(): Flow<PlaceTime> {
+    return _placeTimeFlow
   }
 
   companion object {

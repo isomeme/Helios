@@ -13,7 +13,6 @@ import javax.inject.Singleton
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.microseconds
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
@@ -24,55 +23,39 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.take
-import org.onereed.helios.common.ApplicationScope
 import org.onereed.helios.common.arc
-import org.onereed.helios.common.stateIn
 import timber.log.Timber
 
 @Singleton
 class Orienter
 @Inject
-constructor(
-  @ApplicationContext context: Context,
-  @ApplicationScope externalScope: CoroutineScope,
-  storeRepository: StoreRepository,
-) {
+constructor(@ApplicationContext context: Context, storeRepository: StoreRepository) {
+
   private val executor by lazy { Dispatchers.Default.asExecutor() }
 
   private val orientationProvider by lazy {
     LocationServices.getFusedOrientationProviderClient(context)
   }
 
-  private val ticker = Ticker(TICKER_INTERVAL, "LockedHeadingTicker")
+  private val ticker = Ticker(TICKER_INTERVAL, "SwingTicker")
 
-  private val lockedHeadingStateFlow =
-    storeRepository.isCompassSouthTopFlow
-      .map { southTop -> if (southTop) 180f else 0f }
-      .stateIn(scope = externalScope, initialValue = 0f)
+  private val lockedHeadingFlow =
+    storeRepository.isCompassSouthTopFlow.map { southTop -> if (southTop) 180f else 0f }
 
-  private val lockedHeadingTickerFlow =
-    lockedHeadingStateFlow.combine(ticker.flow) { heading, _ -> heading }.take(LOCK_SWING_TICKS)
+  private val swingToLockedHeadingFlow =
+    lockedHeadingFlow.combine(ticker.flow) { heading, _ -> heading }.take(LOCK_SWING_TICKS)
 
-  private val liveHeadingFlow =
-    getOrientationUpdates()
-      .map { it.headingDegrees }
-      .onStart { Timber.d("Live heading flow start") }
-      .onCompletion { Timber.d("Live heading flow stop") }
+  private val liveHeadingFlow = getOrientationUpdates().map { it.headingDegrees }
 
   val headingFlow =
-    storeRepository.isCompassLockedFlow
-      .flatMapLatest { isLocked -> if (isLocked) lockedHeadingTickerFlow else liveHeadingFlow }
-      .scan(lockedHeadingStateFlow.value, ::smooth)
-      .map(::quantize)
-      .stateIn(
-        scope = externalScope,
-        initialValue = lockedHeadingStateFlow.value,
-        stopTimeout = 30.seconds,
-      )
+    lockedHeadingFlow.flatMapLatest { lockedHeading ->
+      storeRepository.isCompassLockedFlow
+        .flatMapLatest { isLocked -> if (isLocked) swingToLockedHeadingFlow else liveHeadingFlow }
+        .scan(lockedHeading, ::smooth)
+        .map(::quantize)
+    }
 
   private fun getOrientationUpdates(): Flow<DeviceOrientation> = callbackFlow {
     val orientationListener = DeviceOrientationListener {

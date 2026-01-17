@@ -10,6 +10,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.onereed.helios.ui.theme.ThemeType
@@ -20,16 +21,24 @@ class StoreRepository @Inject constructor(@ApplicationContext val context: Conte
   private val Context.dataStore by preferencesDataStore("app_preferences")
 
   val isDynamicThemeFlow: Flow<Boolean> =
-    context.dataStore.data.map { preferences -> preferences[isDynamicThemeKey] ?: false }
+    context.dataStore.data
+      .map { preferences -> preferences[isDynamicThemeKey] ?: false }
+      .distinctUntilChanged()
 
   val themeTypeFlow: Flow<ThemeType> =
-    context.dataStore.data.map { preferences -> ThemeType.entries[preferences[themeTypeKey] ?: 0] }
+    context.dataStore.data
+      .map { preferences -> ThemeType.entries[preferences[themeTypeKey] ?: 0] }
+      .distinctUntilChanged()
 
   val isCompassLockedFlow: Flow<Boolean> =
-    context.dataStore.data.map { preferences -> preferences[isCompassLockedKey] ?: false }
+    context.dataStore.data
+      .map { preferences -> preferences[isCompassLockedKey] ?: false }
+      .distinctUntilChanged()
 
   val isCompassSouthTopFlow: Flow<Boolean> =
-    context.dataStore.data.map { preferences -> preferences[isCompassSouthTopKey] ?: false }
+    context.dataStore.data
+      .map { preferences -> preferences[isCompassSouthTopKey] ?: false }
+      .distinctUntilChanged()
 
   fun setDynamicTheme(value: Boolean, scope: CoroutineScope) {
     scope.launch {

@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -41,9 +40,10 @@ import org.onereed.helios.R
 import org.onereed.helios.compose.compass.ZIndex.COMPASS_FACE
 import org.onereed.helios.compose.compass.ZIndex.OVERLAY
 import org.onereed.helios.compose.compass.ZIndex.VIEW_LINE
-import org.onereed.helios.datasource.testing.santaMonicaNow
+import org.onereed.helios.compose.shared.confirm
 import org.onereed.helios.compose.shared.sunColorFilters
 import org.onereed.helios.datasource.SunResources
+import org.onereed.helios.datasource.testing.santaMonicaNow
 import org.onereed.helios.sun.SunCompass
 import org.onereed.helios.sun.SunTimeSeries
 import org.onereed.helios.ui.theme.DarkHeliosTheme
@@ -51,13 +51,13 @@ import org.onereed.helios.ui.theme.DarkHeliosTheme
 @OptIn(FlowPreview::class)
 @Composable
 fun CompassScreen(compassViewModel: CompassViewModel = hiltViewModel()) {
-  val compassUi by compassViewModel.compassUiFlow.collectAsStateWithLifecycle()
-  val heading by compassViewModel.headingFlow.collectAsStateWithLifecycle()
+  val compassUi by compassViewModel.compassUiFlow.collectAsStateWithLifecycle(CompassUi.INVALID)
+  val heading by compassViewModel.headingFlow.collectAsStateWithLifecycle(0f)
   val compassAngle by remember {
     derivedStateOf { 360f - heading } // Compass turns opposite heading
   }
 
-  val isLocked by compassViewModel.isLockedFlow.collectAsStateWithLifecycle()
+  val isLocked by compassViewModel.isLockedFlow.collectAsStateWithLifecycle(false)
   val haptics = LocalHapticFeedback.current
 
   StatelessCompassScreen(
@@ -65,7 +65,7 @@ fun CompassScreen(compassViewModel: CompassViewModel = hiltViewModel()) {
     compassAngle = compassAngle,
     isLocked = isLocked,
     onLockChange = {
-      haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+      haptics.confirm()
       compassViewModel.setLocked(it)
     },
   )

@@ -33,7 +33,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedback
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -50,6 +49,7 @@ import com.halilibo.richtext.ui.RichTextStyle
 import com.halilibo.richtext.ui.material3.RichText
 import org.onereed.helios.compose.shared.ScrollbarActions
 import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
+import org.onereed.helios.compose.shared.confirm
 import org.onereed.helios.compose.shared.sunColorFamilies
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunEventType
@@ -234,12 +234,12 @@ private data class EventMenuActions(
     haptics: HapticFeedback,
   ) : this(
     onExpanded = {
-      haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+      haptics.confirm()
       eventMenuExpandedState.value = true
     },
     onDismissed = { eventMenuExpandedState.value = false },
     onSelectIndex = { index ->
-      haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+      haptics.confirm()
       eventMenuExpandedState.value = false
       textViewModel.selectTextIndex(index)
     },

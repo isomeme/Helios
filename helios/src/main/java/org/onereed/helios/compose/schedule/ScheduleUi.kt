@@ -38,8 +38,7 @@ data class ScheduleUi(val events: List<EventUi>, val isValid: Boolean) {
     private val sunResources: SunResources,
   ) {
     fun create(sunSchedule: SunSchedule): ScheduleUi {
-      if (!sunSchedule.isValid)
-        return ScheduleUi(events = emptyList(), isValid = false)
+      if (!sunSchedule.isValid) return INVALID
 
       val events =
         sunSchedule.events.map {
@@ -83,5 +82,9 @@ data class ScheduleUi(val events: List<EventUi>, val isValid: Boolean) {
 
       private const val TIME_FORMAT_FLAGS = FORMAT_SHOW_TIME or FORMAT_ABBREV_ALL
     }
+  }
+
+  companion object {
+    val INVALID = ScheduleUi(events = emptyList(), isValid = false)
   }
 }

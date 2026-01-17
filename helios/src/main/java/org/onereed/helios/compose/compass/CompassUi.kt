@@ -62,7 +62,7 @@ data class CompassUi(val items: List<CompassItem>, val isValid: Boolean) {
   class Factory @Inject constructor(val sunResources: SunResources) {
 
     fun create(sunCompass: SunCompass): CompassUi {
-      if (!sunCompass.isValid) return CompassUi(items = emptyList(), isValid = false)
+      if (!sunCompass.isValid) return INVALID
 
       val sunAngle = sunCompass.sunAzimuth.toFloat()
       val arrowRotation = if (sunCompass.isSunClockwise) sunAngle else sunAngle + 180f
@@ -109,5 +109,9 @@ data class CompassUi(val items: List<CompassItem>, val isValid: Boolean) {
 
       return CompassUi(items = allItems, isValid = true)
     }
+  }
+
+  companion object {
+    val INVALID = CompassUi(items = emptyList(), isValid = false)
   }
 }

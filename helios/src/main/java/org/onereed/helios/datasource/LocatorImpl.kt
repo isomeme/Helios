@@ -16,7 +16,6 @@ import kotlin.time.Clock.System.now
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
@@ -26,18 +25,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import org.onereed.helios.common.ApplicationScope
-import org.onereed.helios.common.stateIn
 import org.onereed.helios.datasource.PlaceTime.Place
 import timber.log.Timber
 
 @OptIn(ExperimentalTime::class)
-class LocatorImpl
-@Inject
-constructor(
-  @ApplicationContext private val context: Context,
-  @ApplicationScope private val externalScope: CoroutineScope,
-) : Locator {
+class LocatorImpl @Inject constructor(@ApplicationContext private val context: Context) : Locator {
+
   private val locationProvider by lazy { LocationServices.getFusedLocationProviderClient(context) }
 
   private val ticker = Ticker(TICKER_INTERVAL, "LocatorTicker")
@@ -49,7 +42,6 @@ constructor(
       .onStart { Timber.d("Locator flow start") }
       .onEach { Timber.d("Locator flow onEach $it") }
       .onCompletion { Timber.d("Locator flow stop") }
-      .stateIn(scope = externalScope, initialValue = PlaceTime.EMPTY, stopTimeout = 5.seconds)
 
   override fun placeTimeFlow() = _placeTimeFlow
 
@@ -62,7 +54,8 @@ constructor(
 
     val locationCallback =
       object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult) { locationResult.lastLocation?.let {
+        override fun onLocationResult(locationResult: LocationResult) {
+          locationResult.lastLocation?.let {
             trySend(it).onFailure { t -> Timber.e(t, "Failed to send location to flow.") }
           }
         }

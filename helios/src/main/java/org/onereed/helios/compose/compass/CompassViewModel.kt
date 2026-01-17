@@ -2,6 +2,7 @@ package org.onereed.helios.compose.compass
 
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import org.onereed.helios.common.BaseViewModel
 import org.onereed.helios.datasource.Locator
@@ -23,11 +24,11 @@ constructor(
   val compassUiFlow =
     locator
       .placeTimeFlow()
-      .mapState(::SunTimeSeries)
-      .mapState(SunCompass::compute)
-      .mapState(compassUiFactory::create)
+      .map(::SunTimeSeries)
+      .map(SunCompass::compute)
+      .map(compassUiFactory::create)
 
-  val isLockedFlow = storeRepository.isCompassLockedFlow.stateIn(initialValue = false)
+  val isLockedFlow = storeRepository.isCompassLockedFlow
 
   val headingFlow = orienter.headingFlow
 

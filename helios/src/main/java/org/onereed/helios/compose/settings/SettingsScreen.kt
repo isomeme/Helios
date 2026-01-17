@@ -36,7 +36,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.hapticfeedback.HapticFeedback
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -53,6 +52,7 @@ import org.onereed.helios.R
 import org.onereed.helios.common.dynamicThemeSupported
 import org.onereed.helios.compose.shared.ScrollbarActions
 import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
+import org.onereed.helios.compose.shared.confirm
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 import org.onereed.helios.ui.theme.ThemeType
 
@@ -266,15 +266,15 @@ private data class SettingsActions(
     haptics: HapticFeedback,
   ) : this(
     onThemeTypeSelected = {
-      haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+      haptics.confirm()
       settingsViewModel.setThemeType(it)
     },
     onDynamicThemeSelected = {
-      haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+      haptics.confirm()
       settingsViewModel.setDynamicTheme(it)
     },
     onCompassSouthTopSelected = {
-      haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+      haptics.confirm()
       settingsViewModel.setCompassSouthTop(it)
     },
     onViewDoc = { uriHandler.openUri("https://www.one-reed.org/helios") },

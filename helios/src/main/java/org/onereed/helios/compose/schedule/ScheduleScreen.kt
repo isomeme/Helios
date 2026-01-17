@@ -26,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -44,6 +43,7 @@ import org.onereed.helios.compose.app.Screen
 import org.onereed.helios.compose.schedule.ScheduleUi.EventUi
 import org.onereed.helios.compose.shared.ScrollbarActions
 import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
+import org.onereed.helios.compose.shared.confirm
 import org.onereed.helios.compose.shared.sunColorFamilies
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.datasource.testing.santaMonicaNow
@@ -53,7 +53,7 @@ import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @Composable
 fun ScheduleScreen(navActions: NavActions, scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
-  val scheduleUi by scheduleViewModel.scheduleUiFlow.collectAsStateWithLifecycle()
+  val scheduleUi by scheduleViewModel.scheduleUiFlow.collectAsStateWithLifecycle(ScheduleUi.INVALID)
   val coroutineScope = rememberCoroutineScope()
   val lazyListState = rememberLazyListState()
   val canScrollUp by remember { derivedStateOf { lazyListState.canScrollBackward } }
@@ -65,7 +65,7 @@ fun ScheduleScreen(navActions: NavActions, scheduleViewModel: ScheduleViewModel 
   val onSelectEvent =
     remember(scheduleViewModel, navActions, haptics) {
       { index: Int ->
-        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+        haptics.confirm()
         scheduleViewModel.selectTextIndex(index)
         navActions.navigateTo(Screen.Text)
       }

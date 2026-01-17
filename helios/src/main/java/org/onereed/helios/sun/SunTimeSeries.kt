@@ -22,7 +22,7 @@ class SunTimeSeries(val placeTime: PlaceTime) {
   val isValid: Boolean
 
   init {
-    if (placeTime.isEmpty()) {
+    if (!placeTime.isValid) {
       this.events = emptyList()
       this.isValid = false
     } else {
