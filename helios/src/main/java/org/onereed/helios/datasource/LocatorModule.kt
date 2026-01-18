@@ -12,5 +12,5 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class LocatorModule {
 
-  @Singleton @Binds abstract fun bindLocator(locatorImpl: LocatorImpl): Locator
+  @Binds @Singleton abstract fun bindLocator(locatorImpl: LocatorImpl): Locator
 }

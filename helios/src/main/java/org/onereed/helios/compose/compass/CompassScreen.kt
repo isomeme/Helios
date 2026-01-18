@@ -159,10 +159,10 @@ fun StatelessCompassScreen(
 @Preview
 @Composable
 fun CompassScreenPreview() {
-  val sunResources = SunResources(LocalContext.current)
+  val sunResources = SunResources.create(LocalContext.current)
   val placeTime = santaMonicaNow()
-  val sunTimeSeries = SunTimeSeries(placeTime)
-  val sunCompass = SunCompass.compute(sunTimeSeries)
+  val sunTimeSeries = SunTimeSeries.create(placeTime)
+  val sunCompass = SunCompass.create(sunTimeSeries)
   val compassUi = CompassUi.Factory(sunResources).create(sunCompass)
 
   DarkHeliosTheme {

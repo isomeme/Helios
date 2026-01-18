@@ -12,20 +12,22 @@ import org.shredzone.commons.suncalc.SunTimes
 
 @OptIn(ExperimentalTime::class)
 @Immutable
-class SunTimeSeries(val placeTime: PlaceTime) {
+data class SunTimeSeries(
+  val placeTime: PlaceTime,
+  val events: List<Event>,
+  val isValid: Boolean = true,
+) {
+  @Immutable
   data class Event(val sunEventType: SunEventType, val time: Instant) : Comparable<Event> {
     override fun compareTo(other: Event) =
       compareValuesBy(this, other, { it.time }, { it.sunEventType })
   }
 
-  val events: List<Event>
-  val isValid: Boolean
+  companion object {
 
-  init {
-    if (!placeTime.isValid) {
-      this.events = emptyList()
-      this.isValid = false
-    } else {
+    fun create(placeTime: PlaceTime): SunTimeSeries {
+      if (!placeTime.isValid) return INVALID
+
       val futureSunTimes = placeTime.computeSunTimes(FUTURE_LIMIT)
       val futureEvents = toEvents(futureSunTimes)
       val nextEvent = futureEvents.first()
@@ -38,16 +40,31 @@ class SunTimeSeries(val placeTime: PlaceTime) {
           .filter { it.sunEventType != nextEvent.sunEventType }
           .last { it.time < placeTime.time }
 
-      this.events = listOf(lastEvent) + futureEvents
+      val allEvents = listOf(lastEvent) + futureEvents
 
       // Downstream logic relies on there being at least two events (noon and midnight), so if for
       // some reason we have fewer, mark the data as being invalid.
 
-      this.isValid = this.events.size >= 2
+      return if (allEvents.size < 2) INVALID else SunTimeSeries(placeTime, allEvents)
     }
-  }
 
-  companion object {
+    private fun PlaceTime.computeSunTimes(limit: Duration): SunTimes =
+      SunTimes.compute()
+        .at(place.lat, place.lon)
+        .elevation(place.alt)
+        .on(time.toJavaInstant())
+        .limit(limit.toJavaDuration())
+        .execute()
+
+    private fun toEvents(sunTimes: SunTimes): List<Event> {
+      return SunEventType.entries
+        .map { Pair(it, it.timeOf(sunTimes)) }
+        .filter { it.second != null }
+        .map { Event(it.first, it.second!!) }
+        .sorted()
+    }
+
+    private val INVALID = SunTimeSeries(PlaceTime.INVALID, emptyList(), false)
 
     /**
      * We search farther than one day ahead because e.g. around the spring equinox successive
@@ -66,21 +83,5 @@ class SunTimeSeries(val placeTime: PlaceTime) {
 
     /** See [PRECEDING_OFFSET]. */
     private val PRECEDING_LIMIT = 14.hours
-
-    private fun PlaceTime.computeSunTimes(limit: Duration): SunTimes =
-      SunTimes.compute()
-        .at(place.lat, place.lon)
-        .elevation(place.alt)
-        .on(time.toJavaInstant())
-        .limit(limit.toJavaDuration())
-        .execute()
-
-    private fun toEvents(sunTimes: SunTimes): List<Event> {
-      return SunEventType.entries
-        .map { Pair(it, it.timeOf(sunTimes)) }
-        .filter { it.second != null }
-        .map { Event(it.first, it.second!!) }
-        .sorted()
-    }
   }
 }

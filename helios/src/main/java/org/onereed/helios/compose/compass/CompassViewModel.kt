@@ -24,8 +24,8 @@ constructor(
   val compassUiFlow =
     locator
       .placeTimeFlow()
-      .map(::SunTimeSeries)
-      .map(SunCompass::compute)
+      .map(SunTimeSeries::create)
+      .map(SunCompass::create)
       .map(compassUiFactory::create)
 
   val isLockedFlow = storeRepository.isCompassLockedFlow

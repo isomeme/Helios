@@ -158,10 +158,10 @@ private fun LazyItemScope.EventCard(event: EventUi, onSelectEvent: (Int) -> Unit
 @Preview
 @Composable
 fun ScheduleScreenPreview() {
-  val sunResources = SunResources(LocalContext.current)
+  val sunResources = SunResources.create(LocalContext.current)
   val placeTime = santaMonicaNow()
-  val sunTimeSeries = SunTimeSeries(placeTime)
-  val sunSchedule = SunSchedule(sunTimeSeries)
+  val sunTimeSeries = SunTimeSeries.create(placeTime)
+  val sunSchedule = SunSchedule.create(sunTimeSeries)
   val scheduleUi = ScheduleUi.Factory(LocalContext.current, sunResources).create(sunSchedule)
   val scrollbarActions = ScrollbarActions(onScrollToTop = {}, onScrollToBottom = {})
 

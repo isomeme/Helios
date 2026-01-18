@@ -6,7 +6,8 @@ import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 @Immutable
-class SunSchedule(sunTimeSeries: SunTimeSeries) {
+data class SunSchedule(val events: List<Event>, val isValid: Boolean = true) {
+  @Immutable
   data class Event(
     val sunEventType: SunEventType,
     val time: Instant,
@@ -14,14 +15,11 @@ class SunSchedule(sunTimeSeries: SunTimeSeries) {
     val weakId: Long,
   )
 
-  val events: List<Event>
-  val isValid: Boolean
+  companion object {
 
-  init {
-    if (!sunTimeSeries.isValid) {
-      this.events = emptyList()
-      this.isValid = false
-    } else {
+    fun create(sunTimeSeries: SunTimeSeries): SunSchedule {
+      if (!sunTimeSeries.isValid) return INVALID
+
       val closestEventIndex =
         getClosestEventIndex(
           sunTimeSeries.placeTime.time,
@@ -29,21 +27,20 @@ class SunSchedule(sunTimeSeries: SunTimeSeries) {
           sunTimeSeries.events[1].time,
         )
 
-      this.events =
+      val events =
         sunTimeSeries.events.mapIndexed { index, event ->
           val isClosestEvent = index == closestEventIndex
           val weakId = weakIdOf(event)
           Event(event.sunEventType, event.time, isClosestEvent, weakId)
         }
 
-      this.isValid = true
+      return SunSchedule(events)
     }
-  }
-
-  companion object {
 
     private fun getClosestEventIndex(now: Instant, t0: Instant, t1: Instant): Int =
       if ((now - t0) < (t1 - now)) 0 else 1
+
+    private val INVALID = SunSchedule(emptyList(), false)
 
     /**
      * When applied with bitwise `and` to the sun event epoch second, yields a time bucket within

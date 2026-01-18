@@ -249,7 +249,7 @@ private data class EventMenuActions(
 @Preview
 @Composable
 fun TextScreenPreview() {
-  val sunResources = SunResources(LocalContext.current)
+  val sunResources = SunResources.create(LocalContext.current)
   val textUi = TextUi.Factory(sunResources).create(SunEventType.SET.ordinal)
   val eventMenuActions = EventMenuActions(onExpanded = {}, onDismissed = {}, onSelectIndex = {})
   val scrollbarActions = ScrollbarActions(onScrollToTop = {}, onScrollToBottom = {})

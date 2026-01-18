@@ -19,8 +19,9 @@ data class SunCompass(
   val isSunClockwise: Boolean,
   val events: EnumMap<SunEventType, Event>,
   val noonNadirOverlap: SunEventType?,
-  val isValid: Boolean,
+  val isValid: Boolean = true,
 ) {
+  @Immutable
   data class Event(val sunEventType: SunEventType, val time: Instant, val azimuth: Double) :
     Comparable<Event> {
     override fun compareTo(other: Event): Int {
@@ -30,18 +31,8 @@ data class SunCompass(
 
   companion object {
 
-    /** The (short) time interval over which sun movement direction is determined. */
-    private val DELTA_TIME = 1.minutes
-
-    fun compute(sunTimeSeries: SunTimeSeries): SunCompass {
-      if (!sunTimeSeries.isValid)
-        return SunCompass(
-          sunAzimuth = 0.0,
-          isSunClockwise = true,
-          events = EnumMap(SunEventType::class.java),
-          noonNadirOverlap = null,
-          isValid = false,
-        )
+    fun create(sunTimeSeries: SunTimeSeries): SunCompass {
+      if (!sunTimeSeries.isValid) return INVALID
 
       val placeTime = sunTimeSeries.placeTime
 
@@ -76,7 +67,6 @@ data class SunCompass(
         isSunClockwise = isSunClockwise,
         events = eventMap,
         noonNadirOverlap = noonNadirOverlap,
-        isValid = true,
       )
     }
 
@@ -103,5 +93,17 @@ data class SunCompass(
         maxOf(noon, nadir).sunEventType // Time comparison
       else null
     }
+
+    private val INVALID =
+      SunCompass(
+        sunAzimuth = 0.0,
+        isSunClockwise = true,
+        events = EnumMap(SunEventType::class.java),
+        noonNadirOverlap = null,
+        isValid = false,
+      )
+
+    /** The (short) time interval over which sun movement direction is determined. */
+    private val DELTA_TIME = 1.minutes
   }
 }

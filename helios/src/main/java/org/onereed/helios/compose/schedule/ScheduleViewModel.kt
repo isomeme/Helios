@@ -20,7 +20,7 @@ constructor(
 
   val scheduleUiFlow =
     locator.placeTimeFlow()
-      .map(::SunTimeSeries)
-      .map(::SunSchedule)
+      .map(SunTimeSeries::create)
+      .map(SunSchedule::create)
       .map(uiFactory::create)
 }
