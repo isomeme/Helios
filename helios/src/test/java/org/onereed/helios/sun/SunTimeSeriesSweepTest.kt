@@ -24,7 +24,7 @@ class SunTimeSeriesSweepTest {
 
     while (time < T1) {
       val placeTime = PlaceTime(santaMonica, time)
-      val events = SunTimeSeries(placeTime).events
+      val events = SunTimeSeries.create(placeTime).events
 
       assertWithMessage("placeTime=$placeTime").that(events).hasSize(5)
 

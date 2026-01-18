@@ -14,7 +14,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -51,19 +50,11 @@ import org.onereed.helios.ui.theme.DarkHeliosTheme
 @OptIn(FlowPreview::class)
 @Composable
 fun CompassScreen(compassViewModel: CompassViewModel = hiltViewModel()) {
-  val compassUi by compassViewModel.compassUiFlow.collectAsStateWithLifecycle(CompassUi.INVALID)
-  val heading by compassViewModel.headingFlow.collectAsStateWithLifecycle(0f)
-  val compassAngle by remember {
-    derivedStateOf { 360f - heading } // Compass turns opposite heading
-  }
-
-  val isLocked by compassViewModel.isLockedFlow.collectAsStateWithLifecycle(false)
+  val compassUi by compassViewModel.compassUiFlow.collectAsStateWithLifecycle()
   val haptics = LocalHapticFeedback.current
 
   StatelessCompassScreen(
     compassUi = compassUi,
-    compassAngle = compassAngle,
-    isLocked = isLocked,
     onLockChange = {
       haptics.confirm()
       compassViewModel.setLocked(it)
@@ -73,12 +64,7 @@ fun CompassScreen(compassViewModel: CompassViewModel = hiltViewModel()) {
 
 @OptIn(ExperimentalAtomicApi::class)
 @Composable
-fun StatelessCompassScreen(
-  compassUi: CompassUi,
-  compassAngle: Float,
-  isLocked: Boolean,
-  onLockChange: (Boolean) -> Unit,
-) {
+fun StatelessCompassScreen(compassUi: CompassUi, onLockChange: (Boolean) -> Unit) {
   val viewLineColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
   val compassFaceColor = MaterialTheme.colorScheme.outlineVariant
 
@@ -90,10 +76,14 @@ fun StatelessCompassScreen(
     }
 
   val sunColorFilters = sunColorFilters()
+  
+  val compassItems = compassUi.compassItems
+  val compassAngle = compassUi.compassAngle
+  val isLocked = compassUi.isLocked
 
   Surface(modifier = Modifier.fillMaxSize()) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-      if (!compassUi.isValid) {
+      if (!compassItems.isValid) {
         CircularProgressIndicator(modifier = Modifier.zIndex(OVERLAY.zIndex))
       }
 
@@ -101,7 +91,11 @@ fun StatelessCompassScreen(
         modifier =
           Modifier.align(Alignment.BottomEnd)
             .padding(all = 15.dp)
-            .toggleable(value = isLocked, onValueChange = onLockChange, role = Role.Checkbox)
+            .toggleable(
+              value = isLocked,
+              onValueChange = onLockChange,
+              role = Role.Checkbox,
+            )
             .padding(all = 15.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
@@ -135,7 +129,7 @@ fun StatelessCompassScreen(
           modifier = Modifier.fillMaxSize().zIndex(COMPASS_FACE.zIndex),
         )
 
-        compassUi.items.forEach { item ->
+        compassItems.items.forEach { item ->
           Image(
             painter = painterResource(id = item.iconRes),
             contentDescription = stringResource(id = item.nameRes),
@@ -163,14 +157,8 @@ fun CompassScreenPreview() {
   val placeTime = santaMonicaNow()
   val sunTimeSeries = SunTimeSeries.create(placeTime)
   val sunCompass = SunCompass.create(sunTimeSeries)
-  val compassUi = CompassUi.Factory(sunResources).create(sunCompass)
+  val compassItems = CompassItems.Factory(sunResources).create(sunCompass)
+  val compassUi = CompassUi(compassItems, 30f, true)
 
-  DarkHeliosTheme {
-    StatelessCompassScreen(
-      compassUi = compassUi,
-      compassAngle = 30f,
-      isLocked = true,
-      onLockChange = {},
-    )
-  }
+  DarkHeliosTheme { StatelessCompassScreen(compassUi = compassUi, onLockChange = {}) }
 }

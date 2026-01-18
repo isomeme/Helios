@@ -53,7 +53,7 @@ import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @Composable
 fun ScheduleScreen(navActions: NavActions, scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
-  val scheduleUi by scheduleViewModel.scheduleUiFlow.collectAsStateWithLifecycle(ScheduleUi.INVALID)
+  val scheduleUi by scheduleViewModel.scheduleUiFlow.collectAsStateWithLifecycle()
   val coroutineScope = rememberCoroutineScope()
   val lazyListState = rememberLazyListState()
   val canScrollUp by remember { derivedStateOf { lazyListState.canScrollBackward } }

@@ -23,4 +23,5 @@ constructor(
       .map(SunTimeSeries::create)
       .map(SunSchedule::create)
       .map(uiFactory::create)
+      .stateIn(initialValue = ScheduleUi.INVALID)
 }

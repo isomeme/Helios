@@ -4,7 +4,5 @@ import javax.inject.Inject
 
 class SelectTextIndexUseCase @Inject constructor(private val textStateHolder: TextStateHolder) {
 
-  operator fun invoke(index: Int) {
-    textStateHolder.selectIndex(index)
-  }
+  operator fun invoke(index: Int) = textStateHolder.selectIndex(index)
 }

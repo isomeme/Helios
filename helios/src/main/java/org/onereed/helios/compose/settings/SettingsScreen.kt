@@ -58,9 +58,7 @@ import org.onereed.helios.ui.theme.ThemeType
 
 @Composable
 fun SettingsScreen(settingsViewModel: SettingsViewModel = hiltViewModel()) {
-  val themeType by settingsViewModel.themeTypeFlow.collectAsStateWithLifecycle()
-  val isDynamicTheme by settingsViewModel.isDynamicThemeFlow.collectAsStateWithLifecycle()
-  val isCompassSouthTop by settingsViewModel.isCompassSouthTopFlow.collectAsStateWithLifecycle()
+  val settingsUi by settingsViewModel.settingsUiFlow.collectAsStateWithLifecycle()
 
   val uriHandler = LocalUriHandler.current
   val haptics = LocalHapticFeedback.current
@@ -78,9 +76,7 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = hiltViewModel()) {
   StatelessSettingsScreen(
     canScrollUp = canScrollUp,
     canScrollDown = canScrollDown,
-    themeType = themeType,
-    isDynamicTheme = isDynamicTheme,
-    isCompassSouthTop = isCompassSouthTop,
+    settingsUi = settingsUi,
     settingsActions = settingsActions,
     scrollbarActions = scrollbarActions,
     scrollState = scrollState,
@@ -91,9 +87,7 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = hiltViewModel()) {
 private fun StatelessSettingsScreen(
   canScrollUp: Boolean,
   canScrollDown: Boolean,
-  themeType: ThemeType,
-  isDynamicTheme: Boolean,
-  isCompassSouthTop: Boolean,
+  settingsUi: SettingsUi,
   settingsActions: SettingsActions,
   scrollbarActions: ScrollbarActions,
   scrollState: ScrollState,
@@ -110,9 +104,9 @@ private fun StatelessSettingsScreen(
             },
           verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-          ThemeSettings(themeType, isDynamicTheme, settingsActions)
+          ThemeSettings(settingsUi.themeType, settingsUi.isDynamicTheme, settingsActions)
 
-          CompassSettings(isCompassSouthTop, settingsActions)
+          CompassSettings(settingsUi.isCompassSouthTop, settingsActions)
 
           OnlineDocLink(settingsActions)
         }
@@ -284,6 +278,8 @@ private data class SettingsActions(
 @Preview
 @Composable
 fun SettingsScreenPreview() {
+  val settingsUi =
+    SettingsUi(isDynamicTheme = true, themeType = ThemeType.SYSTEM, isCompassSouthTop = true)
   val settingsActions =
     SettingsActions(
       onThemeTypeSelected = {},
@@ -297,9 +293,7 @@ fun SettingsScreenPreview() {
     StatelessSettingsScreen(
       canScrollUp = false,
       canScrollDown = true,
-      themeType = ThemeType.SYSTEM,
-      isDynamicTheme = true,
-      isCompassSouthTop = true,
+      settingsUi = settingsUi,
       settingsActions = settingsActions,
       scrollbarActions = scrollbarActions,
       scrollState = ScrollState(0),
