@@ -20,7 +20,6 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
@@ -39,13 +38,13 @@ constructor(@ApplicationContext context: Context, storeRepository: StoreReposito
     LocationServices.getFusedOrientationProviderClient(context)
   }
 
-  private val ticker = Ticker(TICKER_INTERVAL, "SwingTicker")
-
   private val lockedHeadingFlow =
     storeRepository.isCompassSouthTopFlow.map { southTop -> if (southTop) 180f else 0f }
 
   private val swingToLockedHeadingFlow =
-    lockedHeadingFlow.combine(ticker.flow) { heading, _ -> heading }.take(LOCK_SWING_TICKS)
+    lockedHeadingFlow
+      .flatMapLatest { heading -> repeatingTickerFlow(TICKER_INTERVAL, heading) }
+      .take(LOCK_SWING_TICKS)
 
   private val liveHeadingFlow = getOrientationUpdates().map { it.headingDegrees }
 

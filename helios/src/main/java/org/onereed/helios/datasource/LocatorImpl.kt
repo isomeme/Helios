@@ -33,12 +33,12 @@ class LocatorImpl @Inject constructor(@ApplicationContext private val context: C
 
   private val locationProvider by lazy { LocationServices.getFusedLocationProviderClient(context) }
 
-  private val ticker = Ticker(TICKER_INTERVAL, "LocatorTicker")
+  private val ticker = countingTickerFlow(TICKER_INTERVAL)
 
   private val _placeTimeFlow =
     getLocationUpdates()
       .map(::Place)
-      .combine(ticker.flow) { place, _ -> PlaceTime(place, now()) }
+      .combine(ticker) { place, _ -> PlaceTime(place, now()) }
       .onStart { Timber.d("Locator flow start") }
       .onEach { Timber.d("Locator flow onEach $it") }
       .onCompletion { Timber.d("Locator flow stop") }

@@ -19,15 +19,14 @@ import kotlinx.datetime.toLocalDateTime
 import org.onereed.helios.common.ApplicationScope
 import org.onereed.helios.datasource.Locator
 import org.onereed.helios.datasource.PlaceTime
-import org.onereed.helios.datasource.Ticker
+import org.onereed.helios.datasource.countingTickerFlow
 import timber.log.Timber
 
 class FakeLocator @Inject constructor(@ApplicationScope private val externalScope: CoroutineScope) :
   Locator {
 
-  private val ticker = Ticker(tickerInterval)
   private val _placeTimeFlow =
-    ticker.flow
+    countingTickerFlow(tickerInterval)
       .map { tick -> t0 + dt * tick }
       .onEach { time -> Timber.d("time: ${timeFormat(time)}") }
       .map { time -> PlaceTime(place, time) }
