@@ -9,14 +9,15 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import org.onereed.helios.common.ApplicationScope
+import org.onereed.helios.common.stateIn
 import org.onereed.helios.datasource.Locator
 import org.onereed.helios.datasource.PlaceTime
 import org.onereed.helios.datasource.countingTickerFlow
@@ -30,12 +31,11 @@ class FakeLocator @Inject constructor(@ApplicationScope private val externalScop
       .map { tick -> t0 + dt * tick }
       .onEach { time -> Timber.d("time: ${timeFormat(time)}") }
       .map { time -> PlaceTime(place, time) }
+      .stateIn(externalScope, PlaceTime.INVALID)
 
   private val _emptyPlaceTimeFlow = MutableStateFlow(PlaceTime.INVALID)
 
-  override fun placeTimeFlow(): Flow<PlaceTime> {
-    return _placeTimeFlow
-  }
+  override fun placeTimeFlow(): StateFlow<PlaceTime> = _placeTimeFlow
 
   companion object {
 

@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.take
 import org.onereed.helios.common.arc
+import org.onereed.helios.common.logAllEvents
+import org.onereed.helios.common.logBoundaryEvents
 import timber.log.Timber
 
 @Singleton
@@ -39,18 +41,22 @@ constructor(@ApplicationContext context: Context, storeRepository: StoreReposito
   }
 
   private val lockedHeadingFlow =
-    storeRepository.isCompassSouthTopFlow.map { southTop -> if (southTop) 180f else 0f }
+    storeRepository.isCompassSouthTopFlow
+      .map { southTop -> if (southTop) 180f else 0f }
+      .logAllEvents("lockedHeadingFlow")
 
   private val swingToLockedHeadingFlow =
     lockedHeadingFlow
       .flatMapLatest { heading -> repeatingTickerFlow(TICKER_INTERVAL, heading) }
       .take(LOCK_SWING_TICKS)
 
-  private val liveHeadingFlow = getOrientationUpdates().map { it.headingDegrees }
+  private val liveHeadingFlow =
+    getOrientationUpdates().map { it.headingDegrees }.logBoundaryEvents("liveHeadingFlow")
 
   val headingFlow =
     lockedHeadingFlow.flatMapLatest { lockedHeading ->
       storeRepository.isCompassLockedFlow
+        .logAllEvents("isCompassLockedFlow")
         .flatMapLatest { isLocked -> if (isLocked) swingToLockedHeadingFlow else liveHeadingFlow }
         .scan(lockedHeading, ::smooth)
         .map(::quantize)
@@ -63,17 +69,13 @@ constructor(@ApplicationContext context: Context, storeRepository: StoreReposito
 
     orientationProvider
       .requestOrientationUpdates(DEVICE_ORIENTATION_REQUEST, executor, orientationListener)
-      .addOnSuccessListener { Timber.d("Orientation updates requested.") }
-      .addOnFailureListener { e ->
-        Timber.e(e, "Orientation updates request failed.")
-        close(e)
-      }
+      .logBoundaryEvents("requestOrientationUpdates")
+      .addOnFailureListener { e -> close(e) }
 
     awaitClose {
       orientationProvider
         .removeOrientationUpdates(orientationListener)
-        .addOnSuccessListener { Timber.d("Orientation updates removed.") }
-        .addOnFailureListener { e -> Timber.e(e, "Orientation updates removal failed.") }
+        .logBoundaryEvents("removeOrientationUpdates")
     }
   }
 

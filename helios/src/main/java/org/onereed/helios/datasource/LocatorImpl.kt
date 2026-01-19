@@ -11,6 +11,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 import kotlin.time.Clock.System.now
 import kotlin.time.Duration.Companion.minutes
@@ -22,14 +23,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
+import org.onereed.helios.common.ApplicationScope
+import org.onereed.helios.common.logAllEvents
+import org.onereed.helios.common.logBoundaryEvents
+import org.onereed.helios.common.stateIn
 import org.onereed.helios.datasource.PlaceTime.Place
 import timber.log.Timber
 
 @OptIn(ExperimentalTime::class)
-class LocatorImpl @Inject constructor(@ApplicationContext private val context: Context) : Locator {
+class LocatorImpl @Inject constructor(
+  @ApplicationScope externalScope: CoroutineScope,
+  @ApplicationContext private val context: Context) : Locator {
 
   private val locationProvider by lazy { LocationServices.getFusedLocationProviderClient(context) }
 
@@ -39,9 +43,8 @@ class LocatorImpl @Inject constructor(@ApplicationContext private val context: C
     getLocationUpdates()
       .map(::Place)
       .combine(ticker) { place, _ -> PlaceTime(place, now()) }
-      .onStart { Timber.d("Locator flow start") }
-      .onEach { Timber.d("Locator flow onEach $it") }
-      .onCompletion { Timber.d("Locator flow stop") }
+      .logAllEvents("placeTimeFlow")
+      .stateIn(externalScope, PlaceTime.INVALID)
 
   override fun placeTimeFlow() = _placeTimeFlow
 
@@ -63,17 +66,13 @@ class LocatorImpl @Inject constructor(@ApplicationContext private val context: C
 
     locationProvider
       .requestLocationUpdates(LOCATION_REQUEST, locationCallback, Looper.getMainLooper())
-      .addOnSuccessListener { Timber.d("Location updates requested.") }
-      .addOnFailureListener { e ->
-        Timber.e(e, "Location updates request failed.")
-        close(e)
-      }
+      .logBoundaryEvents("requestLocationUpdates")
+      .addOnFailureListener { e -> close(e) }
 
     awaitClose {
       locationProvider
         .removeLocationUpdates(locationCallback)
-        .addOnSuccessListener { Timber.d("Location updates stopped.") }
-        .addOnFailureListener { e -> Timber.e(e, "Location updates stop failed.") }
+        .logBoundaryEvents("removeLocationUpdates")
     }
   }
 
