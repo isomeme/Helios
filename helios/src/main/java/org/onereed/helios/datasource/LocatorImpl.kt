@@ -33,7 +33,7 @@ class LocatorImpl @Inject constructor(@ApplicationContext private val context: C
 
   private val locationProvider by lazy { LocationServices.getFusedLocationProviderClient(context) }
 
-  private val ticker = countingTickerFlow(TICKER_INTERVAL)
+  private val ticker = unitTickerFlow(TICKER_INTERVAL)
 
   private val _placeTimeFlow =
     getLocationUpdates()

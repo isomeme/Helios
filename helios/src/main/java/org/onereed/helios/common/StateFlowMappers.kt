@@ -2,7 +2,6 @@
 
 package org.onereed.helios.common
 
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,24 +17,11 @@ fun <T, K> StateFlow<T>.mapState(scope: CoroutineScope, transform: (data: T) -> 
   return mapLatest { transform(it) }.stateIn(scope = scope, initialValue = transform(value))
 }
 
-fun <T, K> StateFlow<T>.mapState(
-  scope: CoroutineScope,
-  stopTimeout: Duration,
-  transform: (data: T) -> K,
-): StateFlow<K> {
-  return mapLatest { transform(it) }
-    .stateIn(scope = scope, initialValue = transform(value), stopTimeout = stopTimeout)
-}
-
-fun <T> Flow<T>.stateIn(
-  scope: CoroutineScope,
-  initialValue: T,
-  stopTimeout: Duration = defaultStopTimeout,
-): StateFlow<T> {
+fun <T> Flow<T>.stateIn(scope: CoroutineScope, initialValue: T): StateFlow<T> {
   return stateIn(
     scope = scope,
-    started = SharingStarted.WhileSubscribed(stopTimeoutMillis = stopTimeout.inWholeMilliseconds),
     initialValue = initialValue,
+    started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
   )
 }
 
@@ -43,4 +29,4 @@ fun <T> Flow<T>.stateIn(
  * We build in a short delay before unsubscribing so that established flows survive brief
  * interruptions for e.g. navigation events or portrait/landscape swaps.
  */
-private val defaultStopTimeout = 2.seconds
+private val STOP_TIMEOUT_MILLIS = 5.seconds.inWholeMilliseconds
