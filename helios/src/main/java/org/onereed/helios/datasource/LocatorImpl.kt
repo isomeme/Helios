@@ -11,12 +11,12 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 import kotlin.time.Clock.System.now
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
@@ -25,15 +25,18 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import org.onereed.helios.common.ApplicationScope
 import org.onereed.helios.common.logAllEvents
-import org.onereed.helios.common.logBoundaryEvents
+import org.onereed.helios.common.logOutcomes
 import org.onereed.helios.common.stateIn
 import org.onereed.helios.datasource.PlaceTime.Place
 import timber.log.Timber
 
 @OptIn(ExperimentalTime::class)
-class LocatorImpl @Inject constructor(
+class LocatorImpl
+@Inject
+constructor(
   @ApplicationScope externalScope: CoroutineScope,
-  @ApplicationContext private val context: Context) : Locator {
+  @ApplicationContext private val context: Context,
+) : Locator {
 
   private val locationProvider by lazy { LocationServices.getFusedLocationProviderClient(context) }
 
@@ -66,13 +69,11 @@ class LocatorImpl @Inject constructor(
 
     locationProvider
       .requestLocationUpdates(LOCATION_REQUEST, locationCallback, Looper.getMainLooper())
-      .logBoundaryEvents("requestLocationUpdates")
+      .logOutcomes("requestLocationUpdates")
       .addOnFailureListener { e -> close(e) }
 
     awaitClose {
-      locationProvider
-        .removeLocationUpdates(locationCallback)
-        .logBoundaryEvents("removeLocationUpdates")
+      locationProvider.removeLocationUpdates(locationCallback).logOutcomes("removeLocationUpdates")
     }
   }
 

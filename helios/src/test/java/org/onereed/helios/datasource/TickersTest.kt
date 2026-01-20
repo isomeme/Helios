@@ -8,12 +8,12 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
-import org.onereed.helios.util.TimberRule
+import org.onereed.helios.util.TimberConsoleRule
 import timber.log.Timber
 
 class TickersTest {
 
-  @get:Rule val timberRule = TimberRule()
+  @get:Rule val timberConsoleRule = TimberConsoleRule()
 
   @Test
   fun countingTickerFlow() = runBlocking {

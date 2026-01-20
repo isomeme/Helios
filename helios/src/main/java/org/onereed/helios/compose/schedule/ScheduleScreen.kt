@@ -47,8 +47,6 @@ import org.onereed.helios.compose.shared.confirm
 import org.onereed.helios.compose.shared.sunColorFamilies
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.datasource.testing.santaMonicaNow
-import org.onereed.helios.sun.SunSchedule
-import org.onereed.helios.sun.SunTimeSeries
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @Composable
@@ -160,9 +158,7 @@ private fun LazyItemScope.EventCard(event: EventUi, onSelectEvent: (Int) -> Unit
 fun ScheduleScreenPreview() {
   val sunResources = SunResources.create(LocalContext.current)
   val placeTime = santaMonicaNow()
-  val sunTimeSeries = SunTimeSeries.create(placeTime)
-  val sunSchedule = SunSchedule.create(sunTimeSeries)
-  val scheduleUi = ScheduleUi.Factory(LocalContext.current, sunResources).create(sunSchedule)
+  val scheduleUi = ScheduleUi.Factory(LocalContext.current, sunResources).create(placeTime)
   val scrollbarActions = ScrollbarActions(onScrollToTop = {}, onScrollToBottom = {})
 
   DarkHeliosTheme {

@@ -43,8 +43,6 @@ import org.onereed.helios.compose.shared.confirm
 import org.onereed.helios.compose.shared.sunColorFilters
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.datasource.testing.santaMonicaNow
-import org.onereed.helios.sun.SunCompass
-import org.onereed.helios.sun.SunTimeSeries
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 
 @OptIn(FlowPreview::class)
@@ -76,7 +74,7 @@ fun StatelessCompassScreen(compassUi: CompassUi, onLockChange: (Boolean) -> Unit
     }
 
   val sunColorFilters = sunColorFilters()
-  
+
   val compassItems = compassUi.compassItems
   val compassAngle = compassUi.compassAngle
   val isLocked = compassUi.isLocked
@@ -91,11 +89,7 @@ fun StatelessCompassScreen(compassUi: CompassUi, onLockChange: (Boolean) -> Unit
         modifier =
           Modifier.align(Alignment.BottomEnd)
             .padding(all = 15.dp)
-            .toggleable(
-              value = isLocked,
-              onValueChange = onLockChange,
-              role = Role.Checkbox,
-            )
+            .toggleable(value = isLocked, onValueChange = onLockChange, role = Role.Checkbox)
             .padding(all = 15.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
@@ -155,9 +149,7 @@ fun StatelessCompassScreen(compassUi: CompassUi, onLockChange: (Boolean) -> Unit
 fun CompassScreenPreview() {
   val sunResources = SunResources.create(LocalContext.current)
   val placeTime = santaMonicaNow()
-  val sunTimeSeries = SunTimeSeries.create(placeTime)
-  val sunCompass = SunCompass.create(sunTimeSeries)
-  val compassItems = CompassItems.Factory(sunResources).create(sunCompass)
+  val compassItems = CompassItems.Factory(sunResources).create(placeTime)
   val compassUi = CompassUi(compassItems, 30f, true)
 
   DarkHeliosTheme { StatelessCompassScreen(compassUi = compassUi, onLockChange = {}) }

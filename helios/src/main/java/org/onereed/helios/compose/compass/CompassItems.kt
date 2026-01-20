@@ -9,8 +9,10 @@ import org.onereed.helios.common.Point
 import org.onereed.helios.compose.compass.ZIndex.SUN_AND_ARROW
 import org.onereed.helios.compose.compass.ZIndex.SUN_EVENT
 import org.onereed.helios.compose.shared.SUN_ORDINAL
+import org.onereed.helios.datasource.PlaceTime
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunCompass
+import org.onereed.helios.sun.SunTimeSeries
 
 @Immutable
 data class CompassItems(val items: List<CompassItem>, val isValid: Boolean = true) {
@@ -61,12 +63,14 @@ data class CompassItems(val items: List<CompassItem>, val isValid: Boolean = tru
 
   class Factory @Inject constructor(val sunResources: SunResources) {
 
-    fun create(sunCompass: SunCompass): CompassItems {
+    fun create(placeTime: PlaceTime): CompassItems {
+      val sunTimeSeries = SunTimeSeries.create(placeTime)
+      val sunCompass = SunCompass.create(sunTimeSeries)
       if (!sunCompass.isValid) return INVALID
 
       val sunAngle = sunCompass.sunAzimuth.toFloat()
       val arrowRotation = if (sunCompass.isSunClockwise) sunAngle else sunAngle + 180f
-      
+
       val sunItem =
         CompassItem.create(
           iconRes = R.drawable.ic_solid_dot,

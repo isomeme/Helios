@@ -12,11 +12,13 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import dagger.hilt.android.qualifiers.ApplicationContext
+import org.onereed.helios.datasource.PlaceTime
 import javax.inject.Inject
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunSchedule
+import org.onereed.helios.sun.SunTimeSeries
 
 @OptIn(ExperimentalTime::class)
 @Immutable
@@ -37,7 +39,9 @@ data class ScheduleUi(val events: List<EventUi>, val isValid: Boolean) {
     @ApplicationContext private val context: Context,
     private val sunResources: SunResources,
   ) {
-    fun create(sunSchedule: SunSchedule): ScheduleUi {
+    fun create(placeTime: PlaceTime): ScheduleUi {
+      val sunTimeSeries = SunTimeSeries.create(placeTime)
+      val sunSchedule = SunSchedule.create(sunTimeSeries)
       if (!sunSchedule.isValid) return INVALID
 
       val events =

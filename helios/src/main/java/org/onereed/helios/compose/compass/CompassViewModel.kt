@@ -9,8 +9,6 @@ import org.onereed.helios.common.BaseViewModel
 import org.onereed.helios.datasource.Locator
 import org.onereed.helios.datasource.Orienter
 import org.onereed.helios.datasource.StoreRepository
-import org.onereed.helios.sun.SunCompass
-import org.onereed.helios.sun.SunTimeSeries
 
 @HiltViewModel
 class CompassViewModel
@@ -22,12 +20,7 @@ constructor(
   private val storeRepository: StoreRepository,
 ) : BaseViewModel() {
 
-  private val compassItemsFlow =
-    locator
-      .placeTimeFlow()
-      .map(SunTimeSeries::create)
-      .map(SunCompass::create)
-      .map(compassItemsFactory::create)
+  private val compassItemsFlow = locator.placeTimeFlow().map(compassItemsFactory::create)
 
   // Compass turns opposite heading.
   private val compassAngleFlow = orienter.headingFlow.map { heading -> 360f - heading }

@@ -25,13 +25,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
-import org.onereed.helios.util.TimberRule
+import org.onereed.helios.util.TimberConsoleRule
 import timber.log.Timber
 
 @OptIn(ExperimentalTime::class)
 class FlowPlaygroundTest {
 
-  @get:Rule val timberRule = TimberRule()
+  @get:Rule val timberConsoleRule = TimberConsoleRule()
 
   @Test
   fun subscription() = runBlocking {

@@ -26,7 +26,8 @@ import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.take
 import org.onereed.helios.common.arc
 import org.onereed.helios.common.logAllEvents
-import org.onereed.helios.common.logBoundaryEvents
+import org.onereed.helios.common.logKeyEvents
+import org.onereed.helios.common.logOutcomes
 import timber.log.Timber
 
 @Singleton
@@ -51,16 +52,18 @@ constructor(@ApplicationContext context: Context, storeRepository: StoreReposito
       .take(LOCK_SWING_TICKS)
 
   private val liveHeadingFlow =
-    getOrientationUpdates().map { it.headingDegrees }.logBoundaryEvents("liveHeadingFlow")
+    getOrientationUpdates().map { it.headingDegrees }.logKeyEvents("liveHeadingFlow")
 
   val headingFlow =
-    lockedHeadingFlow.flatMapLatest { lockedHeading ->
-      storeRepository.isCompassLockedFlow
-        .logAllEvents("isCompassLockedFlow")
-        .flatMapLatest { isLocked -> if (isLocked) swingToLockedHeadingFlow else liveHeadingFlow }
-        .scan(lockedHeading, ::smooth)
-        .map(::quantize)
-    }
+    lockedHeadingFlow
+      .flatMapLatest { lockedHeading ->
+        storeRepository.isCompassLockedFlow
+          .logAllEvents("isCompassLockedFlow")
+          .flatMapLatest { isLocked -> if (isLocked) swingToLockedHeadingFlow else liveHeadingFlow }
+          .scan(lockedHeading, ::smooth)
+          .map(::quantize)
+      }
+      .logKeyEvents("headingFlow")
 
   private fun getOrientationUpdates(): Flow<DeviceOrientation> = callbackFlow {
     val orientationListener = DeviceOrientationListener {
@@ -69,13 +72,13 @@ constructor(@ApplicationContext context: Context, storeRepository: StoreReposito
 
     orientationProvider
       .requestOrientationUpdates(DEVICE_ORIENTATION_REQUEST, executor, orientationListener)
-      .logBoundaryEvents("requestOrientationUpdates")
+      .logOutcomes("requestOrientationUpdates")
       .addOnFailureListener { e -> close(e) }
 
     awaitClose {
       orientationProvider
         .removeOrientationUpdates(orientationListener)
-        .logBoundaryEvents("removeOrientationUpdates")
+        .logOutcomes("removeOrientationUpdates")
     }
   }
 

@@ -13,17 +13,15 @@ import kotlinx.coroutines.flow.stateIn
 
 // See https://proandroiddev.com/clean-stateflow-transformations-in-kotlin-608f4c7de5ab
 
-fun <T, K> StateFlow<T>.mapState(scope: CoroutineScope, transform: (data: T) -> K): StateFlow<K> {
-  return mapLatest { transform(it) }.stateIn(scope = scope, initialValue = transform(value))
-}
+fun <T, K> StateFlow<T>.mapState(scope: CoroutineScope, transform: (data: T) -> K): StateFlow<K> =
+  mapLatest { transform(it) }.stateIn(scope = scope, initialValue = transform(value))
 
-fun <T> Flow<T>.stateIn(scope: CoroutineScope, initialValue: T): StateFlow<T> {
-  return stateIn(
+fun <T> Flow<T>.stateIn(scope: CoroutineScope, initialValue: T): StateFlow<T> =
+  stateIn(
     scope = scope,
     initialValue = initialValue,
     started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
   )
-}
 
 /**
  * We build in a short delay before unsubscribing so that established flows survive brief

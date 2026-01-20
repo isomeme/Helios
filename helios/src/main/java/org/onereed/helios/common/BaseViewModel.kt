@@ -8,7 +8,9 @@ import kotlinx.coroutines.flow.StateFlow
 /** See https://proandroiddev.com/clean-stateflow-transformations-in-kotlin-608f4c7de5ab */
 abstract class BaseViewModel : ViewModel() {
 
-  fun <T> Flow<T>.stateIn(initialValue: T): StateFlow<T> {
-    return stateIn(scope = viewModelScope, initialValue = initialValue)
-  }
+  fun <T, K> StateFlow<T>.mapState(transform: (data: T) -> K): StateFlow<K> =
+    mapState(scope = viewModelScope, transform = transform)
+
+  fun <T> Flow<T>.stateIn(initialValue: T): StateFlow<T> =
+    stateIn(scope = viewModelScope, initialValue = initialValue)
 }

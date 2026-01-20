@@ -8,7 +8,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.onereed.helios.datasource.PlaceTime
 import org.onereed.helios.datasource.testing.santaMonica
-import org.onereed.helios.util.TimberRule
+import org.onereed.helios.util.TimberConsoleRule
 
 /**
  * This test is intended to be modified as needed to find anomalous behaviors in [SunTimeSeries].
@@ -16,7 +16,7 @@ import org.onereed.helios.util.TimberRule
 @OptIn(ExperimentalTime::class)
 class SunTimeSeriesSweepTest {
 
-  @get:Rule val timberRule = TimberRule()
+  @get:Rule val timberConsoleRule = TimberConsoleRule()
 
   @Test
   fun sweep() {

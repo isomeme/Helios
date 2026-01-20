@@ -8,13 +8,11 @@ import kotlinx.coroutines.flow.onStart
 import timber.log.Timber
 
 fun <T> Flow<T>.logAllEvents(label: String = "flow"): Flow<T> =
-  onStart { Timber.d("$label start") }
-    .onEach { Timber.d("$label each $it") }
-    .onCompletion { Timber.d("$label completion") }
+  logKeyEvents(label).onEach { Timber.d("$label each $it") }
 
-fun <T> Flow<T>.logBoundaryEvents(label: String = "flow"): Flow<T> =
+fun <T> Flow<T>.logKeyEvents(label: String = "flow"): Flow<T> =
   onStart { Timber.d("$label start") }.onCompletion { Timber.d("$label completion") }
 
-fun <T> Task<T>.logBoundaryEvents(label: String = "task"): Task<T> =
+fun <T> Task<T>.logOutcomes(label: String = "task"): Task<T> =
   addOnSuccessListener { Timber.d("$label success") }
     .addOnFailureListener { e -> Timber.e(e, "$label failure") }

@@ -11,14 +11,14 @@ import timber.log.Timber
  * A [TestRule] which configures the [Timber] logging system to write log entries to the console.
  * Each line includes a timestamp and the logged message.
  */
-class TimberRule : TestRule {
+class TimberConsoleRule : TestRule {
   override fun apply(base: Statement, description: Description): Statement {
     return object : Statement() {
       override fun evaluate() {
         Timber.plant(
           object : Timber.DebugTree() {
             override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-              val time = timeFormatter.format(Date())
+              val time = TIME_FORMATTER.format(Date())
               println("*** $time: $message")
               t?.printStackTrace()
             }
@@ -35,6 +35,7 @@ class TimberRule : TestRule {
   }
 
   companion object {
-    val timeFormatter = SimpleDateFormat("HH:mm:ss.SSS")
+
+    private val TIME_FORMATTER = SimpleDateFormat("HH:mm:ss.SSS")
   }
 }

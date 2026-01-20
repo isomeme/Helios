@@ -1,10 +1,8 @@
 package org.onereed.helios.compose.text
 
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import org.onereed.helios.common.BaseViewModel
-import org.onereed.helios.common.mapState
 
 @HiltViewModel
 class TextViewModel
@@ -15,5 +13,5 @@ constructor(
   val selectTextIndex: SelectTextIndexUseCase,
 ) : BaseViewModel() {
 
-  val textUiFlow = textStateHolder.selectedIndexFlow.mapState(viewModelScope, uiFactory::create)
+  val textUiFlow = textStateHolder.selectedIndexFlow.mapState(uiFactory::create)
 }
