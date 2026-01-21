@@ -8,12 +8,12 @@ import com.google.android.gms.location.DeviceOrientationListener
 import com.google.android.gms.location.DeviceOrientationRequest
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.microseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.runningReduce
 import kotlinx.coroutines.flow.take
 import org.onereed.helios.common.ApplicationScope
 import org.onereed.helios.common.arc
@@ -40,16 +40,17 @@ class Orienter
 @Inject
 constructor(
   @ApplicationScope externalScope: CoroutineScope,
-  @ApplicationContext context: Context, storeRepository: StoreRepository) {
-
+  @ApplicationContext context: Context,
+  storeRepository: StoreRepository,
+) {
   private val executor by lazy { Dispatchers.Default.asExecutor() }
 
   private val orientationProvider by lazy {
     LocationServices.getFusedOrientationProviderClient(context)
   }
 
-  val isCompassLockedFlow = storeRepository.isCompassLockedFlow
-    .logAllEvents("isCompassLockedFlow")
+  private val isCompassLockedFlow =
+    storeRepository.isCompassLockedFlow.logAllEvents("isCompassLockedFlow")
 
   private val lockedHeadingFlow =
     storeRepository.isCompassSouthTopFlow
@@ -60,29 +61,21 @@ constructor(
     lockedHeadingFlow
       .flatMapLatest { heading -> repeatingTickerFlow(TICKER_INTERVAL, heading) }
       .take(LOCK_SWING_TICKS)
+      .logKeyEvents("swingToLockedHeadingFlow")
 
   private val liveHeadingFlow =
-    getOrientationUpdates().map { it.headingDegrees }
-      .stateIn(externalScope, null)
+    getOrientationUpdates()
+      .map { it.headingDegrees }
+      .stateIn(externalScope, null) // Sustain orientation updates across small gaps.
       .filterNotNull()
       .logKeyEvents("liveHeadingFlow")
 
-  private val initialHeadingFlow =
-    isCompassLockedFlow
-      .flatMapLatest { isLocked -> if (isLocked) lockedHeadingFlow else liveHeadingFlow }
-      .logAllEvents("initialHeadingFlow")
-
   val headingFlow =
-    initialHeadingFlow
-      .take(1)
-      .flatMapLatest { initialHeading ->
-        isCompassLockedFlow
-          .combine(lockedHeadingFlow) { isLocked, _ -> isLocked }
-          .logAllEvents("combinedLockFlow")
-          .flatMapLatest { isLocked -> if (isLocked) swingToLockedHeadingFlow else liveHeadingFlow }
-          .scan(initialHeading, ::smooth)
-          .map(::quantize)
-      }
+    combine(isCompassLockedFlow, lockedHeadingFlow) { isLocked, _ -> isLocked }
+      .logAllEvents("combinedLockFlow")
+      .flatMapLatest { isLocked -> if (isLocked) swingToLockedHeadingFlow else liveHeadingFlow }
+      .runningReduce(::smooth)
+      .map(::quantize)
       .logKeyEvents("headingFlow")
 
   private fun getOrientationUpdates(): Flow<DeviceOrientation> = callbackFlow {
