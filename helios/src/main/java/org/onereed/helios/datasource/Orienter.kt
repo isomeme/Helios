@@ -13,7 +13,6 @@ import javax.inject.Singleton
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.microseconds
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
@@ -22,27 +21,21 @@ import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.runningReduce
 import kotlinx.coroutines.flow.take
-import org.onereed.helios.common.ApplicationScope
 import org.onereed.helios.common.arc
 import org.onereed.helios.common.logAllEvents
 import org.onereed.helios.common.logKeyEvents
 import org.onereed.helios.common.logOutcomes
-import org.onereed.helios.common.stateIn
 import timber.log.Timber
 
 @Singleton
 class Orienter
 @Inject
-constructor(
-  @ApplicationScope externalScope: CoroutineScope,
-  @ApplicationContext context: Context,
-  storeRepository: StoreRepository,
-) {
+constructor(@ApplicationContext context: Context, storeRepository: StoreRepository) {
+
   private val executor by lazy { Dispatchers.Default.asExecutor() }
 
   private val orientationProvider by lazy {
@@ -64,11 +57,7 @@ constructor(
       .logKeyEvents("swingToLockedHeadingFlow")
 
   private val liveHeadingFlow =
-    getOrientationUpdates()
-      .map { it.headingDegrees }
-      .stateIn(externalScope, null) // Sustain orientation updates across small gaps.
-      .filterNotNull()
-      .logKeyEvents("liveHeadingFlow")
+    getOrientationUpdates().map { it.headingDegrees }.logKeyEvents("liveHeadingFlow")
 
   val headingFlow =
     combine(isCompassLockedFlow, lockedHeadingFlow) { isLocked, _ -> isLocked }
