@@ -5,7 +5,6 @@ plugins {
   alias(libs.plugins.hiltAndroid) apply false
   alias(libs.plugins.ksp) apply false
   alias(libs.plugins.googleServices) apply false
-  alias(libs.plugins.kotlinAndroid) apply false
   alias(libs.plugins.kotlinCompose) apply false
 
   // Intentionally allowing this to operate at root level.

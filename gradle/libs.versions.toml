@@ -1,9 +1,9 @@
 [versions]
-androidApplication = "8.13.2"
-hilt = "2.57.2"
+androidApplication = "9.0.0"
+hilt = "2.58"
 ksp = "2.3.4"
 googleServices = "4.4.4"
-kotlin = "2.2.21"
+kotlin = "2.3.0"
 kotlinPluginSerialization = "2.3.0"
 benManesVersions = "0.53.0"
 desugarJdkLibsNio = "2.1.5"
@@ -92,7 +92,6 @@ androidApplication = { id = "com.android.application", version.ref = "androidApp
 hiltAndroid = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }
-kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinCompose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinPluginSerialization" }
 benManesVersions = { id = "com.github.ben-manes.versions", version.ref = "benManesVersions" }

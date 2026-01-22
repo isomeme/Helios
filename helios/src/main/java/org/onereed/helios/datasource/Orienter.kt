@@ -54,14 +54,12 @@ constructor(@ApplicationContext context: Context, storeRepository: StoreReposito
     lockedHeadingFlow
       .flatMapLatest { heading -> repeatingTickerFlow(TICKER_INTERVAL, heading) }
       .take(LOCK_SWING_TICKS)
-      .logKeyEvents("swingToLockedHeadingFlow")
 
   private val liveHeadingFlow =
-    getOrientationUpdates().map { it.headingDegrees }.logKeyEvents("liveHeadingFlow")
+    getOrientationUpdates().map { it.headingDegrees }
 
   val headingFlow =
     combine(isCompassLockedFlow, lockedHeadingFlow) { isLocked, _ -> isLocked }
-      .logAllEvents("combinedLockFlow")
       .flatMapLatest { isLocked -> if (isLocked) swingToLockedHeadingFlow else liveHeadingFlow }
       .runningReduce(::smooth)
       .map(::quantize)

@@ -2,7 +2,6 @@ plugins {
   alias(libs.plugins.androidApplication)
   alias(libs.plugins.googleServices)
   alias(libs.plugins.hiltAndroid)
-  alias(libs.plugins.kotlinAndroid)
   alias(libs.plugins.kotlinCompose)
   alias(libs.plugins.kotlinSerialization)
   alias(libs.plugins.ksp)
@@ -14,8 +13,8 @@ android {
 
   defaultConfig {
     applicationId = "org.onereed.helios"
-    versionCode = 21
-    versionName = "3.0.1"
+    versionCode = 22
+    versionName = "3.0.2"
 
     minSdk = 26
     targetSdk = 36
@@ -28,10 +27,11 @@ android {
       listOf(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
 
     getByName("release") {
+      versionNameSuffix = ""
+
       isMinifyEnabled = true
       isShrinkResources = true
       setProguardFiles(commonProguardFiles)
-      versionNameSuffix = ""
 
       ndk {
         debugSymbolLevel = "FULL"
@@ -41,12 +41,13 @@ android {
     getByName("debug") { versionNameSuffix = " (debug)" }
 
     create("staging") {
+      versionNameSuffix = " (staging)"
+
       initWith(getByName("debug"))
       isDebuggable = false
       isMinifyEnabled = true
       isShrinkResources = true
       setProguardFiles(commonProguardFiles)
-      versionNameSuffix = " (staging)"
     }
   }
 
