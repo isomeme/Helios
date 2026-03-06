@@ -35,14 +35,10 @@
     <string name="view_online_documentation">View online documentation</string>
 
     <string name="location_permission_rationale">
-        Helios uses your precise location to calculate the times and directions of sunrise, noon,
-        sunset, and midnight. Please touch the \'OK\' button below, then grant Helios permission to
-        access your precise location in the resulting Android permission management dialog.
+        Helios needs your precise location to calculate sun events. Tap OK, then grant permission.
     </string>
     <string name="location_permission_use_settings">
-        Helios uses your precise location to calculate the times and directions of sunrise, noon,
-        sunset, and midnight. The app cannot be used without permission to access your precise
-        location. This permission must be granted in the \'Permissions\' section of the app
-        settings. Touch the \'OK\' button below to open the app settings.
+        Helios requires your precise location to function. Tap OK to open Settings and grant
+        permission.
     </string>
 </resources>
