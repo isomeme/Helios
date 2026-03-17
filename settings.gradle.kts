@@ -15,8 +15,19 @@ dependencyResolutionManagement {
     mavenCentral()
     maven { url = uri("https://jitpack.io") }
   }
+
+  versionCatalogs {
+    create("sharedLibs") {
+      from(files("submodules/Shared/gradle/libs.versions.toml"))
+    }
+  }
 }
 
 rootProject.name = "Helios"
-
 include(":helios")
+
+include(":Shared")
+project(":Shared").projectDir = file("submodules/Shared")
+
+include(":Shared:app")
+project(":Shared:app").projectDir = file("submodules/Shared/app")

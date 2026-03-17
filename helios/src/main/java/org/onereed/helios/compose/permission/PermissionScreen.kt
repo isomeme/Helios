@@ -45,7 +45,8 @@ import org.onereed.helios.ui.theme.DarkHeliosTheme
 @Composable
 fun PermissionScreen(locationPermissionState: PermissionState) {
   // Marked as nullable, but expected to be non-null in runtime app.
-  val activity = LocalActivity.current
+  val activity = LocalActivity.current!!
+
   val permissionActions =
     remember(locationPermissionState, activity) {
       PermissionActions(locationPermissionState, activity)
@@ -130,11 +131,11 @@ private data class PermissionActions(
 ) {
   constructor(
     permissionState: PermissionState,
-    activity: Activity?,
+    activity: Activity,
   ) : this(
     requestPermission = permissionState::launchPermissionRequest,
-    openSettings = { activity?.openSettings() },
-    exitApp = { activity?.finishAndRemoveTask() },
+    openSettings = { activity.openSettings() },
+    exitApp = { activity.finishAndRemoveTask() },
   )
 }
 

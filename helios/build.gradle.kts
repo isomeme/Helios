@@ -82,6 +82,10 @@ dependencies {
   // Required for Java 8+ APIs on API levels < 33
   coreLibraryDesugaring(libs.desugarJdkLibsNio)
 
+  // Shared org.onereed library
+
+  implementation(project(":Shared:app"))
+
   // Core Dependencies
   implementation(libs.coreKtx)
   implementation(libs.bundles.composeRuntime)
