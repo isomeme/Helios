@@ -9,7 +9,7 @@ plugins {
 
 android {
   namespace = "org.onereed.helios"
-  compileSdk = 36
+  compileSdk { version = release(37) { minorApiLevel = 1 } }
 
   defaultConfig {
     applicationId = "org.onereed.helios"
@@ -17,7 +17,7 @@ android {
     versionName = "3.0.2"
 
     minSdk = 26
-    targetSdk = 36
+    targetSdk = 37
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -71,10 +71,6 @@ android {
 
 kotlin {
   jvmToolchain(17)
-
-  compilerOptions {
-    freeCompilerArgs.add("-Xannotation-default-target=param-property")
-  }
 }
 
 dependencies {
