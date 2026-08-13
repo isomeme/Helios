@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -92,4 +92,4 @@ fun StatelessHeliosApp(
 
 // See https://issuetracker.google.com/issues/378726489#comment5
 @Composable
-private fun navSuiteType(): NavigationSuiteType = navigationSuiteType(currentWindowAdaptiveInfo())
+private fun navSuiteType(): NavigationSuiteType = navigationSuiteType(currentWindowAdaptiveInfoV2())
