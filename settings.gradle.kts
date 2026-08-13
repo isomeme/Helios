@@ -26,8 +26,4 @@ dependencyResolutionManagement {
 rootProject.name = "Helios"
 include(":helios")
 
-include(":Shared")
-project(":Shared").projectDir = file("submodules/Shared")
-
-include(":Shared:app")
-project(":Shared:app").projectDir = file("submodules/Shared/app")
+includeBuild("submodules/Shared")

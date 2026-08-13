@@ -78,9 +78,12 @@ dependencies {
   // Required for Java 8+ APIs on API levels < 33
   coreLibraryDesugaring(libs.desugarJdkLibsNio)
 
-  // Shared org.onereed library
+  // Compose BOM
+  implementation(platform(libs.composeBom))
+  androidTestImplementation(enforcedPlatform(libs.composeBom))
 
-  implementation(project(":Shared:app"))
+  // org.onereed.shared library
+  implementation(libs.onereedShared)
 
   // Core Dependencies
   implementation(libs.coreKtx)
@@ -88,13 +91,6 @@ dependencies {
   implementation(libs.bundles.navigationRuntime)
   implementation(libs.bundles.hiltRuntime)
   ksp(libs.bundles.hiltProcessor)
-
-  // Compose BOM
-  val composeBom = platform(libs.composeBom)
-  implementation(composeBom)
-  debugImplementation(composeBom)
-  testImplementation(composeBom)
-  androidTestImplementation(composeBom)
 
   // Services
   implementation(libs.firebaseAnalytics)
