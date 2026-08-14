@@ -11,7 +11,10 @@ plugins {
   alias(libs.plugins.benManesVersions)
 }
 
-tasks.register<Delete>("clean") { delete(rootProject.layout.buildDirectory) }
+tasks.register<Delete>("clean") {
+  description = "Deep clean builder output directories"
+  delete(rootProject.layout.buildDirectory)
+}
 
 tasks.withType<JavaCompile> {
   options.compilerArgs.addAll(listOf("-Xlint:unchecked", "-Xlint:deprecation"))
