@@ -13,8 +13,8 @@ android {
 
   defaultConfig {
     applicationId = "org.onereed.helios"
-    versionCode = 22
-    versionName = "3.0.2"
+    versionCode = 23
+    versionName = "3.0.3"
 
     minSdk = 26
     targetSdk = 37
