@@ -62,7 +62,6 @@ android {
 
   buildFeatures {
     buildConfig = true
-    viewBinding = true
     compose = true
   }
 
@@ -79,6 +78,7 @@ dependencies {
   coreLibraryDesugaring(libs.desugarJdkLibsNio)
 
   // Compose BOM
+  // Use of enforcedPlatform is a hack to avoid duplicate-dependencies warnings.
   implementation(platform(libs.composeBom))
   androidTestImplementation(enforcedPlatform(libs.composeBom))
 
