@@ -57,9 +57,6 @@ android {
     isCoreLibraryDesugaringEnabled = true
   }
 
-  // See https://stackoverflow.com/questions/65124097
-  lint.disable += "UseCompatLoadingForDrawables"
-
   buildFeatures {
     buildConfig = true
     compose = true
@@ -68,19 +65,17 @@ android {
   testOptions { unitTests.isReturnDefaultValues = true }
 }
 
-kotlin {
-  jvmToolchain(17)
-}
-
 dependencies {
 
   // Required for Java 8+ APIs on API levels < 33
   coreLibraryDesugaring(libs.desugarJdkLibsNio)
 
   // Compose BOM
-  // Use of enforcedPlatform is a hack to avoid duplicate-dependencies warnings.
+  // See https://www.reddit.com/r/AndroidStudio/comments/1vnjxv4/comment/p3mmorh/
+  @Suppress("AvoidDuplicateDependencies")
   implementation(platform(libs.composeBom))
-  androidTestImplementation(enforcedPlatform(libs.composeBom))
+  @Suppress("AvoidDuplicateDependencies")
+  androidTestImplementation(platform(libs.composeBom))
 
   // org.onereed.shared library
   implementation(libs.onereedShared)
