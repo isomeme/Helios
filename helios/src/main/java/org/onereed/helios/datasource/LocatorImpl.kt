@@ -24,8 +24,8 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import org.onereed.helios.common.ApplicationScope
-import org.onereed.helios.common.logAllEvents
-import org.onereed.helios.common.logOutcomes
+import org.onereed.shared.logging.logAllEvents
+import org.onereed.shared.logging.logOutcomes
 import org.onereed.helios.common.stateIn
 import org.onereed.helios.datasource.PlaceTime.Place
 import timber.log.Timber

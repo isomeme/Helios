@@ -26,9 +26,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.runningReduce
 import kotlinx.coroutines.flow.take
 import org.onereed.helios.common.arc
-import org.onereed.helios.common.logAllEvents
-import org.onereed.helios.common.logKeyEvents
-import org.onereed.helios.common.logOutcomes
+import org.onereed.shared.logging.logAllEvents
+import org.onereed.shared.logging.logKeyEvents
+import org.onereed.shared.logging.logOutcomes
 import timber.log.Timber
 
 @Singleton

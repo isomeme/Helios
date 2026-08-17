@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.onereed.helios.util.TestTree
+import org.onereed.shared.logging.logAllEvents
 import timber.log.Timber
 
 class LoggingExtensionsTest {

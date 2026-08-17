@@ -1,6 +1,5 @@
 package org.onereed.helios.compose.permission
 
-import android.app.Activity
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -21,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -38,8 +36,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import org.onereed.helios.R
-import org.onereed.helios.common.openSettings
 import org.onereed.helios.ui.theme.DarkHeliosTheme
+import org.onereed.shared.permission.PermissionActions
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -120,23 +118,6 @@ fun StatelessPermissionScreen(
       }
     }
   }
-}
-
-@Immutable
-@OptIn(ExperimentalPermissionsApi::class)
-private data class PermissionActions(
-  val requestPermission: () -> Unit,
-  val openSettings: () -> Unit,
-  val exitApp: () -> Unit,
-) {
-  constructor(
-    permissionState: PermissionState,
-    activity: Activity,
-  ) : this(
-    requestPermission = permissionState::launchPermissionRequest,
-    openSettings = { activity.openSettings() },
-    exitApp = { activity.finishAndRemoveTask() },
-  )
 }
 
 @Preview

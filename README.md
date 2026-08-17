@@ -13,7 +13,7 @@ Android app which assists with the practice of
 
 *Helios* is an Android app designed to assist with the practice of *Liber Resh* by providing the
 times, directions, and associated texts for recent and upcoming quarters of the Sun.
-It is maintained as [a Github repository](https://github.com/isomeme/Helios).
+It is maintained as [a GitHub repository](https://github.com/isomeme/Helios).
 
 ## Author
 
