@@ -16,9 +16,6 @@
     <string name="content_sun_position">Sun position</string>
     <string name="content_sun_movement_direction">Sun movement direction</string>
 
-    <string name="button_exit">Exit</string>
-    <string name="button_ok">OK</string>
-
     <string name="scroll_to_top">Scroll to top</string>
     <string name="scroll_to_bottom">Scroll to bottom</string>
 

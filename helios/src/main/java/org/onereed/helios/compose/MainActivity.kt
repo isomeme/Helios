@@ -7,13 +7,13 @@ import androidx.activity.enableEdgeToEdge
 import dagger.hilt.android.AndroidEntryPoint
 import org.onereed.helios.compose.app.HeliosApp
 import org.onereed.helios.ui.theme.HeliosTheme
-import org.onereed.shared.logging.LifecycleLogger
+import org.onereed.shared.logging.LifecycleLogger.Companion.addLogger
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
   init {
-    lifecycle.addObserver(LifecycleLogger())
+    lifecycle.addLogger()
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
