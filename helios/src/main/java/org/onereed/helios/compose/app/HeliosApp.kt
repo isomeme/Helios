@@ -67,9 +67,9 @@ fun StatelessHeliosApp(
   ) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
       NavHost(
+        modifier = Modifier.padding(innerPadding),
         navController = navHostController,
         startDestination = Screen.Schedule,
-        modifier = Modifier.padding(innerPadding),
       ) {
         composable<Screen.Schedule> { WithPermissions { ScheduleScreen(navActions = navActions) } }
         composable<Screen.Text> { TextScreen() }
@@ -84,6 +84,7 @@ fun StatelessHeliosApp(
 private fun WithPermissions(content: @Composable () -> Unit) {
   PermissionGate(
     permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION),
+    allowCoarseLocation = true,
     rationaleTitle = stringResource(R.string.permission_title),
     rationaleDescription = stringResource(R.string.permission_rationale),
     useSettingsTitle = stringResource(R.string.permission_title),

@@ -1,8 +1,7 @@
 package org.onereed.helios.datasource
 
-import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.content.Context
-import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.location.Location
 import android.os.Looper
 import com.google.android.gms.location.LocationCallback
@@ -24,10 +23,11 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import org.onereed.helios.common.ApplicationScope
-import org.onereed.shared.logging.logAllEvents
-import org.onereed.shared.logging.logOutcomes
 import org.onereed.helios.common.stateIn
 import org.onereed.helios.datasource.PlaceTime.Place
+import org.onereed.shared.logging.logAllEvents
+import org.onereed.shared.logging.logOutcomes
+import org.onereed.shared.permission.hasCapability
 import timber.log.Timber
 
 @OptIn(ExperimentalTime::class)
@@ -52,8 +52,11 @@ constructor(
   override fun placeTimeFlow() = _placeTimeFlow
 
   private fun getLocationUpdates(): Flow<Location> = callbackFlow {
-    if (context.checkSelfPermission(ACCESS_FINE_LOCATION) != PERMISSION_GRANTED) {
-      Timber.d("Not requesting location updates; permission not granted yet.")
+    // If fine location is available, coarse location will always also be available. So we can use
+    // coarse location availability as a proxy for location availability in general.
+
+    if (!context.hasCapability(ACCESS_COARSE_LOCATION)) {
+      Timber.d("Location reporting is not yet available.")
       close()
       return@callbackFlow
     }
@@ -67,6 +70,8 @@ constructor(
         }
       }
 
+    // Permission check is done by hasCapability() above.
+    // noinspection MissingPermission
     locationProvider
       .requestLocationUpdates(LOCATION_REQUEST, locationCallback, Looper.getMainLooper())
       .logOutcomes("requestLocationUpdates")

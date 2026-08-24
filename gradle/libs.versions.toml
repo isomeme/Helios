@@ -2,7 +2,7 @@
 accompanistPermissions = "0.37.3"
 activityCompose = "1.13.0"
 activityKtx = "1.13.0"
-androidApplication = "9.3.1"
+androidApplication = "9.3.2"
 androidxHilt = "1.4.0"
 androidxTestExtJunit = "1.3.0"
 appcompat = "1.8.0"
@@ -108,7 +108,6 @@ composeRuntime = [
     "ui",
     "uiGraphics",
     "uiTextGoogleFonts",
-    "uiToolingPreview",
 ]
 
 # For core Navigation in production code
@@ -127,7 +126,7 @@ hiltRuntime = ["hiltAndroid", "androidxHiltNavigationCompose"]
 hiltProcessor = ["hiltCompiler", "androidxHiltCompiler"]
 
 # For Previews and the Layout Inspector
-composeDebug = ["uiTooling"]
+composeDebug = ["uiTooling", "uiToolingPreview"]
 
 # For local unit tests
 unitTest = ["junit", "kotlinTest", "kotlinxCoroutinesTest", "mockitoCore", "truth"]

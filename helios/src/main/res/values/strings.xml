@@ -33,12 +33,12 @@
 
     <string name="permission_title">Location access required</string>
     <string name="permission_rationale">
-        Helios needs to know your precise location to calculate sun event times and directions for
-        the schedule and compass screens.
+        Helios needs to know your location to calculate sun event times and directions for the
+        schedule and compass screens.
     </string>
     <string name="permission_use_settings">
-        Helios needs to know your precise location to calculate sun event times and directions for
-        the schedule and compass screens. You must grant this permission manually in the app\'s
+        Helios needs to know your location to calculate sun event times and directions for the
+        schedule and compass screens. You must grant this permission manually in the app\'s
         system settings.
     </string>
 </resources>
