@@ -31,6 +31,7 @@
 
     <string name="view_online_documentation">View online documentation</string>
 
+    <string name="permission_button">Allow location access</string>
     <string name="permission_title">Location access required</string>
     <string name="permission_rationale">
         Helios needs to know your location to calculate sun event times and directions for the

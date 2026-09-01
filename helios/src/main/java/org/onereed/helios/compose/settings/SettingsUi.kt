@@ -5,12 +5,8 @@ import org.onereed.helios.ui.theme.ThemeType
 
 @Immutable
 data class SettingsUi(
-  val isDynamicTheme: Boolean,
-  val themeType: ThemeType,
-  val isCompassSouthTop: Boolean,
-) {
-  companion object {
-    val INITIAL =
-      SettingsUi(isDynamicTheme = false, themeType = ThemeType.SYSTEM, isCompassSouthTop = false)
-  }
-}
+  val isDynamicTheme: Boolean = false,
+  val themeType: ThemeType = ThemeType.SYSTEM,
+  val isCompassSouthTop: Boolean = false,
+  val locationUpgradeAvailable: Boolean = false,
+)

@@ -47,6 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.onereed.helios.R
 import org.onereed.helios.compose.shared.ScrollbarActions
@@ -58,6 +59,11 @@ import org.onereed.shared.sysinfo.dynamicThemeSupported
 
 @Composable
 fun SettingsScreen(settingsViewModel: SettingsViewModel = hiltViewModel()) {
+  LifecycleResumeEffect(Unit) {
+    settingsViewModel.updateLocationUpgradeAvailable()
+    onPauseOrDispose {}
+  }
+
   val settingsUi by settingsViewModel.settingsUiFlow.collectAsStateWithLifecycle()
 
   val uriHandler = LocalUriHandler.current
@@ -107,6 +113,8 @@ private fun StatelessSettingsScreen(
           ThemeSettings(settingsUi.themeType, settingsUi.isDynamicTheme, settingsActions)
 
           CompassSettings(settingsUi.isCompassSouthTop, settingsActions)
+
+          LocationUpgradeSettings(settingsUi.locationUpgradeAvailable, settingsActions)
 
           OnlineDocLink(settingsActions)
         }
@@ -221,6 +229,28 @@ private fun CompassSettings(isCompassSouthTop: Boolean, settingsActions: Setting
 }
 
 @Composable
+private fun LocationUpgradeSettings(
+  locationUpgradeAvailable: Boolean,
+  settingsActions: SettingsActions,
+) {
+  Column(
+    modifier =
+      Modifier.fillMaxWidth()
+        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+        .padding(all = 15.dp),
+    verticalArrangement = Arrangement.spacedBy(15.dp),
+  ) {
+    Text(
+      text = "Location upgrade",
+      style = MaterialTheme.typography.labelLarge,
+      fontWeight = FontWeight.Bold,
+    )
+
+    Text(text = "$locationUpgradeAvailable")
+  }
+}
+
+@Composable
 private fun OnlineDocLink(settingsActions: SettingsActions) {
   TextButton(
     modifier = Modifier.fillMaxWidth(),
@@ -279,7 +309,12 @@ private data class SettingsActions(
 @Composable
 fun SettingsScreenPreview() {
   val settingsUi =
-    SettingsUi(isDynamicTheme = true, themeType = ThemeType.SYSTEM, isCompassSouthTop = true)
+    SettingsUi(
+      isDynamicTheme = true,
+      themeType = ThemeType.SYSTEM,
+      isCompassSouthTop = true,
+      locationUpgradeAvailable = true,
+    )
   val settingsActions =
     SettingsActions(
       onThemeTypeSelected = {},

@@ -7,11 +7,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults.navigationSuiteType
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -47,7 +44,6 @@ fun StatelessHeliosApp(
   navActions: NavActions,
 ) {
   NavigationSuiteScaffold(
-    navigationSuiteType = navSuiteType(),
     navigationItems = {
       Screen.TopLevelScreens.forEach { screen ->
         val isSelected = isSelectedFn(screen)
@@ -85,6 +81,7 @@ private fun WithPermissions(content: @Composable () -> Unit) {
   PermissionGate(
     permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION),
     allowCoarseLocation = true,
+    grantButtonLabel = stringResource(R.string.permission_button),
     rationaleTitle = stringResource(R.string.permission_title),
     rationaleDescription = stringResource(R.string.permission_rationale),
     useSettingsTitle = stringResource(R.string.permission_title),
@@ -93,7 +90,3 @@ private fun WithPermissions(content: @Composable () -> Unit) {
     content()
   }
 }
-
-// See https://issuetracker.google.com/issues/378726489#comment5
-@Composable
-private fun navSuiteType(): NavigationSuiteType = navigationSuiteType(currentWindowAdaptiveInfoV2())
