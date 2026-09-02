@@ -23,7 +23,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -55,6 +54,7 @@ import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
 import org.onereed.helios.compose.shared.confirm
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 import org.onereed.helios.ui.theme.ThemeType
+import org.onereed.shared.screen.BasicFrame
 import org.onereed.shared.sysinfo.dynamicThemeSupported
 
 @Composable
@@ -94,39 +94,37 @@ private fun StatelessSettingsScreen(
   canScrollUp: Boolean,
   canScrollDown: Boolean,
   settingsUi: SettingsUi,
-  settingsActions: SettingsActions,
-  scrollbarActions: ScrollbarActions,
-  scrollState: ScrollState,
+  settingsActions: SettingsActions = SettingsActions(),
+  scrollbarActions: ScrollbarActions = ScrollbarActions(),
+  scrollState: ScrollState = rememberScrollState(),
 ) {
-  Surface(modifier = Modifier.fillMaxSize()) {
-    ProvideTextStyle(value = MaterialTheme.typography.labelMedium) {
-      ConstraintLayout(modifier = Modifier.fillMaxSize().padding(vertical = 10.dp)) {
-        val (settings, scrollbar) = createRefs()
+  ProvideTextStyle(value = MaterialTheme.typography.labelMedium) {
+    ConstraintLayout(modifier = Modifier.fillMaxSize().padding(vertical = 10.dp)) {
+      val (settings, scrollbar) = createRefs()
 
-        Column(
-          modifier =
-            Modifier.width(IntrinsicSize.Max).verticalScroll(scrollState).constrainAs(settings) {
-              centerTo(parent)
-            },
-          verticalArrangement = Arrangement.spacedBy(20.dp),
-        ) {
-          ThemeSettings(settingsUi.themeType, settingsUi.isDynamicTheme, settingsActions)
+      Column(
+        modifier =
+          Modifier.width(IntrinsicSize.Max).verticalScroll(scrollState).constrainAs(settings) {
+            centerTo(parent)
+          },
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+      ) {
+        ThemeSettings(settingsUi.themeType, settingsUi.isDynamicTheme, settingsActions)
 
-          CompassSettings(settingsUi.isCompassSouthTop, settingsActions)
+        CompassSettings(settingsUi.isCompassSouthTop, settingsActions)
 
-          LocationUpgradeSettings(settingsUi.locationUpgradeAvailable, settingsActions)
+        LocationUpgradeSettings(settingsUi.locationUpgradeAvailable)
 
-          OnlineDocLink(settingsActions)
-        }
-
-        SimpleVerticalScrollbar(
-          canScrollUp = canScrollUp,
-          canScrollDown = canScrollDown,
-          scrollbarActions = scrollbarActions,
-          modifier =
-            Modifier.constrainAs(scrollbar) { start.linkTo(anchor = settings.end, margin = 10.dp) },
-        )
+        OnlineDocLink(settingsActions)
       }
+
+      SimpleVerticalScrollbar(
+        canScrollUp = canScrollUp,
+        canScrollDown = canScrollDown,
+        scrollbarActions = scrollbarActions,
+        modifier =
+          Modifier.constrainAs(scrollbar) { start.linkTo(anchor = settings.end, margin = 10.dp) },
+      )
     }
   }
 }
@@ -231,7 +229,6 @@ private fun CompassSettings(isCompassSouthTop: Boolean, settingsActions: Setting
 @Composable
 private fun LocationUpgradeSettings(
   locationUpgradeAvailable: Boolean,
-  settingsActions: SettingsActions,
 ) {
   Column(
     modifier =
@@ -279,10 +276,10 @@ private fun OnlineDocLink(settingsActions: SettingsActions) {
 
 @Immutable
 private data class SettingsActions(
-  val onThemeTypeSelected: (ThemeType) -> Unit,
-  val onDynamicThemeSelected: (Boolean) -> Unit,
-  val onCompassSouthTopSelected: (Boolean) -> Unit,
-  val onViewDoc: () -> Unit,
+  val onThemeTypeSelected: (ThemeType) -> Unit = {},
+  val onDynamicThemeSelected: (Boolean) -> Unit = {},
+  val onCompassSouthTopSelected: (Boolean) -> Unit = {},
+  val onViewDoc: () -> Unit = {},
 ) {
   constructor(
     settingsViewModel: SettingsViewModel,
@@ -315,23 +312,14 @@ fun SettingsScreenPreview() {
       isCompassSouthTop = true,
       locationUpgradeAvailable = true,
     )
-  val settingsActions =
-    SettingsActions(
-      onThemeTypeSelected = {},
-      onDynamicThemeSelected = {},
-      onCompassSouthTopSelected = {},
-      onViewDoc = {},
-    )
-  val scrollbarActions = ScrollbarActions(onScrollToTop = {}, onScrollToBottom = {})
 
   DarkHeliosTheme {
-    StatelessSettingsScreen(
-      canScrollUp = false,
-      canScrollDown = true,
-      settingsUi = settingsUi,
-      settingsActions = settingsActions,
-      scrollbarActions = scrollbarActions,
-      scrollState = ScrollState(0),
-    )
+    BasicFrame {
+      StatelessSettingsScreen(
+        canScrollUp = false,
+        canScrollDown = true,
+        settingsUi = settingsUi,
+      )
+    }
   }
 }

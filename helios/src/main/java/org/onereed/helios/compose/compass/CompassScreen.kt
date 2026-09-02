@@ -11,7 +11,6 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,8 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.FlowPreview
 import org.onereed.helios.R
 import org.onereed.helios.compose.compass.ZIndex.COMPASS_FACE
@@ -44,6 +41,7 @@ import org.onereed.helios.compose.shared.sunColorFilters
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.datasource.testing.santaMonicaNow
 import org.onereed.helios.ui.theme.DarkHeliosTheme
+import org.onereed.shared.screen.BasicFrame
 
 @OptIn(FlowPreview::class)
 @Composable
@@ -60,9 +58,8 @@ fun CompassScreen(compassViewModel: CompassViewModel = hiltViewModel()) {
   )
 }
 
-@OptIn(ExperimentalAtomicApi::class)
 @Composable
-fun StatelessCompassScreen(compassUi: CompassUi, onLockChange: (Boolean) -> Unit) {
+fun StatelessCompassScreen(compassUi: CompassUi, onLockChange: (Boolean) -> Unit = {}) {
   val viewLineColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
   val compassFaceColor = MaterialTheme.colorScheme.outlineVariant
 
@@ -79,71 +76,68 @@ fun StatelessCompassScreen(compassUi: CompassUi, onLockChange: (Boolean) -> Unit
   val compassAngle = compassUi.compassAngle
   val isLocked = compassUi.isLocked
 
-  Surface(modifier = Modifier.fillMaxSize()) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-      if (!compassItems.isValid) {
-        CircularProgressIndicator(modifier = Modifier.zIndex(OVERLAY.zIndex))
-      }
+  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    if (!compassItems.isValid) {
+      CircularProgressIndicator(modifier = Modifier.zIndex(OVERLAY.zIndex))
+    }
 
-      Row(
-        modifier =
-          Modifier.align(Alignment.BottomEnd)
-            .padding(all = 15.dp)
-            .toggleable(value = isLocked, onValueChange = onLockChange, role = Role.Checkbox)
-            .padding(all = 15.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Checkbox(checked = isLocked, onCheckedChange = null)
+    Row(
+      modifier =
+        Modifier.align(Alignment.BottomEnd)
+          .padding(all = 15.dp)
+          .toggleable(value = isLocked, onValueChange = onLockChange, role = Role.Checkbox)
+          .padding(all = 15.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Checkbox(checked = isLocked, onCheckedChange = null)
 
-        Spacer(modifier = Modifier.width(10.dp))
+      Spacer(modifier = Modifier.width(10.dp))
 
-        Text(
-          text = stringResource(id = R.string.label_lock_compass),
-          style = MaterialTheme.typography.labelMedium,
-        )
-      }
+      Text(
+        text = stringResource(id = R.string.label_lock_compass),
+        style = MaterialTheme.typography.labelMedium,
+      )
+    }
 
+    Image(
+      painter = painterResource(id = R.drawable.ic_view_line),
+      contentDescription = stringResource(id = R.string.content_view_line),
+      colorFilter = viewLineColorFilter,
+      contentScale = ContentScale.Fit,
+      modifier = Modifier.fillMaxSize().zIndex(VIEW_LINE.zIndex),
+    )
+
+    Box(
+      modifier = Modifier.fillMaxSize().graphicsLayer { rotationZ = compassAngle },
+      contentAlignment = Alignment.Center,
+    ) {
       Image(
-        painter = painterResource(id = R.drawable.ic_view_line),
-        contentDescription = stringResource(id = R.string.content_view_line),
-        colorFilter = viewLineColorFilter,
+        painter = painterResource(id = R.drawable.ic_compass_face),
+        contentDescription = stringResource(id = R.string.content_compass_display),
+        colorFilter = compassFaceColorFilter,
         contentScale = ContentScale.Fit,
-        modifier = Modifier.fillMaxSize().zIndex(VIEW_LINE.zIndex),
+        modifier = Modifier.fillMaxSize().zIndex(COMPASS_FACE.zIndex),
       )
 
-      Box(
-        modifier = Modifier.fillMaxSize().graphicsLayer { rotationZ = compassAngle },
-        contentAlignment = Alignment.Center,
-      ) {
+      compassItems.items.forEach { item ->
         Image(
-          painter = painterResource(id = R.drawable.ic_compass_face),
-          contentDescription = stringResource(id = R.string.content_compass_display),
-          colorFilter = compassFaceColorFilter,
-          contentScale = ContentScale.Fit,
-          modifier = Modifier.fillMaxSize().zIndex(COMPASS_FACE.zIndex),
+          painter = painterResource(id = item.iconRes),
+          contentDescription = stringResource(id = item.nameRes),
+          colorFilter = sunColorFilters[item.ordinal],
+          modifier =
+            Modifier.fillMaxSize().zIndex(item.zIndex).graphicsLayer {
+              scaleX = item.scale
+              scaleY = item.scale
+              translationX = item.point.x * size.minDimension
+              translationY = item.point.y * size.minDimension
+              rotationZ = item.rotation
+            },
         )
-
-        compassItems.items.forEach { item ->
-          Image(
-            painter = painterResource(id = item.iconRes),
-            contentDescription = stringResource(id = item.nameRes),
-            colorFilter = sunColorFilters[item.ordinal],
-            modifier =
-              Modifier.fillMaxSize().zIndex(item.zIndex).graphicsLayer {
-                scaleX = item.scale
-                scaleY = item.scale
-                translationX = item.point.x * size.minDimension
-                translationY = item.point.y * size.minDimension
-                rotationZ = item.rotation
-              },
-          )
-        }
       }
     }
   }
 }
 
-@OptIn(ExperimentalTime::class)
 @Preview
 @Composable
 fun CompassScreenPreview() {
@@ -152,5 +146,9 @@ fun CompassScreenPreview() {
   val compassItems = CompassItems.Factory(sunResources).create(placeTime)
   val compassUi = CompassUi(compassItems, 30f, true)
 
-  DarkHeliosTheme { StatelessCompassScreen(compassUi = compassUi, onLockChange = {}) }
+  DarkHeliosTheme {
+    BasicFrame {
+      StatelessCompassScreen(compassUi)
+    }
+  }
 }

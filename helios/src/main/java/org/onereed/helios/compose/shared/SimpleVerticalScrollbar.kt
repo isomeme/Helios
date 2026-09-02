@@ -67,8 +67,9 @@ fun SimpleVerticalScrollbar(
 }
 
 @Composable
-private fun transitionSpec(): AnimatedContentTransitionScope<Boolean>.() -> ContentTransform =
-  { fadeIn(animationSpec).togetherWith(fadeOut(animationSpec)) }
+private fun transitionSpec(): AnimatedContentTransitionScope<Boolean>.() -> ContentTransform = {
+  fadeIn(animationSpec).togetherWith(fadeOut(animationSpec))
+}
 
 @Composable
 private fun ScrollButton(
@@ -94,7 +95,10 @@ private fun ScrollButton(
 }
 
 @Immutable
-data class ScrollbarActions(val onScrollToTop: () -> Unit, val onScrollToBottom: () -> Unit) {
+data class ScrollbarActions(
+  val onScrollToTop: () -> Unit = {},
+  val onScrollToBottom: () -> Unit = {},
+) {
   constructor(
     scrollState: ScrollState,
     coroutineScope: CoroutineScope,

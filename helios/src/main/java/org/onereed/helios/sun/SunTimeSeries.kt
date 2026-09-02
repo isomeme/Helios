@@ -1,14 +1,16 @@
 package org.onereed.helios.sun
 
 import androidx.compose.runtime.Immutable
+import org.onereed.helios.datasource.PlaceTime
+import org.onereed.helios.sun.SunTimeSeries.Companion.PRECEDING_LIMIT
+import org.onereed.helios.sun.SunTimeSeries.Companion.PRECEDING_OFFSET
+import org.shredzone.commons.suncalc.SunTimes
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlin.time.toJavaDuration
 import kotlin.time.toJavaInstant
-import org.onereed.helios.datasource.PlaceTime
-import org.shredzone.commons.suncalc.SunTimes
 
 @OptIn(ExperimentalTime::class)
 @Immutable
@@ -75,9 +77,9 @@ data class SunTimeSeries(
 
     /**
      * We use this value combined with [PRECEDING_LIMIT] to include "preceding" events up to and
-     * beyond the current instant, to avoid edge cases where an event happening near the time we're
-     * checking falls out of both the preceding and upcoming events lists. We then remove duplicates
-     * in the preceding events.
+     * beyond the current instant. This avoids edge cases where an event happening near the time
+     * we're checking falls out of both the preceding and upcoming events lists. We then remove
+     * duplicates in the preceding events.
      */
     private val PRECEDING_OFFSET = 13.hours
 

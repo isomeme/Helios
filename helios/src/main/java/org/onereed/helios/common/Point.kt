@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import kotlin.math.cos
 import kotlin.math.sin
 
-/** Cartesian coordinates for compass display in the the Compose graphics layer display space. */
+/** Cartesian coordinates for compass display in the Compose graphics layer display space. */
 @Immutable
 data class Point(val x: Float, val y: Float) {
   companion object {

@@ -17,7 +17,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -37,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlin.time.ExperimentalTime
 import org.onereed.helios.compose.app.NavActions
 import org.onereed.helios.compose.app.Screen
 import org.onereed.helios.compose.schedule.ScheduleUi.EventUi
@@ -48,6 +46,7 @@ import org.onereed.helios.compose.shared.sunColorFamilies
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.datasource.testing.santaMonicaNow
 import org.onereed.helios.ui.theme.DarkHeliosTheme
+import org.onereed.shared.screen.BasicFrame
 
 @Composable
 fun ScheduleScreen(navActions: NavActions, scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
@@ -71,9 +70,9 @@ fun ScheduleScreen(navActions: NavActions, scheduleViewModel: ScheduleViewModel 
 
   StatelessScheduleScreen(
     scheduleUi = scheduleUi,
-    lazyListState = lazyListState,
     canScrollUp = canScrollUp,
     canScrollDown = canScrollDown,
+    lazyListState = lazyListState,
     scrollbarActions = scrollbarActions,
     onSelectEvent = onSelectEvent,
   )
@@ -82,39 +81,37 @@ fun ScheduleScreen(navActions: NavActions, scheduleViewModel: ScheduleViewModel 
 @Composable
 fun StatelessScheduleScreen(
   scheduleUi: ScheduleUi,
-  lazyListState: LazyListState,
   canScrollUp: Boolean,
   canScrollDown: Boolean,
-  scrollbarActions: ScrollbarActions,
-  onSelectEvent: (Int) -> Unit,
+  lazyListState: LazyListState = LazyListState(),
+  scrollbarActions: ScrollbarActions = ScrollbarActions(),
+  onSelectEvent: (Int) -> Unit = {},
 ) {
-  Surface(modifier = Modifier.fillMaxSize()) {
-    ConstraintLayout(modifier = Modifier.fillMaxSize().padding(vertical = 10.dp)) {
-      val (progress, events, scrollbar) = createRefs()
+  ConstraintLayout(modifier = Modifier.fillMaxSize().padding(vertical = 10.dp)) {
+    val (progress, events, scrollbar) = createRefs()
 
-      if (!scheduleUi.isValid) {
-        CircularProgressIndicator(modifier = Modifier.constrainAs(progress) { centerTo(parent) })
-        return@ConstraintLayout
-      }
-
-      LazyColumn(
-        modifier = Modifier.wrapContentSize().constrainAs(events) { centerTo(parent) },
-        verticalArrangement = Arrangement.spacedBy(25.dp),
-        state = lazyListState,
-      ) {
-        items(items = scheduleUi.events, key = { it.key }) { event ->
-          EventCard(event, onSelectEvent)
-        }
-      }
-
-      SimpleVerticalScrollbar(
-        canScrollUp = canScrollUp,
-        canScrollDown = canScrollDown,
-        scrollbarActions = scrollbarActions,
-        modifier =
-          Modifier.constrainAs(scrollbar) { start.linkTo(anchor = events.end, margin = 10.dp) },
-      )
+    if (!scheduleUi.isValid) {
+      CircularProgressIndicator(modifier = Modifier.constrainAs(progress) { centerTo(parent) })
+      return@ConstraintLayout
     }
+
+    LazyColumn(
+      modifier = Modifier.wrapContentSize().constrainAs(events) { centerTo(parent) },
+      verticalArrangement = Arrangement.spacedBy(25.dp),
+      state = lazyListState,
+    ) {
+      items(items = scheduleUi.events, key = { it.key }) { event ->
+        EventCard(event, onSelectEvent)
+      }
+    }
+
+    SimpleVerticalScrollbar(
+      canScrollUp = canScrollUp,
+      canScrollDown = canScrollDown,
+      scrollbarActions = scrollbarActions,
+      modifier =
+        Modifier.constrainAs(scrollbar) { start.linkTo(anchor = events.end, margin = 10.dp) },
+    )
   }
 }
 
@@ -151,25 +148,22 @@ private fun LazyItemScope.EventCard(event: EventUi, onSelectEvent: (Int) -> Unit
   }
 }
 
-// 0xFF0F1416
-@OptIn(ExperimentalTime::class)
 @Preview
 @Composable
 fun ScheduleScreenPreview() {
-  val sunResources = SunResources.create(LocalContext.current)
+  val context = LocalContext.current
+  val sunResources = SunResources.create(context)
   val placeTime = santaMonicaNow()
-  val scheduleUi = ScheduleUi.Factory(LocalContext.current, sunResources).create(placeTime)
-  val scrollbarActions = ScrollbarActions(onScrollToTop = {}, onScrollToBottom = {})
+  val scheduleUi = ScheduleUi.Factory(context, sunResources).create(placeTime)
 
   DarkHeliosTheme {
-    StatelessScheduleScreen(
-      scheduleUi = scheduleUi,
-      lazyListState = LazyListState(),
-      canScrollUp = false,
-      canScrollDown = true,
-      scrollbarActions = scrollbarActions,
-      onSelectEvent = {},
-    )
+    BasicFrame {
+      StatelessScheduleScreen(
+        scheduleUi = scheduleUi,
+        canScrollUp = false,
+        canScrollDown = true,
+      )
+    }
   }
 }
 

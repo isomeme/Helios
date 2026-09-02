@@ -19,7 +19,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -54,6 +53,7 @@ import org.onereed.helios.compose.shared.sunColorFamilies
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunEventType
 import org.onereed.helios.ui.theme.DarkHeliosTheme
+import org.onereed.shared.screen.BasicFrame
 
 @Composable
 fun TextScreen(textViewModel: TextViewModel = hiltViewModel()) {
@@ -77,9 +77,9 @@ fun TextScreen(textViewModel: TextViewModel = hiltViewModel()) {
 
   StatelessTextScreen(
     textUi,
-    eventMenuExpandedState.value,
     canScrollUp,
     canScrollDown,
+    eventMenuExpandedState.value,
     eventMenuActions,
     scrollbarActions,
     scrollState,
@@ -89,34 +89,32 @@ fun TextScreen(textViewModel: TextViewModel = hiltViewModel()) {
 @Composable
 private fun StatelessTextScreen(
   textUi: TextUi,
-  eventMenuExpanded: Boolean,
   canScrollUp: Boolean,
   canScrollDown: Boolean,
-  eventMenuActions: EventMenuActions,
-  scrollbarActions: ScrollbarActions,
-  scrollState: ScrollState,
+  eventMenuExpanded: Boolean = false,
+  eventMenuActions: EventMenuActions = EventMenuActions(),
+  scrollbarActions: ScrollbarActions = ScrollbarActions(),
+  scrollState: ScrollState = rememberScrollState(),
 ) {
-  Surface(modifier = Modifier.fillMaxSize()) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-      Column(
-        modifier = Modifier.widthIn(max = 640.dp).padding(vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(15.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-      ) {
-        TitleBar(
-          textUi = textUi,
-          eventMenuActions = eventMenuActions,
-          eventMenuExpanded = eventMenuExpanded,
-        )
+  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+    Column(
+      modifier = Modifier.widthIn(max = 640.dp).padding(vertical = 10.dp),
+      verticalArrangement = Arrangement.spacedBy(15.dp),
+      horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+      TitleBar(
+        textUi = textUi,
+        eventMenuActions = eventMenuActions,
+        eventMenuExpanded = eventMenuExpanded,
+      )
 
-        Body(
-          textUi = textUi,
-          scrollState = scrollState,
-          canScrollUp = canScrollUp,
-          canScrollDown = canScrollDown,
-          scrollbarActions = scrollbarActions,
-        )
-      }
+      Body(
+        textUi = textUi,
+        scrollState = scrollState,
+        canScrollUp = canScrollUp,
+        canScrollDown = canScrollDown,
+        scrollbarActions = scrollbarActions,
+      )
     }
   }
 }
@@ -224,9 +222,9 @@ private fun Body(
 
 @Immutable
 private data class EventMenuActions(
-  val onExpanded: () -> Unit,
-  val onDismissed: () -> Unit,
-  val onSelectIndex: (Int) -> Unit,
+  val onExpanded: () -> Unit = {},
+  val onDismissed: () -> Unit = {},
+  val onSelectIndex: (Int) -> Unit = {},
 ) {
   constructor(
     eventMenuExpandedState: MutableState<Boolean>,
@@ -251,18 +249,14 @@ private data class EventMenuActions(
 fun TextScreenPreview() {
   val sunResources = SunResources.create(LocalContext.current)
   val textUi = TextUi.Factory(sunResources).create(SunEventType.SET.ordinal)
-  val eventMenuActions = EventMenuActions(onExpanded = {}, onDismissed = {}, onSelectIndex = {})
-  val scrollbarActions = ScrollbarActions(onScrollToTop = {}, onScrollToBottom = {})
 
   DarkHeliosTheme {
-    StatelessTextScreen(
-      textUi = textUi,
-      eventMenuExpanded = false,
-      canScrollUp = false,
-      canScrollDown = true,
-      eventMenuActions = eventMenuActions,
-      scrollbarActions = scrollbarActions,
-      scrollState = ScrollState(0),
-    )
+    BasicFrame {
+      StatelessTextScreen(
+        textUi = textUi,
+        canScrollUp = false,
+        canScrollDown = true,
+      )
+    }
   }
 }
