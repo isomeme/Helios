@@ -8,5 +8,5 @@ data class SettingsUi(
   val isDynamicTheme: Boolean = false,
   val themeType: ThemeType = ThemeType.SYSTEM,
   val isCompassSouthTop: Boolean = false,
-  val locationUpgradeAvailable: Boolean = false,
+  val accuracyImprovementAvailable: Boolean = false,
 )

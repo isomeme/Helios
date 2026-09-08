@@ -15,6 +15,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -462,6 +463,33 @@ val usedLightScheme = lightScheme
 val usedLightExtendedColorScheme = extendedLight
 val usedDarkExtendedColorScheme = extendedDark
 
+/**
+ * Android sometimes picks container colors that are too dark in light mode or vice versa. This
+ * method pulls container colors into a safe luminance range, and makes sure that the onXya colors
+ * will show well on top of the containers.
+ */
+fun ColorScheme.sanitizeContainers(): ColorScheme {
+  val secondaryTertiaryAlpha = 0.12f
+  val primaryAlpha = 0.22f // Higher alpha ensures primary actions remain distinctly identifiable
+
+  return this.copy(
+    // Ensure primary container retains its structural boundary relative to the surface background
+    primaryContainer = this.primaryContainer.copy(alpha = primaryAlpha).compositeOver(this.surface),
+    secondaryContainer =
+      this.secondaryContainer.copy(alpha = secondaryTertiaryAlpha).compositeOver(this.surface),
+    tertiaryContainer =
+      this.tertiaryContainer.copy(alpha = secondaryTertiaryAlpha).compositeOver(this.surface),
+    errorContainer =
+      this.errorContainer.copy(alpha = secondaryTertiaryAlpha).compositeOver(this.surface),
+
+    // Route all overlay text to onSurface to maintain crisp, unified reading comfort
+    onPrimaryContainer = this.onSurface,
+    onSecondaryContainer = this.onSurface,
+    onTertiaryContainer = this.onSurface,
+    onErrorContainer = this.onSurface,
+  )
+}
+
 @Composable
 fun HeliosTheme(themeViewModel: ThemeViewModel = hiltViewModel(), content: @Composable () -> Unit) {
   val isDynamicTheme by themeViewModel.isDynamicThemeFlow.collectAsStateWithLifecycle()
@@ -478,7 +506,13 @@ fun HeliosTheme(themeViewModel: ThemeViewModel = hiltViewModel(), content: @Comp
     when {
       isDynamicTheme && dynamicThemeSupported -> {
         val context = LocalContext.current
-        if (isDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+
+        if (isDarkTheme) {
+          dynamicDarkColorScheme(context)
+        }
+        else {
+          dynamicLightColorScheme(context)
+        }
       }
 
       isDarkTheme -> usedDarkScheme
@@ -526,4 +560,3 @@ fun LightHeliosTheme(content: @Composable () -> Unit) {
     content = content,
   )
 }
-

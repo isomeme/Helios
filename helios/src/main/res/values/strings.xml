@@ -28,8 +28,15 @@
 
     <string name="heading_theme">Theme</string>
     <string name="heading_compass">Compass</string>
+    <string name="heading_improve_accuracy">Improve accuracy</string>
 
+    <string name="offer_accuracy_improvement">
+        Helios currently has access only to coarse location data. Allow precise location access in
+        the app\'s system settings to improve the accuracy of sun event times and directions.
+    </string>
     <string name="view_online_documentation">View online documentation</string>
+
+    <string name="system_settings_button">Open system settings</string>
 
     <string name="permission_button">Allow location access</string>
     <string name="permission_title">Location access required</string>

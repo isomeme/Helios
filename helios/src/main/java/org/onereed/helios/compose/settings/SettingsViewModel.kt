@@ -22,15 +22,15 @@ constructor(
   @ApplicationContext private val context: Context,
 ) : BaseViewModel() {
 
-  private val _locationUpgradeAvailableFlow = MutableStateFlow(false)
-  private val locationUpgradeAvailableFlow = _locationUpgradeAvailableFlow.asStateFlow()
+  private val _accuracyImprovementAvailableFlow = MutableStateFlow(false)
+  private val accuracyImprovementAvailableFlow = _accuracyImprovementAvailableFlow.asStateFlow()
 
   val settingsUiFlow =
     combine(
         storeRepository.isDynamicThemeFlow,
         storeRepository.themeTypeFlow,
         storeRepository.isCompassSouthTopFlow,
-        locationUpgradeAvailableFlow,
+        accuracyImprovementAvailableFlow,
         ::SettingsUi,
       )
       .stateIn(initialValue = SettingsUi())
@@ -41,8 +41,8 @@ constructor(
 
   fun setCompassSouthTop(value: Boolean) = storeRepository.setCompassSouthTop(value, viewModelScope)
 
-  fun updateLocationUpgradeAvailable() {
-    _locationUpgradeAvailableFlow.value =
+  fun updateAccuracyImprovementAvailable() {
+    _accuracyImprovementAvailableFlow.value =
       (context.getLocationPermissionState() == LocationPermissionState.COARSE_ONLY)
   }
 }

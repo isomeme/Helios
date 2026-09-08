@@ -1,31 +1,33 @@
 package org.onereed.helios.compose.settings
 
+import android.content.Context
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -33,8 +35,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -54,13 +56,14 @@ import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
 import org.onereed.helios.compose.shared.confirm
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 import org.onereed.helios.ui.theme.ThemeType
+import org.onereed.shared.navigation.openSystemSettings
 import org.onereed.shared.screen.BasicFrame
 import org.onereed.shared.sysinfo.dynamicThemeSupported
 
 @Composable
 fun SettingsScreen(settingsViewModel: SettingsViewModel = hiltViewModel()) {
   LifecycleResumeEffect(Unit) {
-    settingsViewModel.updateLocationUpgradeAvailable()
+    settingsViewModel.updateAccuracyImprovementAvailable()
     onPauseOrDispose {}
   }
 
@@ -68,9 +71,11 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = hiltViewModel()) {
 
   val uriHandler = LocalUriHandler.current
   val haptics = LocalHapticFeedback.current
+  val context = LocalContext.current
+
   val settingsActions =
-    remember(settingsViewModel, uriHandler, haptics) {
-      SettingsActions(settingsViewModel, uriHandler, haptics)
+    remember(settingsViewModel, uriHandler, haptics, context) {
+      SettingsActions(settingsViewModel, uriHandler, haptics, context)
     }
   val scrollState = rememberScrollState()
   val coroutineScope = rememberCoroutineScope()
@@ -99,23 +104,27 @@ private fun StatelessSettingsScreen(
   scrollState: ScrollState = rememberScrollState(),
 ) {
   ProvideTextStyle(value = MaterialTheme.typography.labelMedium) {
-    ConstraintLayout(modifier = Modifier.fillMaxSize().padding(vertical = 10.dp)) {
+    ConstraintLayout(
+      modifier = Modifier.fillMaxSize().padding(horizontal = 15.dp, vertical = 10.dp)
+    ) {
       val (settings, scrollbar) = createRefs()
 
       Column(
         modifier =
-          Modifier.width(IntrinsicSize.Max).verticalScroll(scrollState).constrainAs(settings) {
+          Modifier.requiredWidth(300.dp).verticalScroll(scrollState).constrainAs(settings) {
             centerTo(parent)
           },
         verticalArrangement = Arrangement.spacedBy(20.dp),
       ) {
-        ThemeSettings(settingsUi.themeType, settingsUi.isDynamicTheme, settingsActions)
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+          ThemeSettings(settingsUi.themeType, settingsUi.isDynamicTheme, settingsActions)
 
-        CompassSettings(settingsUi.isCompassSouthTop, settingsActions)
+          CompassSettings(settingsUi.isCompassSouthTop, settingsActions)
 
-        LocationUpgradeSettings(settingsUi.locationUpgradeAvailable)
+          OfferAccuracyImprovement(settingsUi.accuracyImprovementAvailable, settingsActions)
 
-        OnlineDocLink(settingsActions)
+          OnlineDocLink(settingsActions)
+        }
       }
 
       SimpleVerticalScrollbar(
@@ -138,7 +147,7 @@ private fun ThemeSettings(
   Column(
     modifier =
       Modifier.fillMaxWidth()
-        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
         .padding(all = 15.dp),
     verticalArrangement = Arrangement.spacedBy(15.dp),
   ) {
@@ -198,7 +207,7 @@ private fun CompassSettings(isCompassSouthTop: Boolean, settingsActions: Setting
   Column(
     modifier =
       Modifier.fillMaxWidth()
-        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
         .padding(all = 15.dp),
     verticalArrangement = Arrangement.spacedBy(15.dp),
   ) {
@@ -227,50 +236,71 @@ private fun CompassSettings(isCompassSouthTop: Boolean, settingsActions: Setting
 }
 
 @Composable
-private fun LocationUpgradeSettings(
-  locationUpgradeAvailable: Boolean,
+private fun OfferAccuracyImprovement(
+  accuracyImprovementAvailable: Boolean,
+  settingsActions: SettingsActions,
 ) {
+  if (!accuracyImprovementAvailable) return
+
   Column(
     modifier =
       Modifier.fillMaxWidth()
-        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-        .padding(all = 15.dp),
-    verticalArrangement = Arrangement.spacedBy(15.dp),
+        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+        .padding(start = 15.dp, top = 15.dp, end = 15.dp, bottom = 0.dp)
   ) {
     Text(
-      text = "Location upgrade",
+      text = stringResource(R.string.heading_improve_accuracy),
       style = MaterialTheme.typography.labelLarge,
       fontWeight = FontWeight.Bold,
     )
 
-    Text(text = "$locationUpgradeAvailable")
+    Spacer(modifier = Modifier.height(15.dp))
+
+    Text(text = stringResource(R.string.offer_accuracy_improvement))
+
+    TextButton(
+      modifier = Modifier.align(Alignment.CenterHorizontally).padding(0.dp),
+      onClick = { settingsActions.onOpenSystemSettings() },
+    ) {
+      Icon(
+        painter = painterResource(R.drawable.settings_24px),
+        contentDescription = stringResource(R.string.system_settings_button),
+      )
+
+      Spacer(modifier = Modifier.width(10.dp))
+
+      Text(
+        text = stringResource(R.string.system_settings_button),
+        style = MaterialTheme.typography.labelMedium,
+      )
+    }
   }
 }
 
 @Composable
 private fun OnlineDocLink(settingsActions: SettingsActions) {
-  TextButton(
-    modifier = Modifier.fillMaxWidth(),
-    onClick = settingsActions.onViewDoc,
-    colors =
-      ButtonDefaults.textButtonColors(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-      ),
-    shape = RectangleShape,
-    contentPadding = PaddingValues(vertical = 0.dp, horizontal = 15.dp),
+  Column(
+    modifier =
+      Modifier.fillMaxWidth()
+        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+        .padding(horizontal = 15.dp, vertical = 0.dp)
   ) {
-    Icon(
-      painter = painterResource(R.drawable.help_24px),
-      contentDescription = stringResource(R.string.view_online_documentation),
-    )
+    TextButton(
+      modifier = Modifier.align(Alignment.CenterHorizontally).padding(0.dp),
+      onClick = settingsActions.onViewDoc,
+    ) {
+      Icon(
+        painter = painterResource(R.drawable.help_24px),
+        contentDescription = stringResource(R.string.view_online_documentation),
+      )
 
-    Spacer(modifier = Modifier.width(10.dp))
+      Spacer(modifier = Modifier.width(10.dp))
 
-    Text(
-      text = stringResource(R.string.view_online_documentation),
-      style = MaterialTheme.typography.labelMedium,
-    )
+      Text(
+        text = stringResource(R.string.view_online_documentation),
+        style = MaterialTheme.typography.labelMedium,
+      )
+    }
   }
 }
 
@@ -279,12 +309,14 @@ private data class SettingsActions(
   val onThemeTypeSelected: (ThemeType) -> Unit = {},
   val onDynamicThemeSelected: (Boolean) -> Unit = {},
   val onCompassSouthTopSelected: (Boolean) -> Unit = {},
+  val onOpenSystemSettings: () -> Unit = {},
   val onViewDoc: () -> Unit = {},
 ) {
   constructor(
     settingsViewModel: SettingsViewModel,
     uriHandler: UriHandler,
     haptics: HapticFeedback,
+    context: Context,
   ) : this(
     onThemeTypeSelected = {
       haptics.confirm()
@@ -298,6 +330,9 @@ private data class SettingsActions(
       haptics.confirm()
       settingsViewModel.setCompassSouthTop(it)
     },
+    onOpenSystemSettings = {
+      context.openSystemSettings()
+    },
     onViewDoc = { uriHandler.openUri("https://www.one-reed.org/helios") },
   )
 }
@@ -310,7 +345,7 @@ fun SettingsScreenPreview() {
       isDynamicTheme = true,
       themeType = ThemeType.SYSTEM,
       isCompassSouthTop = true,
-      locationUpgradeAvailable = true,
+      accuracyImprovementAvailable = true,
     )
 
   DarkHeliosTheme {
