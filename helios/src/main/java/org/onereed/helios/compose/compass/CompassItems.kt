@@ -8,7 +8,7 @@ import org.onereed.helios.R
 import org.onereed.helios.common.Point
 import org.onereed.helios.compose.compass.ZIndex.SUN_AND_ARROW
 import org.onereed.helios.compose.compass.ZIndex.SUN_EVENT
-import org.onereed.helios.compose.shared.SUN_ORDINAL
+import org.onereed.helios.sun.SUN_ORDINAL
 import org.onereed.helios.datasource.PlaceTime
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunCompass
@@ -74,7 +74,7 @@ data class CompassItems(val items: List<CompassItem>, val isValid: Boolean = tru
       val sunItem =
         CompassItem.create(
           iconRes = R.drawable.ic_solid_dot,
-          nameRes = R.string.content_sun_position,
+          nameRes = R.string.tooltip_sun_position,
           ordinal = SUN_ORDINAL,
           zIndexEnum = SUN_AND_ARROW,
           angle = sunAngle,
@@ -83,7 +83,7 @@ data class CompassItems(val items: List<CompassItem>, val isValid: Boolean = tru
       val arrowItem =
         CompassItem.create(
           iconRes = R.drawable.ic_baseline_arrow_forward_24,
-          nameRes = R.string.content_sun_movement_direction,
+          nameRes = R.string.tooltip_sun_movement_direction,
           ordinal = SUN_ORDINAL,
           zIndexEnum = SUN_AND_ARROW,
           angle = sunAngle,

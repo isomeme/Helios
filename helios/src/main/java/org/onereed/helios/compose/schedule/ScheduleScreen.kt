@@ -39,14 +39,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.onereed.helios.compose.app.NavActions
 import org.onereed.helios.compose.app.Screen
 import org.onereed.helios.compose.schedule.ScheduleUi.EventUi
-import org.onereed.helios.compose.shared.ScrollbarActions
-import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
-import org.onereed.helios.compose.shared.confirm
-import org.onereed.helios.compose.shared.sunColorFamilies
+import org.onereed.helios.common.ScrollbarActions
+import org.onereed.helios.common.SimpleVerticalScrollbar
+import org.onereed.shared.ui.confirm
+import org.onereed.helios.sun.sunColorFamilies
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.datasource.testing.santaMonicaNow
 import org.onereed.helios.ui.theme.DarkHeliosTheme
-import org.onereed.shared.screen.BasicFrame
+import org.onereed.shared.ui.BasicFrame
 
 @Composable
 fun ScheduleScreen(navActions: NavActions, scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
@@ -106,11 +106,11 @@ fun StatelessScheduleScreen(
     }
 
     SimpleVerticalScrollbar(
+      modifier =
+        Modifier.constrainAs(scrollbar) { start.linkTo(anchor = events.end, margin = 10.dp) },
       canScrollUp = canScrollUp,
       canScrollDown = canScrollDown,
       scrollbarActions = scrollbarActions,
-      modifier =
-        Modifier.constrainAs(scrollbar) { start.linkTo(anchor = events.end, margin = 10.dp) },
     )
   }
 }

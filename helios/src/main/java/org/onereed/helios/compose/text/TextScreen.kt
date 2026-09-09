@@ -46,14 +46,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.halilibo.richtext.commonmark.Markdown
 import com.halilibo.richtext.ui.RichTextStyle
 import com.halilibo.richtext.ui.material3.RichText
-import org.onereed.helios.compose.shared.ScrollbarActions
-import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
-import org.onereed.helios.compose.shared.confirm
-import org.onereed.helios.compose.shared.sunColorFamilies
+import org.onereed.helios.common.ScrollbarActions
+import org.onereed.helios.common.SimpleVerticalScrollbar
+import org.onereed.shared.ui.confirm
+import org.onereed.helios.sun.sunColorFamilies
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.sun.SunEventType
 import org.onereed.helios.ui.theme.DarkHeliosTheme
-import org.onereed.shared.screen.BasicFrame
+import org.onereed.shared.ui.BasicFrame
 
 @Composable
 fun TextScreen(textViewModel: TextViewModel = hiltViewModel()) {
@@ -212,10 +212,10 @@ private fun Body(
     }
 
     SimpleVerticalScrollbar(
+      modifier = Modifier.align(Alignment.CenterEnd),
       canScrollUp = canScrollUp,
       canScrollDown = canScrollDown,
       scrollbarActions = scrollbarActions,
-      modifier = Modifier.align(Alignment.CenterEnd),
     )
   }
 }

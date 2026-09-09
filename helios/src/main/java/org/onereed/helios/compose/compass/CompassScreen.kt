@@ -36,12 +36,12 @@ import org.onereed.helios.R
 import org.onereed.helios.compose.compass.ZIndex.COMPASS_FACE
 import org.onereed.helios.compose.compass.ZIndex.OVERLAY
 import org.onereed.helios.compose.compass.ZIndex.VIEW_LINE
-import org.onereed.helios.compose.shared.confirm
-import org.onereed.helios.compose.shared.sunColorFilters
+import org.onereed.shared.ui.confirm
+import org.onereed.helios.sun.sunColorFilters
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.datasource.testing.santaMonicaNow
 import org.onereed.helios.ui.theme.DarkHeliosTheme
-import org.onereed.shared.screen.BasicFrame
+import org.onereed.shared.ui.BasicFrame
 
 @OptIn(FlowPreview::class)
 @Composable
@@ -101,7 +101,7 @@ fun StatelessCompassScreen(compassUi: CompassUi, onLockChange: (Boolean) -> Unit
 
     Image(
       painter = painterResource(id = R.drawable.ic_view_line),
-      contentDescription = stringResource(id = R.string.content_view_line),
+      contentDescription = stringResource(id = R.string.tooltip_view_line),
       colorFilter = viewLineColorFilter,
       contentScale = ContentScale.Fit,
       modifier = Modifier.fillMaxSize().zIndex(VIEW_LINE.zIndex),
@@ -113,7 +113,7 @@ fun StatelessCompassScreen(compassUi: CompassUi, onLockChange: (Boolean) -> Unit
     ) {
       Image(
         painter = painterResource(id = R.drawable.ic_compass_face),
-        contentDescription = stringResource(id = R.string.content_compass_display),
+        contentDescription = stringResource(id = R.string.tooltip_compass_display),
         colorFilter = compassFaceColorFilter,
         contentScale = ContentScale.Fit,
         modifier = Modifier.fillMaxSize().zIndex(COMPASS_FACE.zIndex),

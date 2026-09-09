@@ -51,13 +51,13 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.onereed.helios.R
-import org.onereed.helios.compose.shared.ScrollbarActions
-import org.onereed.helios.compose.shared.SimpleVerticalScrollbar
-import org.onereed.helios.compose.shared.confirm
+import org.onereed.helios.common.ScrollbarActions
+import org.onereed.helios.common.SimpleVerticalScrollbar
+import org.onereed.shared.ui.confirm
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 import org.onereed.helios.ui.theme.ThemeType
 import org.onereed.shared.navigation.openSystemSettings
-import org.onereed.shared.screen.BasicFrame
+import org.onereed.shared.ui.BasicFrame
 import org.onereed.shared.sysinfo.dynamicThemeSupported
 
 @Composable
@@ -128,11 +128,11 @@ private fun StatelessSettingsScreen(
       }
 
       SimpleVerticalScrollbar(
+        modifier =
+          Modifier.constrainAs(scrollbar) { start.linkTo(anchor = settings.end, margin = 10.dp) },
         canScrollUp = canScrollUp,
         canScrollDown = canScrollDown,
         scrollbarActions = scrollbarActions,
-        modifier =
-          Modifier.constrainAs(scrollbar) { start.linkTo(anchor = settings.end, margin = 10.dp) },
       )
     }
   }
@@ -256,7 +256,7 @@ private fun OfferAccuracyImprovement(
 
     Spacer(modifier = Modifier.height(15.dp))
 
-    Text(text = stringResource(R.string.offer_accuracy_improvement))
+    Text(text = stringResource(R.string.text_offer_accuracy_improvement))
 
     TextButton(
       modifier = Modifier.align(Alignment.CenterHorizontally).padding(0.dp),
@@ -264,13 +264,13 @@ private fun OfferAccuracyImprovement(
     ) {
       Icon(
         painter = painterResource(R.drawable.settings_24px),
-        contentDescription = stringResource(R.string.system_settings_button),
+        contentDescription = stringResource(R.string.label_open_system_settings),
       )
 
       Spacer(modifier = Modifier.width(10.dp))
 
       Text(
-        text = stringResource(R.string.system_settings_button),
+        text = stringResource(R.string.label_open_system_settings),
         style = MaterialTheme.typography.labelMedium,
       )
     }
@@ -291,13 +291,13 @@ private fun OnlineDocLink(settingsActions: SettingsActions) {
     ) {
       Icon(
         painter = painterResource(R.drawable.help_24px),
-        contentDescription = stringResource(R.string.view_online_documentation),
+        contentDescription = stringResource(R.string.label_view_online_documentation),
       )
 
       Spacer(modifier = Modifier.width(10.dp))
 
       Text(
-        text = stringResource(R.string.view_online_documentation),
+        text = stringResource(R.string.label_view_online_documentation),
         style = MaterialTheme.typography.labelMedium,
       )
     }

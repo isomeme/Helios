@@ -1,4 +1,4 @@
-package org.onereed.helios.compose.shared
+package org.onereed.helios.common
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -48,7 +48,7 @@ fun SimpleVerticalScrollbar(
         onScrollTo = scrollbarActions.onScrollToTop,
         enabled = enabled,
         icon = R.drawable.arrow_upward_24px,
-        contentDescription = R.string.scroll_to_top,
+        contentDescription = R.string.tooltip_scroll_to_top,
       )
     }
 
@@ -60,7 +60,7 @@ fun SimpleVerticalScrollbar(
         onScrollTo = scrollbarActions.onScrollToBottom,
         enabled = enabled,
         icon = R.drawable.arrow_downward_24px,
-        contentDescription = R.string.scroll_to_bottom,
+        contentDescription = R.string.tooltip_scroll_to_bottom,
       )
     }
   }

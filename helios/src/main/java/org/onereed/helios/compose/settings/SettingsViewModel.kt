@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -12,7 +13,6 @@ import org.onereed.helios.datasource.StoreRepository
 import org.onereed.helios.ui.theme.ThemeType
 import org.onereed.shared.permission.LocationPermissionState
 import org.onereed.shared.permission.getLocationPermissionState
-import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel
@@ -42,7 +42,9 @@ constructor(
   fun setCompassSouthTop(value: Boolean) = storeRepository.setCompassSouthTop(value, viewModelScope)
 
   fun updateAccuracyImprovementAvailable() {
-    _accuracyImprovementAvailableFlow.value =
-      (context.getLocationPermissionState() == LocationPermissionState.COARSE_ONLY)
+    _accuracyImprovementAvailableFlow.value = isAccuracyImprovementAvailable()
   }
+
+  private fun isAccuracyImprovementAvailable(): Boolean =
+    context.getLocationPermissionState() == LocationPermissionState.COARSE_ONLY
 }

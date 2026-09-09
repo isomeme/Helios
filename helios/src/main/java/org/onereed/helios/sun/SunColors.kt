@@ -1,4 +1,4 @@
-package org.onereed.helios.compose.shared
+package org.onereed.helios.sun
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
