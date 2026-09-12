@@ -2,7 +2,6 @@ package org.onereed.helios.datasource
 
 import android.content.Context
 import android.location.Location
-import android.os.Looper
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -10,6 +9,8 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
@@ -40,6 +41,8 @@ constructor(
   @ApplicationContext private val context: Context,
 ) : Locator {
 
+  private val executor by lazy { Dispatchers.Default.asExecutor() }
+
   private val locationClient by lazy { LocationServices.getFusedLocationProviderClient(context) }
 
   private val ticker = unitTickerFlow(TICKER_INTERVAL)
@@ -51,8 +54,7 @@ constructor(
           // Fetch the hardware's last known location to bootstrap the UI instantly
 
           @Suppress("MissingPermission")
-          val hardwareCache = locationClient.lastLocation.await()
-          if (hardwareCache != null) emit(hardwareCache)
+          locationClient.lastLocation.await()?.let { emit(it) }
         }
       }
       .map(::Place)
@@ -84,7 +86,7 @@ constructor(
 
     @Suppress("MissingPermission")
     locationClient
-      .requestLocationUpdates(LOCATION_REQUEST, locationCallback, Looper.getMainLooper())
+      .requestLocationUpdates(LOCATION_REQUEST, executor, locationCallback)
       .logOutcomes("requestLocationUpdates")
       .addOnFailureListener { e -> close(e) }
 
