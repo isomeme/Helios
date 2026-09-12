@@ -6,8 +6,7 @@ enum class ZIndex {
   VIEW_LINE,
   COMPASS_FACE,
   SUN_AND_ARROW,
-  SUN_EVENT,
-  OVERLAY;
+  SUN_EVENT;
 
   val zIndex: Float = ordinal.toFloat()
 }

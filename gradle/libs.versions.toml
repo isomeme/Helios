@@ -9,7 +9,7 @@ appcompat = "1.8.0"
 benManesVersions = "0.61.0"
 cardview = "1.0.0"
 collectionKtx = "1.6.0"
-composeBom = "2026.08.00"
+composeBom = "2026.09.00"
 composeRichtext = "1.0.0-alpha05"
 constraintlayout = "2.2.2"
 constraintlayoutCompose = "1.1.2"
@@ -24,6 +24,7 @@ junit = "4.13.2"
 kotlin = "2.4.20"
 kotlinPluginSerialization = "2.4.20"
 kotlinTest = "2.4.10"
+kotlinxCoroutinesPlayServices = "1.11.0"
 kotlinxCoroutinesTest = "1.11.0"
 kotlinxDatetime = "0.8.0"
 kotlinxSerializationJson = "1.11.0"
@@ -31,14 +32,14 @@ ksp = "2.3.11"
 lifecycle = "2.11.0"
 material = "1.14.0"
 mockitoCore = "5.23.0"
-navigation = "2.10.0"
+navigation = "2.10.1"
 onereedSharedVersion = "1.0"
 playServicesLocation = "21.4.0"
 recyclerview = "1.4.0"
 suncalc = "3.11"
 timber = "5.0.1"
 truth = "1.4.5"
-uiTextGoogleFonts = "1.12.0"
+uiTextGoogleFonts = "1.12.1"
 
 [libraries]
 accompanistPermissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -62,6 +63,7 @@ hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hilt" 
 hiltCompiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlinTest" }
+kotlinxCoroutinesPlayServices = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
 kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinxSerializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }

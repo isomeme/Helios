@@ -3,39 +3,30 @@
 
 package org.onereed.helios.datasource.testing
 
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
-import org.onereed.helios.common.ApplicationScope
-import org.onereed.helios.common.stateIn
 import org.onereed.helios.datasource.Locator
 import org.onereed.helios.datasource.PlaceTime
 import org.onereed.helios.datasource.countingTickerFlow
 import timber.log.Timber
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
-class FakeLocator @Inject constructor(@ApplicationScope private val externalScope: CoroutineScope) :
-  Locator {
+class FakeLocator : Locator {
 
   private val _placeTimeFlow =
     countingTickerFlow(tickerInterval)
       .map { tick -> t0 + dt * tick }
       .onEach { time -> Timber.d("time: ${timeFormat(time)}") }
       .map { time -> PlaceTime(place, time) }
-      .stateIn(externalScope, PlaceTime.INVALID)
 
-  private val _emptyPlaceTimeFlow = MutableStateFlow(PlaceTime.INVALID)
-
-  override fun placeTimeFlow(): StateFlow<PlaceTime> = _placeTimeFlow
+  override fun placeTimeFlow(): Flow<PlaceTime> = _placeTimeFlow
 
   companion object {
 
@@ -50,17 +41,16 @@ class FakeLocator @Inject constructor(@ApplicationScope private val externalScop
       return formatter.format(localTime)
     }
 
-    private val formatter =
-      LocalDateTime.Format {
-        year()
-        char('-')
-        monthNumber()
-        char('-')
-        day()
-        char(' ')
-        hour()
-        char(':')
-        minute()
-      }
+    private val formatter = LocalDateTime.Format {
+      year()
+      char('-')
+      monthNumber()
+      char('-')
+      day()
+      char(' ')
+      hour()
+      char(':')
+      minute()
+    }
   }
 }

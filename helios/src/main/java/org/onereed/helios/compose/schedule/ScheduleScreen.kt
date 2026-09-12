@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,46 +35,50 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.onereed.helios.common.ScrollbarActions
+import org.onereed.helios.common.SimpleVerticalScrollbar
 import org.onereed.helios.compose.app.NavActions
 import org.onereed.helios.compose.app.Screen
 import org.onereed.helios.compose.schedule.ScheduleUi.EventUi
-import org.onereed.helios.common.ScrollbarActions
-import org.onereed.helios.common.SimpleVerticalScrollbar
-import org.onereed.shared.ui.confirm
-import org.onereed.helios.sun.sunColorFamilies
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.datasource.testing.santaMonicaNow
+import org.onereed.helios.sun.sunColorFamilies
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 import org.onereed.shared.ui.BasicFrame
+import org.onereed.shared.ui.UiStateContent
+import org.onereed.shared.ui.confirm
 
 @Composable
 fun ScheduleScreen(navActions: NavActions, scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
-  val scheduleUi by scheduleViewModel.scheduleUiFlow.collectAsStateWithLifecycle()
-  val coroutineScope = rememberCoroutineScope()
-  val lazyListState = rememberLazyListState()
-  val canScrollUp by remember { derivedStateOf { lazyListState.canScrollBackward } }
-  val canScrollDown by remember { derivedStateOf { lazyListState.canScrollForward } }
-  val scrollbarActions =
-    remember(lazyListState, coroutineScope) { ScrollbarActions(lazyListState, coroutineScope) }
+  val uiState by scheduleViewModel.uiStateFlow.collectAsStateWithLifecycle()
 
-  val haptics = LocalHapticFeedback.current
-  val onSelectEvent =
-    remember(scheduleViewModel, navActions, haptics) {
-      { index: Int ->
-        haptics.confirm()
-        scheduleViewModel.selectTextIndex(index)
-        navActions.navigateTo(Screen.Text)
+  UiStateContent(state = uiState) { scheduleUi ->
+    val coroutineScope = rememberCoroutineScope()
+    val lazyListState = rememberLazyListState()
+    val canScrollUp by remember { derivedStateOf { lazyListState.canScrollBackward } }
+    val canScrollDown by remember { derivedStateOf { lazyListState.canScrollForward } }
+    val scrollbarActions =
+      remember(lazyListState, coroutineScope) { ScrollbarActions(lazyListState, coroutineScope) }
+
+    val haptics = LocalHapticFeedback.current
+    val onSelectEvent =
+      remember(scheduleViewModel, navActions, haptics) {
+        { index: Int ->
+          haptics.confirm()
+          scheduleViewModel.selectTextIndex(index)
+          navActions.navigateTo(Screen.Text)
+        }
       }
-    }
 
-  StatelessScheduleScreen(
-    scheduleUi = scheduleUi,
-    canScrollUp = canScrollUp,
-    canScrollDown = canScrollDown,
-    lazyListState = lazyListState,
-    scrollbarActions = scrollbarActions,
-    onSelectEvent = onSelectEvent,
-  )
+    StatelessScheduleScreen(
+      scheduleUi = scheduleUi,
+      canScrollUp = canScrollUp,
+      canScrollDown = canScrollDown,
+      lazyListState = lazyListState,
+      scrollbarActions = scrollbarActions,
+      onSelectEvent = onSelectEvent,
+    )
+  }
 }
 
 @Composable
@@ -88,12 +91,7 @@ fun StatelessScheduleScreen(
   onSelectEvent: (Int) -> Unit = {},
 ) {
   ConstraintLayout(modifier = Modifier.fillMaxSize().padding(vertical = 10.dp)) {
-    val (progress, events, scrollbar) = createRefs()
-
-    if (!scheduleUi.isValid) {
-      CircularProgressIndicator(modifier = Modifier.constrainAs(progress) { centerTo(parent) })
-      return@ConstraintLayout
-    }
+    val (events, scrollbar) = createRefs()
 
     LazyColumn(
       modifier = Modifier.wrapContentSize().constrainAs(events) { centerTo(parent) },

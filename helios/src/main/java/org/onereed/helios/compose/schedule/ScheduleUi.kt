@@ -22,7 +22,7 @@ import org.onereed.helios.sun.SunTimeSeries
 
 @OptIn(ExperimentalTime::class)
 @Immutable
-data class ScheduleUi(val events: List<EventUi>, val isValid: Boolean) {
+data class ScheduleUi(val events: List<EventUi>) {
   @Immutable
   data class EventUi(
     @DrawableRes val iconRes: Int,
@@ -42,7 +42,6 @@ data class ScheduleUi(val events: List<EventUi>, val isValid: Boolean) {
     fun create(placeTime: PlaceTime): ScheduleUi {
       val sunTimeSeries = SunTimeSeries.create(placeTime)
       val sunSchedule = SunSchedule.create(sunTimeSeries)
-      if (!sunSchedule.isValid) return INVALID
 
       val events =
         sunSchedule.events.map {
@@ -59,7 +58,7 @@ data class ScheduleUi(val events: List<EventUi>, val isValid: Boolean) {
           )
         }
 
-      return ScheduleUi(events = events, isValid = true)
+      return ScheduleUi(events = events)
     }
 
     companion object {
@@ -86,9 +85,5 @@ data class ScheduleUi(val events: List<EventUi>, val isValid: Boolean) {
 
       private const val TIME_FORMAT_FLAGS = FORMAT_SHOW_TIME or FORMAT_ABBREV_ALL
     }
-  }
-
-  companion object {
-    val INVALID = ScheduleUi(events = emptyList(), isValid = false)
   }
 }

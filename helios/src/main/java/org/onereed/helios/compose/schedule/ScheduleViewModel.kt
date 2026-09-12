@@ -1,10 +1,12 @@
 package org.onereed.helios.compose.schedule
 
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import kotlinx.coroutines.flow.map
 import org.onereed.helios.common.BaseViewModel
 import org.onereed.helios.compose.text.SelectTextIndexUseCase
 import org.onereed.helios.datasource.Locator
+import org.onereed.shared.ui.UiState
+import javax.inject.Inject
 
 @HiltViewModel
 class ScheduleViewModel
@@ -15,5 +17,10 @@ constructor(
   val selectTextIndex: SelectTextIndexUseCase,
 ) : BaseViewModel() {
 
-  val scheduleUiFlow = locator.placeTimeFlow().mapState(uiFactory::create)
+  val uiStateFlow =
+    locator
+      .placeTimeFlow()
+      .map { uiFactory.create(it) }
+      .map { UiState.Success(it) }
+      .stateIn(initialValue = UiState.Loading)
 }

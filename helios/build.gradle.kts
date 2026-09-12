@@ -107,6 +107,7 @@ dependencies {
 
   // Misc Kotlin libraries
   implementation(libs.collectionKtx)
+  implementation(libs.kotlinxCoroutinesPlayServices)
   implementation(libs.kotlinxDatetime)
   implementation(libs.kotlinxSerializationJson)
 

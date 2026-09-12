@@ -4,15 +4,16 @@ import android.content.Context
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import org.onereed.helios.common.BaseViewModel
 import org.onereed.helios.datasource.StoreRepository
 import org.onereed.helios.ui.theme.ThemeType
-import org.onereed.shared.permission.LocationPermissionState
-import org.onereed.shared.permission.getLocationPermissionState
+import org.onereed.shared.permission.isAccuracyImprovementAvailable
+import org.onereed.shared.ui.UiState
+import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel
@@ -25,7 +26,7 @@ constructor(
   private val _accuracyImprovementAvailableFlow = MutableStateFlow(false)
   private val accuracyImprovementAvailableFlow = _accuracyImprovementAvailableFlow.asStateFlow()
 
-  val settingsUiFlow =
+  val uiStateFlow =
     combine(
         storeRepository.isDynamicThemeFlow,
         storeRepository.themeTypeFlow,
@@ -33,7 +34,12 @@ constructor(
         accuracyImprovementAvailableFlow,
         ::SettingsUi,
       )
-      .stateIn(initialValue = SettingsUi())
+      .map { UiState.Success(it) }
+      .stateIn(initialValue = UiState.Loading)
+
+  init {
+    updateAccuracyImprovementAvailable()
+  }
 
   fun setDynamicTheme(value: Boolean) = storeRepository.setDynamicTheme(value, viewModelScope)
 
@@ -42,9 +48,6 @@ constructor(
   fun setCompassSouthTop(value: Boolean) = storeRepository.setCompassSouthTop(value, viewModelScope)
 
   fun updateAccuracyImprovementAvailable() {
-    _accuracyImprovementAvailableFlow.value = isAccuracyImprovementAvailable()
+    _accuracyImprovementAvailableFlow.value = context.isAccuracyImprovementAvailable()
   }
-
-  private fun isAccuracyImprovementAvailable(): Boolean =
-    context.getLocationPermissionState() == LocationPermissionState.COARSE_ONLY
 }

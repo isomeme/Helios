@@ -15,7 +15,7 @@ import org.onereed.helios.sun.SunCompass
 import org.onereed.helios.sun.SunTimeSeries
 
 @Immutable
-data class CompassItems(val items: List<CompassItem>, val isValid: Boolean = true) {
+data class CompassItems(val items: List<CompassItem>) {
 
   @Immutable
   data class CompassItem(
@@ -66,7 +66,6 @@ data class CompassItems(val items: List<CompassItem>, val isValid: Boolean = tru
     fun create(placeTime: PlaceTime): CompassItems {
       val sunTimeSeries = SunTimeSeries.create(placeTime)
       val sunCompass = SunCompass.create(sunTimeSeries)
-      if (!sunCompass.isValid) return INVALID
 
       val sunAngle = sunCompass.sunAzimuth.toFloat()
       val arrowRotation = if (sunCompass.isSunClockwise) sunAngle else sunAngle + 180f
@@ -113,9 +112,5 @@ data class CompassItems(val items: List<CompassItem>, val isValid: Boolean = tru
 
       return CompassItems(items = allItems)
     }
-  }
-
-  companion object {
-    val INVALID = CompassItems(items = emptyList(), isValid = false)
   }
 }

@@ -6,14 +6,14 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.onereed.helios.ui.theme.ThemeType
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class StoreRepository @Inject constructor(@ApplicationContext val context: Context) {
@@ -40,28 +40,20 @@ class StoreRepository @Inject constructor(@ApplicationContext val context: Conte
       .map { preferences -> preferences[isCompassSouthTopKey] ?: false }
       .distinctUntilChanged()
 
-  fun setDynamicTheme(value: Boolean, scope: CoroutineScope) {
-    scope.launch {
-      context.dataStore.edit { preferences -> preferences[isDynamicThemeKey] = value }
-    }
+  fun setDynamicTheme(value: Boolean, scope: CoroutineScope) = scope.launch {
+    context.dataStore.edit { preferences -> preferences[isDynamicThemeKey] = value }
   }
 
-  fun setThemeType(value: ThemeType, scope: CoroutineScope) {
-    scope.launch {
-      context.dataStore.edit { preferences -> preferences[themeTypeKey] = value.ordinal }
-    }
+  fun setThemeType(value: ThemeType, scope: CoroutineScope) = scope.launch {
+    context.dataStore.edit { preferences -> preferences[themeTypeKey] = value.ordinal }
   }
 
-  fun setCompassLocked(value: Boolean, scope: CoroutineScope) {
-    scope.launch {
-      context.dataStore.edit { preferences -> preferences[isCompassLockedKey] = value }
-    }
+  fun setCompassLocked(value: Boolean, scope: CoroutineScope) = scope.launch {
+    context.dataStore.edit { preferences -> preferences[isCompassLockedKey] = value }
   }
 
-  fun setCompassSouthTop(value: Boolean, scope: CoroutineScope) {
-    scope.launch {
-      context.dataStore.edit { preferences -> preferences[isCompassSouthTopKey] = value }
-    }
+  fun setCompassSouthTop(value: Boolean, scope: CoroutineScope) = scope.launch {
+    context.dataStore.edit { preferences -> preferences[isCompassSouthTopKey] = value }
   }
 
   private companion object {

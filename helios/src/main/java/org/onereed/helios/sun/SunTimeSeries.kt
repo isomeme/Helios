@@ -17,7 +17,6 @@ import kotlin.time.toJavaInstant
 data class SunTimeSeries(
   val placeTime: PlaceTime,
   val events: List<Event>,
-  val isValid: Boolean = true,
 ) {
   @Immutable
   data class Event(val sunEventType: SunEventType, val time: Instant) : Comparable<Event> {
@@ -28,8 +27,6 @@ data class SunTimeSeries(
   companion object {
 
     fun create(placeTime: PlaceTime): SunTimeSeries {
-      if (!placeTime.isValid) return INVALID
-
       val futureSunTimes = placeTime.computeSunTimes(FUTURE_LIMIT)
       val futureEvents = toEvents(futureSunTimes)
       val nextEvent = futureEvents.first()
@@ -45,9 +42,11 @@ data class SunTimeSeries(
       val allEvents = listOf(lastEvent) + futureEvents
 
       // Downstream logic relies on there being at least two events (noon and midnight), so if for
-      // some reason we have fewer, mark the data as being invalid.
+      // some reason we have fewer, throw an exception.
 
-      return if (allEvents.size < 2) INVALID else SunTimeSeries(placeTime, allEvents)
+      check(allEvents.size >= 2) { "SunTimeSeries must have at least two events" }
+
+      return SunTimeSeries(placeTime, allEvents)
     }
 
     private fun PlaceTime.computeSunTimes(limit: Duration): SunTimes =
@@ -65,8 +64,6 @@ data class SunTimeSeries(
         .map { Event(it.first, it.second!!) }
         .sorted()
     }
-
-    private val INVALID = SunTimeSeries(PlaceTime.INVALID, emptyList(), false)
 
     /**
      * We search farther than one day ahead because e.g. around the spring equinox successive

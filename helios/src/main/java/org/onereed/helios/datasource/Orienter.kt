@@ -38,7 +38,7 @@ constructor(@ApplicationContext context: Context, storeRepository: StoreReposito
 
   private val executor by lazy { Dispatchers.Default.asExecutor() }
 
-  private val orientationProvider by lazy {
+  private val orientationClient by lazy {
     LocationServices.getFusedOrientationProviderClient(context)
   }
 
@@ -58,7 +58,7 @@ constructor(@ApplicationContext context: Context, storeRepository: StoreReposito
   private val liveHeadingFlow =
     getOrientationUpdates().map { it.headingDegrees }
 
-  val headingFlow =
+  fun headingFlow() =
     combine(isCompassLockedFlow, lockedHeadingFlow) { isLocked, _ -> isLocked }
       .flatMapLatest { isLocked -> if (isLocked) swingToLockedHeadingFlow else liveHeadingFlow }
       .runningReduce(::smooth)
@@ -70,13 +70,13 @@ constructor(@ApplicationContext context: Context, storeRepository: StoreReposito
       trySend(it).onFailure { t -> Timber.e(t, "Failed to send orientation to flow.") }
     }
 
-    orientationProvider
+    orientationClient
       .requestOrientationUpdates(DEVICE_ORIENTATION_REQUEST, executor, orientationListener)
       .logOutcomes("requestOrientationUpdates")
       .addOnFailureListener { e -> close(e) }
 
     awaitClose {
-      orientationProvider
+      orientationClient
         .removeOrientationUpdates(orientationListener)
         .logOutcomes("removeOrientationUpdates")
     }

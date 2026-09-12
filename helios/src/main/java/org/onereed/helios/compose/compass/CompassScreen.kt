@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,28 +33,31 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.FlowPreview
 import org.onereed.helios.R
 import org.onereed.helios.compose.compass.ZIndex.COMPASS_FACE
-import org.onereed.helios.compose.compass.ZIndex.OVERLAY
 import org.onereed.helios.compose.compass.ZIndex.VIEW_LINE
-import org.onereed.shared.ui.confirm
-import org.onereed.helios.sun.sunColorFilters
 import org.onereed.helios.datasource.SunResources
 import org.onereed.helios.datasource.testing.santaMonicaNow
+import org.onereed.helios.sun.sunColorFilters
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 import org.onereed.shared.ui.BasicFrame
+import org.onereed.shared.ui.UiStateContent
+import org.onereed.shared.ui.confirm
 
 @OptIn(FlowPreview::class)
 @Composable
 fun CompassScreen(compassViewModel: CompassViewModel = hiltViewModel()) {
-  val compassUi by compassViewModel.compassUiFlow.collectAsStateWithLifecycle()
-  val haptics = LocalHapticFeedback.current
+  val uiState by compassViewModel.uiStateFlow.collectAsStateWithLifecycle()
 
-  StatelessCompassScreen(
-    compassUi = compassUi,
-    onLockChange = {
-      haptics.confirm()
-      compassViewModel.setLocked(it)
-    },
-  )
+  UiStateContent(state = uiState) { compassUi ->
+    val haptics = LocalHapticFeedback.current
+
+    StatelessCompassScreen(
+      compassUi = compassUi,
+      onLockChange = {
+        haptics.confirm()
+        compassViewModel.setLocked(it)
+      },
+    )
+  }
 }
 
 @Composable
@@ -77,10 +79,6 @@ fun StatelessCompassScreen(compassUi: CompassUi, onLockChange: (Boolean) -> Unit
   val isLocked = compassUi.isLocked
 
   Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-    if (!compassItems.isValid) {
-      CircularProgressIndicator(modifier = Modifier.zIndex(OVERLAY.zIndex))
-    }
-
     Row(
       modifier =
         Modifier.align(Alignment.BottomEnd)

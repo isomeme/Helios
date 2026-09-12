@@ -9,6 +9,7 @@ import org.onereed.helios.common.BaseViewModel
 import org.onereed.helios.datasource.Locator
 import org.onereed.helios.datasource.Orienter
 import org.onereed.helios.datasource.StoreRepository
+import org.onereed.shared.ui.UiState
 
 @HiltViewModel
 class CompassViewModel
@@ -20,14 +21,15 @@ constructor(
   private val storeRepository: StoreRepository,
 ) : BaseViewModel() {
 
-  private val compassItemsFlow = locator.placeTimeFlow().map(compassItemsFactory::create)
+  private val compassItemsFlow = locator.placeTimeFlow().map { compassItemsFactory.create(it) }
 
   // Compass turns opposite heading.
-  private val compassAngleFlow = orienter.headingFlow.map { heading -> 360f - heading }
+  private val compassAngleFlow = orienter.headingFlow().map { heading -> 360f - heading }
 
-  val compassUiFlow =
+  val uiStateFlow =
     combine(compassItemsFlow, compassAngleFlow, storeRepository.isCompassLockedFlow, ::CompassUi)
-      .stateIn(initialValue = CompassUi.INITIAL)
+      .map { UiState.Success(it) }
+      .stateIn(initialValue = UiState.Loading)
 
   fun setLocked(locked: Boolean) =
     storeRepository.setCompassLocked(value = locked, scope = viewModelScope)

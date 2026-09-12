@@ -53,12 +53,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.onereed.helios.R
 import org.onereed.helios.common.ScrollbarActions
 import org.onereed.helios.common.SimpleVerticalScrollbar
-import org.onereed.shared.ui.confirm
 import org.onereed.helios.ui.theme.DarkHeliosTheme
 import org.onereed.helios.ui.theme.ThemeType
 import org.onereed.shared.navigation.openSystemSettings
-import org.onereed.shared.ui.BasicFrame
 import org.onereed.shared.sysinfo.dynamicThemeSupported
+import org.onereed.shared.ui.BasicFrame
+import org.onereed.shared.ui.UiStateContent
+import org.onereed.shared.ui.confirm
 
 @Composable
 fun SettingsScreen(settingsViewModel: SettingsViewModel = hiltViewModel()) {
@@ -67,31 +68,33 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = hiltViewModel()) {
     onPauseOrDispose {}
   }
 
-  val settingsUi by settingsViewModel.settingsUiFlow.collectAsStateWithLifecycle()
+  val uiState by settingsViewModel.uiStateFlow.collectAsStateWithLifecycle()
 
-  val uriHandler = LocalUriHandler.current
-  val haptics = LocalHapticFeedback.current
-  val context = LocalContext.current
+  UiStateContent(state = uiState) { settingsUi ->
+    val uriHandler = LocalUriHandler.current
+    val haptics = LocalHapticFeedback.current
+    val context = LocalContext.current
 
-  val settingsActions =
-    remember(settingsViewModel, uriHandler, haptics, context) {
-      SettingsActions(settingsViewModel, uriHandler, haptics, context)
-    }
-  val scrollState = rememberScrollState()
-  val coroutineScope = rememberCoroutineScope()
-  val canScrollUp by remember { derivedStateOf { scrollState.canScrollBackward } }
-  val canScrollDown by remember { derivedStateOf { scrollState.canScrollForward } }
-  val scrollbarActions =
-    remember(scrollState, coroutineScope) { ScrollbarActions(scrollState, coroutineScope) }
+    val settingsActions =
+      remember(settingsViewModel, uriHandler, haptics, context) {
+        SettingsActions(settingsViewModel, uriHandler, haptics, context)
+      }
+    val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
+    val canScrollUp by remember { derivedStateOf { scrollState.canScrollBackward } }
+    val canScrollDown by remember { derivedStateOf { scrollState.canScrollForward } }
+    val scrollbarActions =
+      remember(scrollState, coroutineScope) { ScrollbarActions(scrollState, coroutineScope) }
 
-  StatelessSettingsScreen(
-    canScrollUp = canScrollUp,
-    canScrollDown = canScrollDown,
-    settingsUi = settingsUi,
-    settingsActions = settingsActions,
-    scrollbarActions = scrollbarActions,
-    scrollState = scrollState,
-  )
+    StatelessSettingsScreen(
+      canScrollUp = canScrollUp,
+      canScrollDown = canScrollDown,
+      settingsUi = settingsUi,
+      settingsActions = settingsActions,
+      scrollbarActions = scrollbarActions,
+      scrollState = scrollState,
+    )
+  }
 }
 
 @Composable
