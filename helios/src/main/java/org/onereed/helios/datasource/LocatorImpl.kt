@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.tasks.await
 import org.onereed.helios.common.ApplicationScope
 import org.onereed.helios.datasource.PlaceTime.Place
+import org.onereed.shared.flow.unitTickerFlow
 import org.onereed.shared.logging.logAllEvents
 import org.onereed.shared.logging.logOutcomes
 import org.onereed.shared.permission.hasLocationPermission
@@ -53,8 +54,7 @@ constructor(
         if (context.hasLocationPermission()) {
           // Fetch the hardware's last known location to bootstrap the UI instantly
 
-          @Suppress("MissingPermission")
-          locationClient.lastLocation.await()?.let { emit(it) }
+          @Suppress("MissingPermission") locationClient.lastLocation.await()?.let { emit(it) }
         }
       }
       .map(::Place)
@@ -63,7 +63,7 @@ constructor(
       .shareIn(
         scope = externalScope,
         started = SharingStarted.WhileSubscribed(SHARING_TIMEOUT_MILLIS),
-        replay = 1
+        replay = 1,
       )
 
   override fun placeTimeFlow() = _placeTimeFlow
@@ -103,7 +103,7 @@ constructor(
 
     private val LOCATION_UPDATE_INTERVAL_MILLIS = 2.minutes.inWholeMilliseconds
 
-    private val LOCATION_REQUEST =
+    val LOCATION_REQUEST =
       LocationRequest.Builder(
           Priority.PRIORITY_BALANCED_POWER_ACCURACY,
           LOCATION_UPDATE_INTERVAL_MILLIS,

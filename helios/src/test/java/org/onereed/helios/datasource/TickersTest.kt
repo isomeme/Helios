@@ -17,7 +17,7 @@ class TickersTest {
 
   @Test
   fun countingTickerFlow() = runBlocking {
-    val ticker = countingTickerFlow(interval = 1.seconds)
+    val ticker = org.onereed.shared.flow.countingTickerFlow(interval = 1.seconds)
 
     val values1 = ticker.onEach { Timber.d("Received $it") }.take(3).toList()
     assertThat(values1).containsExactly(0, 1, 2).inOrder()
@@ -30,7 +30,7 @@ class TickersTest {
 
   @Test
   fun repeatingTickerFlow(): Unit = runBlocking {
-    val ticker = repeatingTickerFlow(interval = 1.seconds, value = "foo")
+    val ticker = org.onereed.shared.flow.repeatingTickerFlow(interval = 1.seconds, value = "foo")
     val values = ticker.onEach { Timber.d("Received $it") }.take(3).toList()
     assertThat(values).containsExactly("foo", "foo", "foo")
   }

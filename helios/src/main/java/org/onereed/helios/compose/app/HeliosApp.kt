@@ -25,7 +25,9 @@ import org.onereed.helios.compose.compass.CompassScreen
 import org.onereed.helios.compose.schedule.ScheduleScreen
 import org.onereed.helios.compose.settings.SettingsScreen
 import org.onereed.helios.compose.text.TextScreen
-import org.onereed.shared.permission.PermissionGate
+import org.onereed.helios.datasource.LocatorImpl
+import org.onereed.shared.ui.LocationSettingsGate
+import org.onereed.shared.ui.PermissionGate
 
 @Composable
 fun HeliosApp(heliosAppState: HeliosAppState = rememberHeliosAppState()) {
@@ -72,10 +74,10 @@ fun StatelessHeliosApp(
           startDestination = Screen.Schedule,
         ) {
           composable<Screen.Schedule> {
-            WithPermissions { ScheduleScreen(navActions = navActions) }
+            WithLocation { ScheduleScreen(navActions = navActions) }
           }
           composable<Screen.Text> { TextScreen() }
-          composable<Screen.Compass> { WithPermissions { CompassScreen() } }
+          composable<Screen.Compass> { WithLocation { CompassScreen() } }
           composable<Screen.Settings> { SettingsScreen() }
         }
       }
@@ -84,7 +86,7 @@ fun StatelessHeliosApp(
 }
 
 @Composable
-private fun WithPermissions(content: @Composable () -> Unit) {
+private fun WithLocation(content: @Composable () -> Unit) {
   PermissionGate(
     permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION),
     allowCoarseLocation = true,
@@ -94,6 +96,8 @@ private fun WithPermissions(content: @Composable () -> Unit) {
     useSettingsTitle = stringResource(R.string.heading_location_access_required),
     useSettingsDescription = stringResource(R.string.text_permission_use_settings),
   ) {
-    content()
+    LocationSettingsGate(locationRequest = LocatorImpl.LOCATION_REQUEST) {
+      content()
+    }
   }
 }

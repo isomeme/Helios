@@ -11,7 +11,7 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import org.onereed.helios.datasource.Locator
 import org.onereed.helios.datasource.PlaceTime
-import org.onereed.helios.datasource.countingTickerFlow
+import org.onereed.shared.flow.countingTickerFlow
 import timber.log.Timber
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
